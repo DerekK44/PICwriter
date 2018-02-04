@@ -6,9 +6,14 @@
 
 from setuptools import setup
 
+def readme():
+    with open('README.md') as f:
+        return f.read()
+
 setup(name='picwriter',
       version='0.0',
       description='Mask generation tool',
+      long_description=readme(),
       url='http://github.com/DerekK88/picwriter',
       author='Derek Kita',
       license='MIT',
@@ -35,4 +40,6 @@ setup(name='picwriter',
       keywords='mask writing library',
       packages=['picwriter'],
       install_requires=['gdspy', 'numpy'],
+      test_suite='nose.collector',
+      tests_require=['nose'],
       zip_safe=False)
