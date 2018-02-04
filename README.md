@@ -3,13 +3,13 @@
 # PICWRITER README
 Nothing here yet, though stay tuned for updates to come!
 
-Picwriter (Photonic Integrated Circuit writer) will be a Python module, built above the fantastic [gdspy](https://github.com/heitzmann/gdspy) module, aimed at simplifying the process of designing complex masks for photonic integrated circuits through a prebuilt library of easy-to-implement parameterized cells (PCells).  Supported blocks will include: waveguides, grating couplers, tapers, multi-mode interferometers (MMI's), resonators, spiral structures, and more!
+Picwriter (Photonic-Integrated-Circuit Writer) will be a Python module, built above the fantastic [gdspy](https://github.com/heitzmann/gdspy) module, aimed at simplifying the process of designing complex masks for photonic integrated circuits through a prebuilt library of easy-to-implement parameterized cells (PCells).  Supported blocks will include: waveguides, grating couplers, tapers, multi-mode interferometers (MMI's), resonators, spiral structures, and more!
 
 ## Installation
 
 ### Dependencies:
 
-* [Python](http://www.python.org/) (tested with versions 2.7, 3.4, 3.5, and 3.6)
+* [Python](http://www.python.org/) (tested with versions 2.7, 3.3, 3.4, 3.5, 3.6, 3.7, nightly, though gdspy pay only work with 2.7, 3.4, 3.5, and 3.6)
 * [Numpy](http://numpy.scipy.org/)
 * [Python-future](http://python-future.org/) (only for Python 2)
 * C compiler (needed only if built from source)
