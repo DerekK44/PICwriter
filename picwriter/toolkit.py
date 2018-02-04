@@ -6,6 +6,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import gdspy
+
 class Cell:
     """
     Cell class for PICwriter toolkit that make it easier to manipulate for 
