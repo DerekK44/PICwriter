@@ -1,5 +1,5 @@
 setuptools
 numpy
 gdspy
-future
+future; python_version < "3"
 uuid
