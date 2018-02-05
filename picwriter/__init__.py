@@ -5,4 +5,5 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from .toolkit import Cell
+from .toolkit import get_angle
+from .toolkit import dist

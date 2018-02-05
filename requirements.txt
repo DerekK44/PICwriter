@@ -2,3 +2,4 @@ setuptools
 numpy
 gdspy
 future
+uuid
