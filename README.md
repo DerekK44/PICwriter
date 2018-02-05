@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/DerekK88/picwriter.svg?branch=master)](https://travis-ci.org/DerekK88/picwriter)
+Linux/OS: [![Build Status](https://travis-ci.org/DerekK88/picwriter.svg?branch=master)](https://travis-ci.org/DerekK88/picwriter)
+Windows: [![Build status](https://ci.appveyor.com/api/projects/status/f9q96u9na63hy3ce?svg=true)](https://ci.appveyor.com/project/DerekK88/picwriter)
 
 # PICwriter README
 Nothing here yet, though stay tuned for updates to come!
