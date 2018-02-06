@@ -60,7 +60,7 @@ class Spiral(gdspy.Cell):
         """
         nmax = 0
         lengthmin = 0
-        for n in xrange(50): # Do not exceed 50 iterations
+        for n in range(50): # Do not exceed 50 iterations
             n = n+1 #start with 1
             ml = self.spiral_length(self.height, corner_dl, n)
             print("spiral length n="+str(n)+" is "+str(ml))
@@ -128,7 +128,7 @@ class Spiral(gdspy.Cell):
         x0p, y0p, hp, wp = x0+p*s, y0+s, h-3*s, w-2*s
         cur_point = (x0p+p*wp, y0p)
         """ Spiral inwards """
-        for i in xrange(int(n-1)):
+        for i in range(int(n-1)):
             i = i+1 #start at 1
             if i%2==1: #ODD
                 cur_point = (cur_point[0] - p*(wp + s - 2*i*s), cur_point[1])
@@ -154,7 +154,7 @@ class Spiral(gdspy.Cell):
         """ Spiral outwards (first do other version of inwards, then reverse list) """
         cur_point = (x0p, y0p + hp)
         mid_points2 = []
-        for i in xrange(int(n-1)):
+        for i in range(int(n-1)):
             i = i+1 #start at 1
             if i%2==1: #ODD
                 cur_point = (cur_point[0] + p*(wp + s - 2*i*s), cur_point[1])
