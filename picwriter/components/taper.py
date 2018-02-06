@@ -11,7 +11,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class Taper(gdspy.Cell):
-    def __init__(self, trace, wgt, end_width):
+    def __init__(self, wgt, length, end_width, port=(0,0), direction='EAST'):
         """
         First initiate super properties (gdspy.Cell)
         trace = list of TWO points [(x1, y1), (x2, y2)] that determine orientation
@@ -23,7 +23,9 @@ class Taper(gdspy.Cell):
 
         self.portlist = {}
 
-        self.trace = trace
+        self.port = port
+        self.trace=[port, tk.translate_point(port, length, direction)]
+        self.direction = direction
         self.start_width = wgt.wg_width
         self.end_width = end_width
         self.resist = wgt.resist
@@ -71,11 +73,13 @@ class Taper(gdspy.Cell):
         self.add(path)
 
     def build_ports(self):
-        """ Portlist format:  (x_position, y_position)
-        will maybe add on an exit angle at some point
-        ¯\_(ツ)_/¯ """
-        self.portlist["input"] = (self.trace[0][0], self.trace[0][1])
-        self.portlist["output"] = (self.trace[1][0], self.trace[1][1])
+        """ Portlist format:
+            example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
+        """
+        self.portlist["input"] = {'port':self.trace[0],
+                                    'direction':tk.flip_direction(self.direction)}
+        self.portlist["output"] = {'port':self.trace[1],
+                                    'direction':self.direction}
 
 if __name__ == "__main__":
     from picwriter.components.waveguide import Waveguide, WaveguideTemplate
@@ -85,8 +89,8 @@ if __name__ == "__main__":
     wg1=Waveguide([(50,0), (250,0), (250,500), (500,500)], wgt)
     top.add(wg1)
 
-    tp1 = Taper([(500,500), (700,500)], wgt, 0.3)
-    tp2 = Taper([(50,0), (0,0)], wgt, 0.0)
+    tp1 = Taper(wgt, 100.0, 0.3, **wg1.portlist["input"])
+    tp2 = Taper(wgt, 100.0, 0.0, **wg1.portlist["output"])
     top.add(tp1)
     top.add(tp2)
 

@@ -44,6 +44,8 @@ class Waveguide(gdspy.Cell):
         """
         gdspy.Cell.__init__(self,"Waveguide--"+str(uuid.uuid4()))
 
+        self.portlist = {}
+
         self.trace = trace
         self.wgt = wgt
         self.resist = wgt.resist
@@ -51,6 +53,7 @@ class Waveguide(gdspy.Cell):
 
         self.type_check_trace()
         self.build_cell()
+        self.build_ports()
 
     def type_check_trace(self):
         """ Round each trace value to the nearest 1e-6 -- prevents
@@ -108,10 +111,18 @@ class Waveguide(gdspy.Cell):
 
         self.add(path)
 
+    def build_ports(self):
+        """ Portlist format:
+            example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
+        """
+        self.portlist["input"] = {'port':(self.trace[0][0], self.trace[0][1]),
+                                  'direction': tk.get_direction(self.trace[1], self.trace[0])}
+        self.portlist["output"] = {'port':(self.trace[-1][0], self.trace[-1][1]),
+                                   'direction':tk.get_direction(self.trace[-2], self.trace[-1])}
 
 if __name__ == "__main__":
     top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(bend_radius=50, resist='+', fab="LIFTOFF")
+    wgt = WaveguideTemplate(bend_radius=50, resist='+', fab="ETCH")
 
     wg1=Waveguide([(50,0), (250,0), (250,500), (500,500)], wgt)
     wg2=Waveguide([(0,0), (0,100), (-250, 100), (-250, -100)], wgt)

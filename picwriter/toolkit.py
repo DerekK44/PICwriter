@@ -27,11 +27,11 @@ def get_angle(pt1, pt2):
     else: #quadrant 4
         angle = 1.5*np.pi + np.arctan(-dx/dy)
     """
-    if dx<=1e-6 and dy>0:
+    if abs(dx)<=1e-6 and dy>0:
         angle=0.5*np.pi
-    elif dy<=1e-6 and dx<0:
+    elif abs(dy)<=1e-6 and dx<0:
         angle=np.pi
-    elif dx<=1e-6 and dy<0:
+    elif abs(dx)<=1e-6 and dy<0:
         angle=1.5*np.pi
     else:
         angle=0.0
@@ -39,3 +39,34 @@ def get_angle(pt1, pt2):
 
 def dist(pt1, pt2):
     return np.sqrt((pt2[0]-pt1[0])**2 + (pt2[1]-pt1[1])**2)
+
+def get_direction(pt1, pt2):
+    """  Returns a cardinal direction:
+        -NORTH, WEST, SOUTH, and EAST
+        that corresponds to a cartesian point 'pt1' (tuple), pointing
+        TOWARDS a second point pt2 """
+    dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
+    if abs(dx)<=1e-6 and dy>0:
+        return "NORTH"
+    elif abs(dy)<=1e-6 and dx<0:
+        return "WEST"
+    elif abs(dx)<=1e-6 and dy<0:
+        return "SOUTH"
+    else:
+        return "EAST"
+
+def flip_direction(direction):
+    if direction=="NORTH": return "SOUTH"
+    if direction=="SOUTH": return "NORTH"
+    if direction=="WEST": return "EAST"
+    if direction=="EAST": return "WEST"
+
+def translate_point(pt, length, direction):
+    if direction=="NORTH":
+        return (pt[0], pt[1]+length)
+    elif direction=="SOUTH":
+        return (pt[0], pt[1]-length)
+    elif direction=="WEST":
+        return (pt[0]-length, pt[1])
+    elif direction=="EAST":
+        return (pt[0]+length, pt[1])
