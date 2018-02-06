@@ -63,7 +63,6 @@ class Waveguide(gdspy.Cell):
         for t in self.trace:
             trace.append((round(t[0], 6), round(t[1], 5)))
         self.trace = trace
-        print(self.trace)
 
         """ Make sure that each waypoint is spaced > 2*bend_radius apart
         as a conservative estimate ¯\_(ツ)_/¯

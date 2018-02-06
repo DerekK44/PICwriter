@@ -18,7 +18,7 @@ Picwriter (Photonic-Integrated-Circuit Writer) will be a Python module, built ab
 ### Linux / OS X
 Both options should automatically install all dependencies (like gdspy, numpy, etc.).  This module is in the early planning stage, so stay tuned for the actual release :)
 
-Option 1: using [pip](https://docs.python.org/3/installing/):
+Option 1: using [pip](https://docs.python.org/3/installing/) (coming soon):
 
 ```sh
 pip install picwriter

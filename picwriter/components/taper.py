@@ -82,7 +82,7 @@ class Taper(gdspy.Cell):
                                     'direction':self.direction}
 
 if __name__ == "__main__":
-    from picwriter.components.waveguide import Waveguide, WaveguideTemplate
+    from . import *
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, resist='+')
 
