@@ -55,6 +55,14 @@ def get_direction(pt1, pt2):
     else:
         return "EAST"
 
+def get_turn(dir1, dir2):
+    """ Returns an angle (+pi/2 or -pi/2) corresponding to the CW or CCW
+    turns that takes you from direction dir1 to dir2 """
+    if (dir1=="NORTH" and dir2=="WEST") or (dir1=="WEST" and dir2=="SOUTH") or (dir1=="SOUTH" and dir2=="EAST") or (dir1=="EAST" and dir2=="NORTH"):
+        return np.pi/2.0
+    elif (dir1=="NORTH" and dir2=="EAST") or (dir1=="EAST" and dir2=="SOUTH") or (dir1=="SOUTH" and dir2=="WEST") or (dir1=="WEST" and dir2=="NORTH"):
+        return -np.pi/2.0
+
 def flip_direction(direction):
     if direction=="NORTH": return "SOUTH"
     if direction=="SOUTH": return "NORTH"

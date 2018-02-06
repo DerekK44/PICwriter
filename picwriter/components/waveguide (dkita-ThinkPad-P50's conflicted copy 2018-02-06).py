@@ -112,9 +112,8 @@ class Waveguide(gdspy.Cell):
                 path.segment(tk.dist(self.trace[i+1], self.trace[i+2])-2*br,
                             **self.spec)
             prior_direction = direction
-        if tk.dist(self.trace[-2],self.trace[-1]) < 2*br:
-            path.segment(tk.dist(self.trace[-2],self.trace[-1])-br, **self.spec)
-        else:
+        if tk.dist(self.trace[-2],self.trace[-1]) > br:
+            print("Adding segment at end "+str(tk.dist(self.trace[-2],self.trace[-1])))
             path.segment(br, **self.spec)
 
         self.add(path)

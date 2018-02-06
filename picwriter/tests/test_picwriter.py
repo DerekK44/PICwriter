@@ -49,3 +49,12 @@ class TestPICwriter(TestCase):
 		# print("Grating coupler area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==3)
 		self.assertTrue(abs(top.area()-22562.0664901) <= 1e-6)
+
+	def test_spiral_creation(self):
+		top = gdspy.Cell("t4")
+		wgt = WaveguideTemplate(bend_radius=50, resist='-')
+		sp1 = Spiral(wgt, 1000.0, 1000.0, 10000.0)
+		top.add(sp1)
+		# print("Spiral area = "+str(top.area()))
+		self.assertTrue(len(top.elements)==1)
+		self.assertTrue(abs(top.area()-20099.9998867) <= 1e-6)

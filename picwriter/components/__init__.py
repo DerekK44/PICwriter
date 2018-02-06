@@ -9,3 +9,4 @@ from .waveguide import WaveguideTemplate
 from .waveguide import Waveguide
 from .taper import Taper
 from .gratingcoupler import GratingCouplerStraight, GratingCouplerFocusing
+from .spiral import Spiral
