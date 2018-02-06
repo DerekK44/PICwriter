@@ -10,7 +10,7 @@ Picwriter (Photonic-Integrated-Circuit Writer) will be a Python module, built ab
 
 ### Dependencies:
 
-* [Python](http://www.python.org/) (tested with versions 2.7, 3.3, 3.4, 3.5, 3.6, 3.7, nightly for Linux/OS, tested with versions 2.7, 3.4, 3.5, 3.6, 2.7-x64, 3.5-x64, 3.6-x64 for Windows.  *Note you may need to install gdspy from Github if running Python3.4-x64 on Windows*)
+* [Python](http://www.python.org/) (tested with versions 2.7, 3.3, 3.4, 3.5, 3.6, 3.7, nightly for Linux/OS, tested with versions 2.7, 3.4, 3.5, 3.6, 2.7-x64, 3.4-x64, 3.5-x64, 3.6-x64 for Windows.)
 * [gdspy](https://github.com/heitzmann/gdspy) (tested with versions 2.7, 3.4, 3.5, and 3.6)
 * [Numpy](http://numpy.scipy.org/)
 * [Python-future](http://python-future.org/) (only for Python 2)
@@ -29,3 +29,6 @@ Option 2: download the source from [github](https://github.com/DerekK88/picwrite
 ```sh
 python setup.py install
 ```
+
+### Windows
+Installation via `pip` and building from source as above are possible.  For installing gdspy, an appropriate [build environment](https://wiki.python.org/moin/WindowsCompilers) is required for compilation of the C extension modules.
