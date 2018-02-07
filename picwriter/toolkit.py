@@ -13,6 +13,8 @@ import gdspy
 Set of helper functions that make it easier to manipulate
 and work with gdspy subclasses defined in 'components' folder
 """
+def add(topcell, subcell):
+    topcell.add(gdspy.CellReference(subcell))
 
 def get_angle(pt1, pt2):
     dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]

@@ -107,7 +107,7 @@ class Waveguide(gdspy.Cell):
         for i in range(len(self.trace)-2):
             direction = tk.get_direction(self.trace[i+1], self.trace[i+2])
             turn = tk.get_turn(prior_direction, direction)
-            path.turn(br, turn, **self.spec)
+            path.turn(br, turn, number_of_points=0.1, **self.spec)
             if tk.dist(self.trace[i+1], self.trace[i+2])-2*br > 0: #ONLY False for last points if spaced br < distance < 2br
                 path.segment(tk.dist(self.trace[i+1], self.trace[i+2])-2*br,
                             **self.spec)
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     wg1=Waveguide([(50,0), (250,0), (250,500), (500,500)], wgt)
     wg2=Waveguide([(0,0), (0,100), (-250, 100), (-250, -100)], wgt)
 
-    top.add(wg1)
-    top.add(wg2)
+    tk.add(top, wg1)
+    tk.add(top, wg2)
 
     gdspy.LayoutViewer()

@@ -87,11 +87,11 @@ if __name__ == "__main__":
     wgt = WaveguideTemplate(bend_radius=50, resist='+')
 
     wg1=Waveguide([(50,0), (250,0), (250,500), (500,500)], wgt)
-    top.add(wg1)
+    tk.add(top, wg1)
 
     tp1 = Taper(wgt, 100.0, 0.3, **wg1.portlist["input"])
     tp2 = Taper(wgt, 100.0, 0.0, **wg1.portlist["output"])
-    top.add(tp1)
-    top.add(tp2)
+    tk.add(top, tp1)
+    tk.add(top, tp2)
 
     gdspy.LayoutViewer()

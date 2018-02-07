@@ -169,7 +169,8 @@ class Spiral(gdspy.Cell):
         mid_points2.reverse()
 
         waypoints = start_points+mid_points+mid_points2+end_points
-        self.add(Waveguide(waypoints, self.wgt))
+        tk.add(self, Waveguide(waypoints, self.wgt))
+        self.flatten()
 
     def build_ports(self):
         """ Portlist format:
@@ -186,6 +187,6 @@ if __name__ == "__main__":
     wgt = WaveguideTemplate(bend_radius=50, resist='-')
 
     sp1 = Spiral(wgt, 1000.0, 1000.0, 10000.0)
-    top.add(sp1)
+    tk.add(top, sp1)
 
     gdspy.LayoutViewer()

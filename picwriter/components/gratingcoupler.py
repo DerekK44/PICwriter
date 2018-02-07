@@ -208,12 +208,12 @@ if __name__ == "__main__":
     wgt = WaveguideTemplate(bend_radius=50, resist='+', fab='ETCH')
 
     wg1=Waveguide([(0,0), (250,0), (250,500), (500,500)], wgt)
-    top.add(wg1)
+    tk.add(top, wg1)
 
     gc1 = GratingCouplerStraight(wgt, width=20, length=50, taper_length=20, period=1.0, dutycycle=0.7, **wg1.portlist["input"])
-    top.add(gc1)
+    tk.add(top, gc1)
 
     gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=50, period=1.0, dutycycle=0.7, **wg1.portlist["output"])
-    top.add(gc2)
+    tk.add(top,gc2)
 
     gdspy.LayoutViewer()
