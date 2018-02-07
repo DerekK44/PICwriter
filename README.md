@@ -39,8 +39,15 @@ python setup.py install
 ```
 
 ### Windows
-The best way of obtaining the library is by downloading the prebuilt binary [here](https://ci.appveyor.com/project/DerekK88/picwriter) and selecting the `.whl` that corresponds to your python version.  Open up a command prompt (type `cmd` in the search bar), navigate to the downloaded file, then install with: 
+The best way of obtaining the library is by installing the prebuilt binaries.
+* First, download gdspy by going [here](https://ci.appveyor.com/project/heitzmann/gdspy), then click the python environment that matches your python environment, click the **Artifacts** tab, and then download the corresponding `dist\gdspy-1.X.X.X.whl` wheel file.
+* Open up a command prompt (type `cmd` in the search bar), navigate to your downloads, then install via:
 ```sh
-pip install *.whl
+pip install dist\gdspy-1.X.X.X.whl
 ```
-Installation via `pip` and building from source as above are also possible.  For installing gdspy, an appropriate [build environment](https://wiki.python.org/moin/WindowsCompilers) is required for compilation of the C extension modules.
+* Next, install the PICwriter library by following the same procedure [here](https://ci.appveyor.com/project/DerekK88/picwriter) to install the corresponding prebuilt picwriter `.whl` file.
+* In a command prompt, install with pip
+```sh
+pip install dist\picwriter-1.X.X.X.whl
+```
+Building from source is also possible.  For installing gdspy, an appropriate [build environment](https://wiki.python.org/moin/WindowsCompilers) is required for compilation of the C extension modules.
