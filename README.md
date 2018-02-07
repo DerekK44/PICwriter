@@ -39,4 +39,8 @@ python setup.py install
 ```
 
 ### Windows
-Installation via `pip` and building from source as above are possible.  For installing gdspy, an appropriate [build environment](https://wiki.python.org/moin/WindowsCompilers) is required for compilation of the C extension modules.
+The best way of obtaining the library is by downloading the prebuilt binary [here](https://ci.appveyor.com/project/DerekK88/picwriter) and selecting the `.whl` that corresponds to your python version.  Open up a command prompt (type `cmd` in the search bar), navigate to the downloaded file, then install with: 
+```sh
+pip install *.whl
+```
+Installation via `pip` and building from source as above are also possible.  For installing gdspy, an appropriate [build environment](https://wiki.python.org/moin/WindowsCompilers) is required for compilation of the C extension modules.
