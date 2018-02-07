@@ -47,7 +47,6 @@ class TestPICwriter(TestCase):
 		tk.add(top, gc1)
 		gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=50, period=1.0, dutycycle=0.7, **wg1.portlist["output"])
 		tk.add(top, gc2)
-		gdspy.LayoutViewer()
 		# print("Grating coupler area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==3)
 		self.assertTrue(abs(top.area()-22562.0664901) <= 1e-6)
