@@ -44,7 +44,6 @@ class Taper(gdspy.Cell):
         for t in self.trace:
             trace.append((round(t[0], 6), round(t[1], 5)))
         self.trace = trace
-        print(self.trace)
         """ Make sure all waypoints specify 90degree angles.  This might be
         updated in the future to allow for 45deg, or arbitrary bends.  For now,
         though, rotations are supported via gdspy library
@@ -70,6 +69,7 @@ class Taper(gdspy.Cell):
                               distance=self.wgt.wg_width + self.wgt.clad_width)
             path.segment(tk.dist(self.trace[0], self.trace[1]), direction=angle,
                          final_distance=self.end_width+self.wgt.clad_width, **self.spec)
+
         self.add(path)
 
     def build_ports(self):
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, resist='+')
 
-    wg1=Waveguide([(50,0), (250,0), (250,500), (500,500)], wgt)
+    wg1=Waveguide([(50,0), (250,0), (250,500)], wgt)
     tk.add(top, wg1)
 
     tp1 = Taper(wgt, 100.0, 0.3, **wg1.portlist["input"])

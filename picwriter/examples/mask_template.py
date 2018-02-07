@@ -29,7 +29,7 @@ top.add(gdspy.Rectangle((X_SIZE-exclusion_region, 0), (X_SIZE, Y_SIZE), layer=7,
 
 """ Add some components from the PICwriter library """
 spiral_unit = gdspy.Cell("spiral_unit")
-sp1 = Spiral(wgt, 1000.0, 1000.0, 10000, parity=1, center=(500.0+exclusion_region+4*step,y0))
+sp1 = Spiral(wgt, 1000.0, 1000.0, 10000, parity=1, port=(500.0+exclusion_region+4*step,y0))
 tk.add(spiral_unit, sp1)
 
 wg1=Waveguide([sp1.portlist["input"]["port"], (sp1.portlist["input"]["port"][0], 4000.0)], wgt)

@@ -12,7 +12,7 @@ import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
 class Spiral(gdspy.Cell):
-    def __init__(self, wgt, width, height, length, spacing=None, parity=1, center=(0,0)):
+    def __init__(self, wgt, width, height, length, spacing=None, parity=1, port=(0,0), direction="NORTH"):
         """
         First initiate super properties (gdspy.Cell)
         wgt = WaveguideTemplate
@@ -21,7 +21,7 @@ class Spiral(gdspy.Cell):
         length = desired length of the waveguide
         spacing = distance between parallel waveguides
         parity = If 1 spiral on right side, if -1 spiral on left side (mirror flip)
-        center = Center of the entire spiral structure
+        port = position for the input of the spiral structure (Bottom)
         """
         gdspy.Cell.__init__(self, "Spiral--"+str(uuid.uuid4()))
 
@@ -31,15 +31,14 @@ class Spiral(gdspy.Cell):
         self.height = height
         self.length = length
         self.parity = parity
-        self.center = center
+        self.port = port
         self.spacing=3*wgt.clad_width if spacing==None else spacing
 
         self.resist = wgt.resist
         self.wgt = wgt
         self.bend_radius = wgt.bend_radius
         self.spec = {'layer': wgt.layer, 'datatype': wgt.datatype}
-        self.direction_input = "SOUTH"
-        self.direction_output = "NORTH"
+        self.direction = direction
 
         self.build_cell()
         self.build_ports()
@@ -104,9 +103,9 @@ class Spiral(gdspy.Cell):
         hnew = self.get_dh(corner_dl, n)
         height = hnew
         if self.parity==1:
-            x0, y0 = self.center[0]-self.width/2.0, self.center[1]
+            x0, y0 = 0, height/2.0
         else:
-            x0, y0 = self.center[0]+self.width/2.0, self.center[1]
+            x0, y0 = 0, height/2.0
         y0 = y0 - hnew/2.0
         h, w, s = height, width, spacing
         p = self.parity
@@ -120,8 +119,6 @@ class Spiral(gdspy.Cell):
                       (x0+p*w, y0+h),
                       (x0, y0+h),
                       (x0, y0+h+self.bend_radius)]
-        self.portlist_input = (x0, y0)
-        self.portlist_output = (x0, y0+h+self.bend_radius)
 
         """ Now solve for the middle points given n loops """
         mid_points = []
@@ -169,24 +166,40 @@ class Spiral(gdspy.Cell):
         mid_points2.reverse()
 
         waypoints = start_points+mid_points+mid_points2+end_points
-        tk.add(self, Waveguide(waypoints, self.wgt))
-        self.flatten()
+
+        wg = Waveguide(waypoints, self.wgt)
+
+        if self.direction=="WEST":
+            wgr = gdspy.CellReference(wg, rotation=90)
+            self.portlist_output = (self.port[0]-h-self.bend_radius, self.port[1])
+        elif self.direction=="SOUTH":
+            wgr = gdspy.CellReference(wg, rotation=180)
+            self.portlist_output = (self.port[0], self.port[1]-h-self.bend_radius)
+        elif self.direction=="EAST":
+            wgr = gdspy.CellReference(wg, rotation=-90)
+            self.portlist_output = (self.port[0]+h+self.bend_radius, self.port[1])
+        else:
+            wgr = gdspy.CellReference(wg)
+            self.portlist_output = (self.port[0], self.port[1]+h+self.bend_radius)
+
+        wgr.translate(self.port[0], self.port[1])
+        self.add(wgr)
 
     def build_ports(self):
         """ Portlist format:
             example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         """
-        self.portlist["input"] = {'port':self.portlist_input,
-                                    'direction':self.direction_input}
+        self.portlist["input"] = {'port':self.port,
+                                    'direction':tk.flip_direction(self.direction)}
         self.portlist["output"] = {'port':self.portlist_output,
-                                    'direction':self.direction_output}
+                                    'direction':self.direction}
 
 if __name__ == "__main__":
     from picwriter.components.waveguide import WaveguideTemplate
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, resist='-')
 
-    sp1 = Spiral(wgt, 1000.0, 1000.0, 10000.0)
+    sp1 = Spiral(wgt, 1000.0, 1000.0, 10000.0, port=(100,200), direction="SOUTH")
     tk.add(top, sp1)
 
     gdspy.LayoutViewer()
