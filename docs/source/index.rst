@@ -21,11 +21,11 @@ PICwriter is tested on python versions 2.7, 3.4, 3.5, and 3.6 on Linux, OS X, an
 Installation (Linux / OS X)
 ---------------------------
 
-(**Option 1**) Install PICwriter by first downloading the source code `here <https://github.com/DerekK88/PICwriter>`_. and then run:::
+(**Option 1**) Install PICwriter by first downloading the source code `here <https://github.com/DerekK88/PICwriter>`_. and then run::
 
     python setup.py install
 
-(**Option 2**) Install PICwriter by running:::
+(**Option 2**) Install PICwriter by running::
 
     pip install picwriter
     
@@ -35,7 +35,7 @@ Installation (Windows)
 The best way of obtaining the library is by installing the prebuilt binaries.
 
 * First, go to the `gdspy avvpeyor project page <https://ci.appveyor.com/project/heitzmann/gdspy>`_, then click the python environment that matches your python environment, click the **Artifacts** tab, and then download the corresponding `dist\gdspy-1.X.X.X.whl` wheel file.
-* Open up a command prompt (type `cmd` in the search bar), navigate to your downloads, then install via:::
+* Open up a command prompt (type `cmd` in the search bar), navigate to your downloads, then install via::
 
     pip install dist\gdspy-1.X.X.X.whl
     
@@ -49,7 +49,7 @@ Building from source is also possible. For installing gdspy, an appropriate buil
 Getting Started
 ===============
 
-Once PICwriter is installed, check that it is installed (along with gdspy) by running:
+Once PICwriter is installed, check that it is installed (along with gdspy) by running::
 
     import gdspy
     import picwriter

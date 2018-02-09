@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
 @author: DerekK88
@@ -8,7 +7,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from unittest import TestCase
 
 import gdspy
-# from picwriter.components.waveguide import Waveguide, WaveguideTemplate
 from picwriter.components import *
 from picwriter import toolkit as tk
 
@@ -59,3 +57,15 @@ class TestPICwriter(TestCase):
 		# print("Spiral area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==1)
 		self.assertTrue(abs(top.area()-20099.9985958) <= 1e-6)
+
+	def test_mmi1x2_creation(self):
+		top = gdspy.Cell("t5")
+		wgt = WaveguideTemplate(bend_radius=50, resist='+')
+		wg1=Waveguide([(0,0), (250,0)], wgt)
+		tk.add(top, wg1)
+		mmi = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **wg1.portlist["output"])
+		tk.add(top, mmi)
+		# print("MMI1x2 area = "+str(top.area()))
+		# print(len(top.elements))
+		self.assertTrue(len(top.elements)==2)
+		self.assertTrue(abs(top.area()-6820.0) <= 1e-6)

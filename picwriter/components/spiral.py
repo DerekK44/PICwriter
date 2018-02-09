@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
 @author: DerekK88
@@ -178,9 +177,11 @@ class Spiral(gdspy.Cell):
         elif self.direction=="EAST":
             wgr = gdspy.CellReference(wg, rotation=-90)
             self.portlist_output = (self.port[0]+h+self.bend_radius, self.port[1])
-        else:
+        elif self.direction=="NORTH":
             wgr = gdspy.CellReference(wg)
             self.portlist_output = (self.port[0], self.port[1]+h+self.bend_radius)
+        else:
+            raise ValueError("Warning! Cardinal direction not provided for 'direction'")
 
         wgr.translate(self.port[0], self.port[1])
         self.add(wgr)

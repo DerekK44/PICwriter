@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
 @author: DerekK88
@@ -10,3 +9,4 @@ from .waveguide import Waveguide
 from .taper import Taper
 from .gratingcoupler import GratingCouplerStraight, GratingCouplerFocusing
 from .spiral import Spiral
+from .mmi1x2 import MMI1x2
