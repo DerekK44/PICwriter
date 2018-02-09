@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-@author: DerekK88
-"""
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
@@ -10,17 +6,17 @@ import uuid
 import picwriter.toolkit as tk
 
 class MMI1x2(gdspy.Cell):
+    """
+    wg_template, center=(0,0), length=33.0, width=6.0, taper_width=0, taper_length=25.0, wg_sep=0):
+    Defines a horizontal (input from left, output on right) multimode interferometer
+    First initiate super properties (gdspy.Cell)
+    length = horizontal length of the MMI region
+    width = vertical height of the MMI region
+    taper_width = max width of the taper region (default=wg_width from wg_template)
+    taper_length = length of the taper leading up to the MMI
+    wg_sep = separation between waveguides on the 2-port side (defaults to 0.5*width)
+    """
     def __init__(self, wgt, length, width, taper_width=None, taper_length=None, wg_sep=None, port=(0,0), direction='EAST'):
-        """
-        wg_template, center=(0,0), length=33.0, width=6.0, taper_width=0, taper_length=25.0, wg_sep=0):
-        Defines a horizontal (input from left, output on right) multimode interferometer
-        First initiate super properties (gdspy.Cell)
-        length = horizontal length of the MMI region
-        width = vertical height of the MMI region
-        taper_width = max width of the taper region (default=wg_width from wg_template)
-        taper_length = length of the taper leading up to the MMI
-        wg_sep = separation between waveguides on the 2-port side (defaults to 0.5*width)
-        """
         gdspy.Cell.__init__(self, "MMI1x2--"+str(uuid.uuid4()))
 
         self.portlist = {}

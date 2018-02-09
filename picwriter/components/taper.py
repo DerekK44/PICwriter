@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-@author: DerekK88
-"""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
@@ -10,14 +7,14 @@ import uuid
 import picwriter.toolkit as tk
 
 class Taper(gdspy.Cell):
+    """
+    First initiate super properties (gdspy.Cell)
+    trace = list of TWO points [(x1, y1), (x2, y2)] that determine orientation
+    start_width = width at first trace point (determined through wgt)
+    end_width = width at second trace point
+    resist = type of resist used, determined through wgt
+    """
     def __init__(self, wgt, length, end_width, port=(0,0), direction='EAST'):
-        """
-        First initiate super properties (gdspy.Cell)
-        trace = list of TWO points [(x1, y1), (x2, y2)] that determine orientation
-        start_width = width at first trace point (determined through wgt)
-        end_width = width at second trace point
-        resist = type of resist used, determined through wgt
-        """
         gdspy.Cell.__init__(self, "Taper--"+str(uuid.uuid4()))
 
         self.portlist = {}

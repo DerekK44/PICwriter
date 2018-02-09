@@ -67,6 +67,7 @@ Guide
 .. toctree::
    :maxdepth: 2
 
+   code.rst
    license.rst
    help.rst
 

@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-@author: DerekK88
-"""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
@@ -11,17 +8,17 @@ import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
 class Spiral(gdspy.Cell):
+    """
+    First initiate super properties (gdspy.Cell)
+    wgt = WaveguideTemplate
+    width = MAX width of the outermost part of the spiral
+    height = MAX height of the outermost part of the spiral
+    length = desired length of the waveguide
+    spacing = distance between parallel waveguides
+    parity = If 1 spiral on right side, if -1 spiral on left side (mirror flip)
+    port = position for the input of the spiral structure (Bottom)
+    """
     def __init__(self, wgt, width, height, length, spacing=None, parity=1, port=(0,0), direction="NORTH"):
-        """
-        First initiate super properties (gdspy.Cell)
-        wgt = WaveguideTemplate
-        width = MAX width of the outermost part of the spiral
-        height = MAX height of the outermost part of the spiral
-        length = desired length of the waveguide
-        spacing = distance between parallel waveguides
-        parity = If 1 spiral on right side, if -1 spiral on left side (mirror flip)
-        port = position for the input of the spiral structure (Bottom)
-        """
         gdspy.Cell.__init__(self, "Spiral--"+str(uuid.uuid4()))
 
         self.portlist = {}

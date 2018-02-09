@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-@author: DerekK88
+Set of helper functions that make it easier to manipulate
+and work with gdspy subclasses defined in **components** miodule
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -8,10 +9,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 import gdspy
 
-"""
-Set of helper functions that make it easier to manipulate
-and work with gdspy subclasses defined in 'components' folder
-"""
 TOL=1e-6
 
 def add(topcell, subcell, center=(0,0)):
@@ -21,36 +18,80 @@ def get_keys(subcell):
     return list(subcell.portlist.keys())
 
 def get_angle(pt1, pt2):
-    dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
-    """ Uncomment below if we want to use real angles in the future
-    and not just 90 degree bends
-    if dx>0 and dy>0: #quadrant 1
-        angle = np.arctan(dy/dx)
-    elif dx<=0 and dy>0: #quadrant 2
-        angle = 0.5*np.pi + np.arctan(-dx/dy)
-    elif dx<0 and dy<=0: #quadrant 3
-        angle = np.pi + np.arctan(dy/dx)
-    else: #quadrant 4
-        angle = 1.5*np.pi + np.arctan(-dx/dy)
     """
+    Given two cardinal points, returns the corresponding angle
+    in *radians*.  Must be an integer multiple of pi/2.
+
+    Args:
+       **pt1** (tuple):  Point 1
+
+       **pt2** (tuple):  Point 2
+
+    Returns:
+       float.  Angle (integer multiple of pi/2)
+
+    Example::
+
+        import picwriter.toolkit as tk
+        print(tk.get_angle((0, 0), (0, 100)))
+        >> 1.5707963267948966
+
+    """
+    dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
     if abs(dx)<=TOL and dy>0:
         angle=0.5*np.pi
     elif abs(dy)<=TOL and dx<0:
         angle=np.pi
     elif abs(dx)<=TOL and dy<0:
         angle=1.5*np.pi
-    else:
+    elif abs(dy)<=TOL and dx>0:
         angle=0.0
+    else:
+        raise ValueError("Warning! The angle between the two points must be an "
+                         "integer multiples of 90deg from each other")
     return angle
 
 def dist(pt1, pt2):
+    """
+    Given two cardinal points, returns the distance between the two.
+
+    Args:
+       **pt1** (tuple):  Point 1
+
+       **pt2** (tuple):  Point 2
+
+    Returns:
+       float.  Distance
+
+    Example::
+
+        import picwriter.toolkit as tk
+        print(tk.dist((0, 0), (100, 100)))
+        >> 141.42135623730951
+
+    """
     return np.sqrt((pt2[0]-pt1[0])**2 + (pt2[1]-pt1[1])**2)
 
 def get_direction(pt1, pt2):
-    """  Returns a cardinal direction:
-        -NORTH, WEST, SOUTH, and EAST
-        that corresponds to a cartesian point 'pt1' (tuple), pointing
-        TOWARDS a second point pt2 """
+    """  Returns a cardinal direction (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, and ``'EAST'``)
+        that corresponds to a cartesian point `pt1 (tuple), pointing
+        TOWARDS a second point `pt2`
+
+        Args:
+           **pt1** (tuple):  Point 1
+
+           **pt2** (tuple):  Point 2
+
+        Returns:
+           string.  (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, and ``'EAST'``)
+
+        Example::
+
+            import picwriter.toolkit as tk
+            tk.get_direction((0,0), (-100,0))
+            >> 'WEST'
+
+    """
     dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
     if abs(dx)<=TOL and dy>0:
         return "NORTH"

@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-@author: DerekK88
-"""
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
@@ -10,19 +6,19 @@ import uuid
 import picwriter.toolkit as tk
 
 class GratingCouplerStraight(gdspy.Cell):
+    """
+    First initiate super properties (gdspy.Cell)
+    wgt = WaveguideTemplate reference
+    port = tuple (x1, y1) position that determines output port
+    direction = direction of the port on the grating coupler
+    width = width of the grating region
+    length = length of the grating region
+    taper_length = length of taper
+    period = grating period
+    dutycycle = dutycycle, defined by (period-gap)/period
+    """
     def __init__(self, wgt, port=(0,0), direction='EAST', width=20, length=50,
                  taper_length=20, period=1.0, dutycycle=0.5):
-        """
-        First initiate super properties (gdspy.Cell)
-        wgt = WaveguideTemplate reference
-        port = tuple (x1, y1) position that determines output port
-        direction = direction of the port on the grating coupler
-        width = width of the grating region
-        length = length of the grating region
-        taper_length = length of taper
-        period = grating period
-        dutycycle = dutycycle, defined by (period-gap)/period
-        """
         gdspy.Cell.__init__(self, "GratingCouplerStraight--"+str(uuid.uuid4()))
 
         self.portlist = {}
@@ -88,27 +84,27 @@ class GratingCouplerStraight(gdspy.Cell):
         self.portlist["output"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
 
 class GratingCouplerFocusing(gdspy.Cell):
+    """
+    First initiate super properties (gdspy.Cell)
+    wgt = WaveguideTemplate reference
+    port = tuple (x1, y1) position that determines output port
+    direction = direction of the port on the grating coupler
+    focus_distance = if None, use straight grating, else focus by this amount
+    width = width of the grating region
+    length = length of the grating region
+    period = grating period
+    dutycycle = dutycycle, defined by (period-gap)/period
+
+    The parameters below only apply to the focusing grating couplers
+    wavelength = free space wavelength
+    sin_theta = sine of the incidence angle
+    focus_distance = distance
+    evaluations = number of parametric evaluations of path.parametric
+    """
     def __init__(self, wgt, port=(0,0), direction='EAST', focus_distance=None,
                     width=20, length=50, period=1.0, dutycycle=0.5,
                     wavelength=1.55, sin_theta=np.sin(np.pi * 8 / 180),
                     evaluations=99):
-        """
-        First initiate super properties (gdspy.Cell)
-        wgt = WaveguideTemplate reference
-        port = tuple (x1, y1) position that determines output port
-        direction = direction of the port on the grating coupler
-        focus_distance = if None, use straight grating, else focus by this amount
-        width = width of the grating region
-        length = length of the grating region
-        period = grating period
-        dutycycle = dutycycle, defined by (period-gap)/period
-
-        The parameters below only apply to the focusing grating couplers
-        wavelength = free space wavelength
-        sin_theta = sine of the incidence angle
-        focus_distance = distance
-        evaluations = number of parametric evaluations of path.parametric
-        """
         gdspy.Cell.__init__(self, "GratingCouplerFocusing--"+str(uuid.uuid4()))
 
         self.portlist = {}

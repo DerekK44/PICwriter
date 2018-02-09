@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-@author: DerekK88
-"""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
@@ -10,15 +7,15 @@ import uuid
 import picwriter.toolkit as tk
 
 class WaveguideTemplate:
+    """
+    wg_width = width of the target waveguide [um]
+    bend_radius = bend radius [um]
+    clad_width = spacing on either side (for '+' resist type ONLY!)
+    resist = determines type for 'ETCH' type applications
+    layer, datatype = layer & datatype for GDS file
+    """
     def __init__(self, bend_radius=50.0, wg_width=2.0, clad_width=10.0,
                  fab='ETCH', resist='+', layer=1, datatype=2):
-        """
-        wg_width = width of the target waveguide [um]
-        bend_radius = bend radius [um]
-        clad_width = spacing on either side (for '+' resist type ONLY!)
-        resist = determines type for 'ETCH' type applications
-        layer, datatype = layer & datatype for GDS file
-        """
         self.wg_width = wg_width
         self.bend_radius = bend_radius
         self.clad_width = clad_width
@@ -34,13 +31,13 @@ class WaveguideTemplate:
         self.datatype = datatype
 
 class Waveguide(gdspy.Cell):
+    """
+    First initiate super properties (gdspy.Cell)
+    trace = list of points [(x1, y1), (x2, y2), ..]
+    wgt = WaveguideTemplate type class
+    resist = type of resist used, determined through wgt
+    """
     def __init__(self, trace, wgt):
-        """
-        First initiate super properties (gdspy.Cell)
-        trace = list of points [(x1, y1), (x2, y2), ..]
-        wgt = WaveguideTemplate type class
-        resist = type of resist used, determined through wgt
-        """
         gdspy.Cell.__init__(self,"Waveguide--"+str(uuid.uuid4()))
 
         self.portlist = {}
