@@ -16,7 +16,8 @@ step = 100.0 #standard spacing between components
 top = gdspy.Cell("top")
 
 wgt = WaveguideTemplate(wg_width=0.45, clad_width=10.0, bend_radius=100,
-                        resist='+', fab='ETCH', layer=1, datatype=1)
+                        resist='+', fab='ETCH', wg_layer=1, wg_datatype=0,
+                        clad_layer=2, clad_datatype=0)
 
 """ Add a die outline, with exclusion, from gdspy geometries found at
     http://gdspy.readthedocs.io/en/latest/"""

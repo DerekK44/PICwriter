@@ -47,7 +47,6 @@ class Spiral(gdspy.Cell):
         self.resist = wgt.resist
         self.wgt = wgt
         self.bend_radius = wgt.bend_radius
-        self.spec = {'layer': wgt.layer, 'datatype': wgt.datatype}
         self.direction = direction
 
         self.build_cell()

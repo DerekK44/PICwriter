@@ -17,6 +17,7 @@ class Taper(gdspy.Cell):
         Keyword Args:
            * **port** (tuple): Cartesian coordinate of the input port
            * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+           * **end_clad_width** (float): Clad width at the end of the taper.  Defaults to the regular clad width.
 
         Members:
            * **portlist** (dict): Dictionary with the relevant port information
@@ -28,7 +29,7 @@ class Taper(gdspy.Cell):
         Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
 
     """
-    def __init__(self, wgt, length, end_width, port=(0,0), direction='EAST'):
+    def __init__(self, wgt, length, end_width, end_clad_width=None, port=(0,0), direction='EAST'):
         gdspy.Cell.__init__(self, "Taper--"+str(uuid.uuid4()))
 
         self.portlist = {}
@@ -38,9 +39,11 @@ class Taper(gdspy.Cell):
         self.direction = direction
         self.start_width = wgt.wg_width
         self.end_width = end_width
+        self.end_clad_width = wgt.clad_width if end_clad_width==None else end_clad_width
         self.resist = wgt.resist
         self.wgt = wgt
-        self.spec = {'layer': wgt.layer, 'datatype': wgt.datatype}
+        self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
+        self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
         self.type_check_trace()
         self.build_cell()
@@ -68,17 +71,17 @@ class Taper(gdspy.Cell):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         angle = tk.get_angle(self.trace[0], self.trace[1])
-        if self.resist=='-':
-            path = gdspy.Path(self.wgt.wg_width, self.trace[0])
-            path.segment(tk.dist(self.trace[0], self.trace[1]),
-                         direction=angle, final_width=self.end_width, **self.spec)
-        elif self.resist=='+':
-            path = gdspy.Path(self.wgt.clad_width, self.trace[0], number_of_paths=2,
-                              distance=self.wgt.wg_width + self.wgt.clad_width)
-            path.segment(tk.dist(self.trace[0], self.trace[1]), direction=angle,
-                         final_distance=self.end_width+self.wgt.clad_width, **self.spec)
+        # Add waveguide taper
+        path = gdspy.Path(self.wgt.wg_width, self.trace[0])
+        path.segment(tk.dist(self.trace[0], self.trace[1]),
+                     direction=angle, final_width=self.end_width, **self.wg_spec)
+        # Cladding for waveguide taper
+        path2 = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, self.trace[0])
+        path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=angle,
+                     final_width=2*self.end_clad_width+self.end_width, **self.clad_spec)
 
         self.add(path)
+        self.add(path2)
 
     def build_ports(self):
         # Portlist format:
@@ -96,7 +99,7 @@ if __name__ == "__main__":
     wg1=Waveguide([(50,0), (250,0), (250,500)], wgt)
     tk.add(top, wg1)
 
-    tp1 = Taper(wgt, 100.0, 0.3, **wg1.portlist["input"])
+    tp1 = Taper(wgt, 100.0, 0.3, end_clad_width=50, **wg1.portlist["input"])
     tp2 = Taper(wgt, 100.0, 0.0, **wg1.portlist["output"])
     tk.add(top, tp1)
     tk.add(top, tp2)

@@ -48,7 +48,8 @@ class GratingCouplerStraight(gdspy.Cell):
             raise ValueError("Warning! Dutycycle *must* specify a valid number "
                              "between 0 and 1.")
         self.dc = dutycycle
-        self.spec = {'layer': wgt.layer, 'datatype': wgt.datatype}
+        self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
+        self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
         self.build_cell()
         self.build_ports()
@@ -59,33 +60,33 @@ class GratingCouplerStraight(gdspy.Cell):
         num_teeth = int(self.length//self.period)
         """ Create a straight grating GratingCoupler
         """
-        if self.resist == '-':
-            gap = self.period - (self.period*self.dc)
-            path = gdspy.Path(self.wgt.wg_width, self.port)
-            path.segment(self.taper_length, direction='+y',
-                         final_width=self.width, **self.spec)
-            teeth = gdspy.L1Path((self.port[0]-0.5*self.width, gap+self.taper_length+self.port[1]+0.5*(num_teeth-1+self.dc)*self.period),
-                                '+x', self.period*self.dc, [self.width], [], num_teeth, self.period, **self.spec)
-        elif self.resist == '+':
-            path = gdspy.Path(self.wgt.clad_width, self.port, number_of_paths=2,
-                              distance=self.wgt.wg_width + self.wgt.clad_width)
-            path.segment(self.taper_length, direction='+y',
-                         final_distance=self.width+self.wgt.clad_width, **self.spec)
-            path.segment(self.length, direction='+y', **self.spec)
-            teeth = gdspy.L1Path((self.port[0]-0.5*self.width, self.taper_length+self.port[1]+0.5*(num_teeth-1+(1.0-self.dc))*self.period),
-                                '+x', self.period*(1.0-self.dc), [self.width], [], num_teeth, self.period, **self.spec)
+        gap = self.period - (self.period*self.dc)
+        path = gdspy.Path(self.wgt.wg_width, self.port)
+        path.segment(self.taper_length, direction='+y',
+                     final_width=self.width, **self.wg_spec)
+        teeth = gdspy.L1Path((self.port[0]-0.5*self.width, gap+self.taper_length+self.port[1]+0.5*(num_teeth-1+self.dc)*self.period),
+                            '+x', self.period*self.dc, [self.width], [], num_teeth, self.period, **self.wg_spec)
+
+        clad_path = gdspy.Path(self.wgt.wg_width + 2*self.wgt.clad_width, self.port)
+        clad_path.segment(self.taper_length, direction='+y',
+                     final_width=self.width+2*self.wgt.clad_width, **self.clad_spec)
+        clad_path.segment(self.length, direction='+y', **self.clad_spec)
 
         if self.direction=="WEST":
             teeth.rotate(np.pi/2.0, self.port)
             path.rotate(np.pi/2.0, self.port)
+            clad_path.rotate(np.pi/2.0, self.port)
         if self.direction=="SOUTH":
             teeth.rotate(np.pi, self.port)
             path.rotate(np.pi, self.port)
+            clad_path.rotate(np.pi, self.port)
         if self.direction=="EAST":
             teeth.rotate(-np.pi/2.0, self.port)
             path.rotate(-np.pi/2.0, self.port)
+            clad_path.rotate(-np.pi/2.0, self.port)
         self.add(teeth)
         self.add(path)
+        self.add(clad_path)
 
     def build_ports(self):
         # Portlist format:
@@ -143,7 +144,8 @@ class GratingCouplerFocusing(gdspy.Cell):
         self.wavelength = wavelength
         self.sin_theta = sin_theta
         self.evaluations = evaluations
-        self.spec = {'layer': wgt.layer, 'datatype': wgt.datatype}
+        self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
+        self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
         self.build_cell()
         self.build_ports()
@@ -161,57 +163,48 @@ class GratingCouplerFocusing(gdspy.Cell):
         w = 0.5 * self.width
         path = gdspy.Path(self.wgt.clad_width, self.port, number_of_paths=2,
                           distance=self.wgt.wg_width + self.wgt.clad_width)
-        if self.resist == '-':
-            teeth = gdspy.Path(self.period * self.dc, self.port)
-            for q in range(qmin, qmin + num_teeth):
-                c1 = q * self.wavelength * self.sin_theta
-                c2 = (q * self.wavelength)**2
-                teeth.parametric(lambda t: (self.width * t - w, (c1 + neff
-                                * np.sqrt(c2 - c3 * (self.width * t - w)**2)) / c3),
-                                number_of_evaluations=self.evaluations,
-                                max_points=max_points,
-                                **self.spec)
-                teeth.x = self.port[0]
-                teeth.y = self.port[1]
-            teeth.polygons[0] = np.vstack(
-                (teeth.polygons[0][:self.evaluations, :],
-                 ([(self.port[0] + 0.5 * self.wgt.wg_width, self.port[1]),
-                   (self.port[0] - 0.5 * self.wgt.wg_width, self.port[1])])))
-            teeth.fracture()
-        elif self.resist == '+':
-            path.segment(self.focus_distance, direction='+y',
-                         final_distance=self.width+self.wgt.clad_width, **self.spec)
-            path.segment(self.length, direction='+y', **self.spec)
-            teeth = gdspy.Path(self.period * (1.0-self.dc), self.port)
-            self.width = self.width + self.period
-            w = 0.5*self.width
-            for q in range(qmin, qmin + num_teeth):
-                c1 = q * self.wavelength * self.sin_theta
-                c2 = (q * self.wavelength)**2
-                teeth.parametric(lambda t: (self.width * t - w, (c1 + neff
-                                * np.sqrt(c2 - c3 * (self.width * t - w)**2)) / c3),
-                                number_of_evaluations=self.evaluations,
-                                max_points=max_points,
-                                **self.spec)
-                teeth.x = self.port[0]
-                teeth.y = self.port[1]
+
+        teeth = gdspy.Path(self.period * self.dc, self.port)
+        for q in range(qmin, qmin + num_teeth):
+            c1 = q * self.wavelength * self.sin_theta
+            c2 = (q * self.wavelength)**2
+            teeth.parametric(lambda t: (self.width * t - w, (c1 + neff
+                            * np.sqrt(c2 - c3 * (self.width * t - w)**2)) / c3),
+                            number_of_evaluations=self.evaluations,
+                            max_points=max_points,
+                            **self.wg_spec)
+            teeth.x = self.port[0]
+            teeth.y = self.port[1]
+        teeth.polygons[0] = np.vstack(
+            (teeth.polygons[0][:self.evaluations, :],
+             ([(self.port[0] + 0.5 * self.wgt.wg_width, self.port[1]),
+               (self.port[0] - 0.5 * self.wgt.wg_width, self.port[1])])))
+        teeth.fracture()
+
+        clad_path = gdspy.Path(self.wgt.wg_width + 2*self.wgt.clad_width, self.port)
+        clad_path.segment(self.focus_distance, direction='+y',
+                     final_width=self.width+2*self.wgt.clad_width, **self.clad_spec)
+        clad_path.segment(self.length, direction='+y', **self.clad_spec)
 
         if self.direction=="WEST":
             teeth.rotate(np.pi/2.0, self.port)
             path.rotate(np.pi/2.0, self.port)
+            clad_path.rotate(np.pi/2.0, self.port)
         if self.direction=="SOUTH":
             teeth.rotate(np.pi, self.port)
             path.rotate(np.pi, self.port)
+            clad_path.rotate(np.pi, self.port)
         if self.direction=="EAST":
             teeth.rotate(-np.pi/2.0, self.port)
             path.rotate(-np.pi/2.0, self.port)
+            clad_path.rotate(-np.pi/2.0, self.port)
         self.add(teeth)
         self.add(path)
+        self.add(clad_path)
 
     def build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-
         self.portlist["output"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
 
 if __name__ == "__main__":

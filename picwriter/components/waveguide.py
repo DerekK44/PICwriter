@@ -15,12 +15,14 @@ class WaveguideTemplate:
            * **clad_width** (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff)
            * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used
            * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'
-           * **layer** (int): Layer type used
-           * **datatype** (int): Data type used
+           * **wg_layer** (int): Layer type used for waveguides
+           * **wg_datatype** (int): Data type used for waveguides
+           * **clad_layer** (int): Layer type used for cladding
+           * **clad_datatype** (int): Data type used for cladding
 
     """
     def __init__(self, bend_radius=50.0, wg_width=2.0, clad_width=10.0,
-                 resist='+', fab='ETCH', layer=1, datatype=2):
+                 resist='+', fab='ETCH', wg_layer=1, wg_datatype=2, clad_layer=2, clad_datatype=2):
         self.wg_width = wg_width
         self.bend_radius = bend_radius
         self.clad_width = clad_width
@@ -32,8 +34,10 @@ class WaveguideTemplate:
         else: #reverse waveguide type if liftoff or something else
             self.resist = '+' if resist=='-' else '-'
 
-        self.layer = layer
-        self.datatype = datatype
+        self.wg_layer = wg_layer
+        self.wg_datatype = wg_datatype
+        self.clad_layer = clad_layer
+        self.clad_datatype = clad_datatype
 
 class Waveguide(gdspy.Cell):
     """ Standard Waveguide Cell class (subclass of gdspy.Cell).
@@ -60,7 +64,8 @@ class Waveguide(gdspy.Cell):
         self.trace = trace
         self.wgt = wgt
         self.resist = wgt.resist
-        self.spec = {'layer': wgt.layer, 'datatype': wgt.datatype}
+        self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
+        self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype} #Used for 'xor' operation
 
         self.type_check_trace()
         self.build_cell()
@@ -103,30 +108,34 @@ class Waveguide(gdspy.Cell):
         # for waveguide, then add it to the Cell
         br = self.wgt.bend_radius
 
-        if self.resist=='-':
-            path = gdspy.Path(self.wgt.wg_width, self.trace[0])
-        elif self.resist=='+':
-            path = gdspy.Path(self.wgt.clad_width, self.trace[0], number_of_paths=2,
-                              distance=self.wgt.wg_width + self.wgt.clad_width)
+        path = gdspy.Path(self.wgt.wg_width, self.trace[0])
+        path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
 
         prior_direction = tk.get_direction(self.trace[0], self.trace[1])
         path.segment(tk.dist(self.trace[0], self.trace[1])-br,
                      direction=tk.get_angle(self.trace[0], self.trace[1]),
-                     **self.spec)
+                     **self.wg_spec)
+        path2.segment(tk.dist(self.trace[0], self.trace[1])-br,
+                     direction=tk.get_angle(self.trace[0], self.trace[1]),
+                     **self.clad_spec)
         for i in range(len(self.trace)-2):
             direction = tk.get_direction(self.trace[i+1], self.trace[i+2])
             turn = tk.get_turn(prior_direction, direction)
-            path.turn(br, turn, number_of_points=0.1, **self.spec)
+            path.turn(br, turn, number_of_points=0.1, **self.wg_spec)
+            path2.turn(br, turn, number_of_points=0.1, **self.clad_spec)
             if tk.dist(self.trace[i+1], self.trace[i+2])-2*br > 0: #ONLY False for last points if spaced br < distance < 2br
-                path.segment(tk.dist(self.trace[i+1], self.trace[i+2])-2*br,
-                            **self.spec)
+                path.segment(tk.dist(self.trace[i+1], self.trace[i+2])-2*br, **self.wg_spec)
+                path2.segment(tk.dist(self.trace[i+1], self.trace[i+2])-2*br, **self.clad_spec)
             prior_direction = direction
         if tk.dist(self.trace[-2],self.trace[-1]) < 2*br:
-            path.segment(tk.dist(self.trace[-2],self.trace[-1])-br, **self.spec)
+            path.segment(tk.dist(self.trace[-2],self.trace[-1])-br, **self.wg_spec)
+            path2.segment(tk.dist(self.trace[-2],self.trace[-1])-br, **self.clad_spec)
         else:
-            path.segment(br, **self.spec)
+            path.segment(br, **self.wg_spec)
+            path2.segment(br, **self.clad_spec)
 
         self.add(path)
+        self.add(path2)
 
     def build_ports(self):
         # Portlist format:
