@@ -11,3 +11,4 @@ Below is the set of supported components that come standard in the picwriter lib
    gratingcouplers.rst
    spirals.rst
    mmis.rst
+   resonators.rst

@@ -21,7 +21,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg2)
 		# print("Waveguide area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-2828.31811879) <= 1e-6)
+		self.assertTrue(abs(top.area()-33939.818854) <= 1e-6)
 
 	def test_taper_creation(self):
 		top = gdspy.Cell("t2")
@@ -34,7 +34,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, tp2)
 		# print("Taper area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==3)
-		self.assertTrue(abs(top.area()-22141.5912852) <= 1e-6)
+		self.assertTrue(abs(top.area()-26199.909427) <= 1e-6)
 
 	def test_grating_coupler_creation(self):
 		top = gdspy.Cell("t3")
@@ -47,7 +47,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, gc2)
 		# print("Grating coupler area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==3)
-		self.assertTrue(abs(top.area()-22562.0651354) <= 1e-6)
+		self.assertTrue(abs(top.area()-30061.6918115) <= 1e-6)
 
 	def test_spiral_creation(self):
 		top = gdspy.Cell("t4")
@@ -56,7 +56,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, sp1)
 		# print("Spiral area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==1)
-		self.assertTrue(abs(top.area()-20099.9985958) <= 1e-6)
+		self.assertTrue(abs(top.area()-241199.988149) <= 1e-6)
 
 	def test_mmi1x2_creation(self):
 		top = gdspy.Cell("t5")
@@ -66,6 +66,45 @@ class TestPICwriter(TestCase):
 		mmi = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **wg1.portlist["output"])
 		tk.add(top, mmi)
 		# print("MMI1x2 area = "+str(top.area()))
-		# print(len(top.elements))
+		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-6820.0) <= 1e-6)
+		self.assertTrue(abs(top.area()-9190.0) <= 1e-6)
+
+	def test_mmi2x2_creation(self):
+		top = gdspy.Cell("t6")
+		wgt = WaveguideTemplate(bend_radius=50, wg_width=1.0, resist='+')
+
+		wg1=Waveguide([(0, 0), (0, -100)], wgt)
+		tk.add(top, wg1)
+		mmi = MMI2x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3.0, port=(0,0), direction='EAST')
+		tk.add(top, mmi)
+		# print("MMI2x2 area = "+str(top.area()))
+		print(len(top.elements))
+		self.assertTrue(len(top.elements)==2)
+		self.assertTrue(abs(top.area()-5640.0) <= 1e-6)
+
+	def test_ring_creation(self):
+		top = gdspy.Cell("t7")
+		wgt = WaveguideTemplate(bend_radius=50, wg_width=1.0, resist='+')
+
+		wg1=Waveguide([(0,0), (100,0)], wgt)
+		tk.add(top, wg1)
+		r1 = Ring(wgt, 60.0, 1.0, parity=1, **wg1.portlist["output"])
+		tk.add(top, r1)
+		# print("Ring area = "+str(top.area()))
+		print(len(top.elements))
+		self.assertTrue(len(top.elements)==2)
+		self.assertTrue(abs(top.area()-13133.8016946) <= 1e-6)
+
+	def test_disk_creation(self):
+		top = gdspy.Cell("t8")
+		wgt = WaveguideTemplate(bend_radius=50, wg_width=1.0, resist='+')
+
+		wg1=Waveguide([(0,0), (100,0)], wgt)
+		tk.add(top, wg1)
+		d1 = Disk(wgt, 60.0, 1.0, parity=1, **wg1.portlist["output"])
+		tk.add(top, d1)
+		# print("Disk area = "+str(top.area()))
+		print(len(top.elements))
+		self.assertTrue(len(top.elements)==2)
+		self.assertTrue(abs(top.area()-31953.5046652) <= 1e-6)
