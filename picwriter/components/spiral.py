@@ -207,7 +207,8 @@ if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, resist='-')
 
-    sp1 = Spiral(wgt, 1000.0, 1000.0, 10000.0, port=(100,200), direction="SOUTH")
+    sp1 = Spiral(wgt, 500.0, 1000.0, 10000.0, port=(100,200), direction="EAST")
     tk.add(top, sp1)
 
     gdspy.LayoutViewer()
+    # gdspy.write_gds('spiral.gds', unit=1.0e-6, precision=1.0e-9)

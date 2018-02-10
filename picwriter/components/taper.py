@@ -96,12 +96,13 @@ if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, resist='+')
 
-    wg1=Waveguide([(50,0), (250,0), (250,500)], wgt)
+    wg1=Waveguide([(0,0), (100,0)], wgt)
     tk.add(top, wg1)
 
     tp1 = Taper(wgt, 100.0, 0.3, end_clad_width=50, **wg1.portlist["input"])
-    tp2 = Taper(wgt, 100.0, 0.0, **wg1.portlist["output"])
+    tp2 = Taper(wgt, 100.0, 0.5, end_clad_width=15, **wg1.portlist["output"])
     tk.add(top, tp1)
     tk.add(top, tp2)
 
     gdspy.LayoutViewer()
+    # gdspy.write_gds('taper.gds', unit=1.0e-6, precision=1.0e-9)

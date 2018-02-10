@@ -7,6 +7,8 @@ Waveguide Template
 .. automodule:: picwriter.components
    :members: WaveguideTemplate
    
+.. image:: imgs/waveguide.png
+   
 Waveguides
 ----------
 

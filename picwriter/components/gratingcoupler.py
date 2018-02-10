@@ -215,10 +215,11 @@ if __name__ == "__main__":
     wg1=Waveguide([(0,0), (250,0), (250,500), (500,500)], wgt)
     tk.add(top, wg1)
 
-    gc1 = GratingCouplerStraight(wgt, width=20, length=50, taper_length=20, period=1.0, dutycycle=0.7, **wg1.portlist["input"])
+    gc1 = GratingCouplerStraight(wgt, width=20, length=50, taper_length=20, period=1.0, dutycycle=0.7, **wg1.portlist["output"])
     tk.add(top, gc1)
 
-    gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=50, period=1.0, dutycycle=0.7, **wg1.portlist["output"])
+    gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=50, period=1.0, dutycycle=0.7, **wg1.portlist["input"])
     tk.add(top,gc2)
 
     gdspy.LayoutViewer()
+    # gdspy.write_gds('gratingcoupler.gds', unit=1.0e-6, precision=1.0e-9)

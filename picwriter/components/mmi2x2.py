@@ -143,12 +143,12 @@ if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, wg_width=1.0, resist='+')
 
-    wg1=Waveguide([(0, 0), (0, -100)], wgt)
-    tk.add(top, wg1)
+    # wg1=Waveguide([(0, 0), (0, -100)], wgt)
+    # tk.add(top, wg1)
 
-    mmi = MMI2x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3.0, **wg1.portlist["output"])
+    # mmi = MMI2x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3.0, **wg1.portlist["output"])
+    mmi = MMI2x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3.0, port=(0,0), direction='EAST')
     tk.add(top, mmi)
 
-    print(mmi.portlist)
-
-    gdspy.LayoutViewer()
+    # gdspy.LayoutViewer()
+    gdspy.write_gds('mmi2x2.gds', unit=1.0e-6, precision=1.0e-9)

@@ -84,7 +84,7 @@ class MMI1x2(gdspy.Cell):
                     (self.port[0]+2*self.taper_length+self.length, self.port[1]+self.wg_sep/2.0+self.wgt.wg_width/2.0+self.wgt.clad_width),
                     (self.port[0]+self.taper_length+self.length, self.port[1]+self.width/2.0+self.wgt.clad_width),
                     (self.port[0]+self.taper_length, self.port[1]+self.width/2.0+self.wgt.clad_width),
-                    (self.port[0], self.port[1]-self.wgt.wg_width/2.0+self.wgt.clad_width)]
+                    (self.port[0], self.port[1]+self.wgt.wg_width/2.0+self.wgt.clad_width)]
         clad = gdspy.Polygon(clad_pts, **self.clad_spec)
 
         angle=0
@@ -129,10 +129,12 @@ if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, wg_width=1.0, resist='+')
 
-    wg1=Waveguide([(0, 0), (0, -100)], wgt)
+    wg1=Waveguide([(0, 0), (100, 0)], wgt)
     tk.add(top, wg1)
 
     mmi = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **wg1.portlist["output"])
+    # mmi = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=4.0, port=(0,0), direction='EAST')
     tk.add(top, mmi)
 
     gdspy.LayoutViewer()
+    # gdspy.write_gds('mmi1x2.gds', unit=1.0e-6, precision=1.0e-9)

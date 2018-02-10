@@ -22,7 +22,7 @@ class WaveguideTemplate:
 
     """
     def __init__(self, bend_radius=50.0, wg_width=2.0, clad_width=10.0,
-                 resist='+', fab='ETCH', wg_layer=1, wg_datatype=2, clad_layer=2, clad_datatype=2):
+                 resist='+', fab='ETCH', wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0):
         self.wg_width = wg_width
         self.bend_radius = bend_radius
         self.clad_width = clad_width
@@ -149,10 +149,9 @@ if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, resist='+', fab="ETCH")
 
-    wg1=Waveguide([(50,0), (250,0), (250,500), (500,500)], wgt)
-    wg2=Waveguide([(0,0), (0,100), (-250, 100), (-250, -100)], wgt)
+    wg1=Waveguide([(0,0), (250,0), (250,100), (500,100)], wgt)
 
     tk.add(top, wg1)
-    tk.add(top, wg2)
 
     gdspy.LayoutViewer()
+    # gdspy.write_gds('waveguide.gds', unit=1.0e-6, precision=1.0e-9)

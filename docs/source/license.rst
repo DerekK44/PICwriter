@@ -25,4 +25,4 @@ SOFTWARE.
 
 Contact
 -------
-Questions? Please contact dkita@mit.edu
+Questions? Please contact dkitaone@gmail.com
