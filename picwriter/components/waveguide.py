@@ -7,15 +7,20 @@ import uuid
 import picwriter.toolkit as tk
 
 class WaveguideTemplate:
-    """
-    wg_width = width of the target waveguide [um]
-    bend_radius = bend radius [um]
-    clad_width = spacing on either side (for '+' resist type ONLY!)
-    resist = determines type for 'ETCH' type applications
-    layer, datatype = layer & datatype for GDS file
+    """ Standard template for waveguides (as well as other structures) that contains some standard information about the fabrication process and waveguides.
+
+        Keyword Args:
+           * **bend_radius** (float): Radius of curvature for waveguide bends (circular)
+           * **wg_width** (float): Width of the waveguide as shown on the mask
+           * **clad_width** (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff)
+           * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used
+           * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'
+           * **layer** (int): Layer type used
+           * **datatype** (int): Data type used
+
     """
     def __init__(self, bend_radius=50.0, wg_width=2.0, clad_width=10.0,
-                 fab='ETCH', resist='+', layer=1, datatype=2):
+                 resist='+', fab='ETCH', layer=1, datatype=2):
         self.wg_width = wg_width
         self.bend_radius = bend_radius
         self.clad_width = clad_width
@@ -31,11 +36,21 @@ class WaveguideTemplate:
         self.datatype = datatype
 
 class Waveguide(gdspy.Cell):
-    """
-    First initiate super properties (gdspy.Cell)
-    trace = list of points [(x1, y1), (x2, y2), ..]
-    wgt = WaveguideTemplate type class
-    resist = type of resist used, determined through wgt
+    """ Standard Waveguide Cell class (subclass of gdspy.Cell).
+
+        Args:
+           * **trace** (list):  List of coordinates used to generate the waveguide (such as '[(x1,y1), (x2,y2), ...]')
+           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+
+        Members:
+           * **portlist** (dict): Dictionary with the relevant port information
+
+        Portlist format:
+           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+
+        Where in the above (x1,y1) are the first elements of 'trace', (x2, y2) are the last elements of 'trace', and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+
     """
     def __init__(self, trace, wgt):
         gdspy.Cell.__init__(self,"Waveguide--"+str(uuid.uuid4()))
@@ -52,10 +67,10 @@ class Waveguide(gdspy.Cell):
         self.build_ports()
 
     def type_check_trace(self):
+        trace = []
         """ Round each trace value to the nearest 1e-6 -- prevents
         some typechecking errors
         """
-        trace = []
         for t in self.trace:
             trace.append((round(t[0], 6), round(t[1], 5)))
         self.trace = trace
@@ -84,10 +99,8 @@ class Waveguide(gdspy.Cell):
             prev_dx, prev_dy = dx, dy
 
     def build_cell(self):
-        """
-        Sequentially build all the geometric shapes using gdspy path functions
-        for waveguide, then add it to the Cell
-        """
+        # Sequentially build all the geometric shapes using gdspy path functions
+        # for waveguide, then add it to the Cell
         br = self.wgt.bend_radius
 
         if self.resist=='-':
@@ -116,9 +129,8 @@ class Waveguide(gdspy.Cell):
         self.add(path)
 
     def build_ports(self):
-        """ Portlist format:
-            example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        """
+        # Portlist format:
+        # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["input"] = {'port':(self.trace[0][0], self.trace[0][1]),
                                   'direction': tk.get_direction(self.trace[1], self.trace[0])}
         self.portlist["output"] = {'port':(self.trace[-1][0], self.trace[-1][1]),

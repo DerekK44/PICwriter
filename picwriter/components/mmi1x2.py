@@ -6,15 +6,30 @@ import uuid
 import picwriter.toolkit as tk
 
 class MMI1x2(gdspy.Cell):
-    """
-    wg_template, center=(0,0), length=33.0, width=6.0, taper_width=0, taper_length=25.0, wg_sep=0):
-    Defines a horizontal (input from left, output on right) multimode interferometer
-    First initiate super properties (gdspy.Cell)
-    length = horizontal length of the MMI region
-    width = vertical height of the MMI region
-    taper_width = max width of the taper region (default=wg_width from wg_template)
-    taper_length = length of the taper leading up to the MMI
-    wg_sep = separation between waveguides on the 2-port side (defaults to 0.5*width)
+    """ Standard 1x2 MMI Cell class (subclass of gdspy.Cell).
+
+        Args:
+           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+           * **length** (float): Length of the MMI region (along direction of propagation)
+           * **width** (float): Width of the MMI region (perpendicular to direction of propagation)
+
+        Keyword Args:
+           * **taper_width** (float): Maximum width of the taper region (default = wg_width from wg_template)
+           * **taper_length** (float): Length of the taper leading up to the MMI
+           * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to width/3.0)
+           * **port** (tuple): Cartesian coordinate of the input port
+           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+
+        Members:
+           * **portlist** (dict): Dictionary with the relevant port information
+
+        Portlist format:
+           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+           * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
+           * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
+
+        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and 'dir1', 'dir2', 'dir3' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+
     """
     def __init__(self, wgt, length, width, taper_width=None, taper_length=None, wg_sep=None, port=(0,0), direction='EAST'):
         gdspy.Cell.__init__(self, "MMI1x2--"+str(uuid.uuid4()))
@@ -39,8 +54,8 @@ class MMI1x2(gdspy.Cell):
         self.build_ports()
 
     def type_check_values(self):
-        """ Check that the values for the MMI1x2 are all valid
-        """
+        #Check that the values for the MMI1x2 are all valid
+
         if self.wg_sep > (self.width-self.taper_width):
             raise ValueError("Warning! Waveguide separation is larger than the "
                              "max value (width - taper_width)")
@@ -49,10 +64,9 @@ class MMI1x2(gdspy.Cell):
                              "minimum value (taper_width)")
 
     def build_cell(self):
-        """
-        Sequentially build all the geometric shapes using gdspy path functions
-        then add it to the Cell
-        """
+        # Sequentially build all the geometric shapes using gdspy path functions
+        # then add it to the Cell
+
         if self.resist=='-':
             path1 = gdspy.Path(self.wgt.wg_width, self.port)
             path1.segment(self.taper_length, direction='+x', final_width=self.taper_width, **self.spec)
@@ -105,9 +119,9 @@ class MMI1x2(gdspy.Cell):
         self.add(path4)
 
     def build_ports(self):
-        """ Portlist format:
-            example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        """
+        # Portlist format:
+        #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
+        
         self.portlist["input"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
         self.portlist["output_top"] = {'port':self.output_port_top, 'direction':self.direction}
         self.portlist["output_bot"] = {'port':self.output_port_bot, 'direction':self.direction}

@@ -6,16 +6,28 @@ import uuid
 import picwriter.toolkit as tk
 
 class GratingCouplerStraight(gdspy.Cell):
-    """
-    First initiate super properties (gdspy.Cell)
-    wgt = WaveguideTemplate reference
-    port = tuple (x1, y1) position that determines output port
-    direction = direction of the port on the grating coupler
-    width = width of the grating region
-    length = length of the grating region
-    taper_length = length of taper
-    period = grating period
-    dutycycle = dutycycle, defined by (period-gap)/period
+    """ Standard Staight Grating Coupler Cell class (subclass of gdspy.Cell).
+
+        Args:
+           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+
+        Keyword Args:
+           * **port** (tuple): Cartesian coordinate of the input port
+           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+           * **width** (float): Width of the grating region
+           * **length** (float): Length of the grating region
+           * **taper_length** (float): Length of the taper before the grating coupler
+           * **period** (float): Grating period
+           * **dutycycle** (float): dutycycle, determines the size of the 'gap' by dutycycle=(period-gap)/period.
+
+        Members:
+           **portlist** (dict): Dictionary with the relevant port information
+
+        Portlist format:
+           portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+
+        Where in the above (x1,y1) is the same as the 'port' input, and 'dir1' is of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+
     """
     def __init__(self, wgt, port=(0,0), direction='EAST', width=20, length=50,
                  taper_length=20, period=1.0, dutycycle=0.5):
@@ -42,10 +54,8 @@ class GratingCouplerStraight(gdspy.Cell):
         self.build_ports()
 
     def build_cell(self):
-        """
-        Sequentially build all the geometric shapes using gdspy path functions
-        then add it to the Cell
-        """
+        #Sequentially build all the geometric shapes using gdspy path functions
+        #then add it to the Cell
         num_teeth = int(self.length//self.period)
         """ Create a straight grating GratingCoupler
         """
@@ -78,28 +88,36 @@ class GratingCouplerStraight(gdspy.Cell):
         self.add(path)
 
     def build_ports(self):
-        """ Portlist format:
-            example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        """
+        # Portlist format:
+        #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["output"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
 
 class GratingCouplerFocusing(gdspy.Cell):
-    """
-    First initiate super properties (gdspy.Cell)
-    wgt = WaveguideTemplate reference
-    port = tuple (x1, y1) position that determines output port
-    direction = direction of the port on the grating coupler
-    focus_distance = if None, use straight grating, else focus by this amount
-    width = width of the grating region
-    length = length of the grating region
-    period = grating period
-    dutycycle = dutycycle, defined by (period-gap)/period
+    """ Standard Focusing Grating Coupler Cell class (subclass of gdspy.Cell).
 
-    The parameters below only apply to the focusing grating couplers
-    wavelength = free space wavelength
-    sin_theta = sine of the incidence angle
-    focus_distance = distance
-    evaluations = number of parametric evaluations of path.parametric
+        Args:
+           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+
+        Keyword Args:
+           * **port** (tuple): Cartesian coordinate of the input port
+           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+           * **focus_distance** (float): Distance over which the light is focused to the waveguide port
+           * **width** (float): Width of the grating region
+           * **length** (float): Length of the grating region
+           * **period** (float): Grating period
+           * **dutycycle** (float): dutycycle, determines the size of the 'gap' by dutycycle=(period-gap)/period.
+           * **wavelength** (float): free space wavelength of the light
+           * **sin_theta** (float): sine of the incident angle
+           * **evaluations** (int): number of parameteric evaluations of path.parametric
+
+        Members:
+           **portlist** (dict): Dictionary with the relevant port information
+
+        Portlist format:
+           portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+
+        Where in the above (x1,y1) is the same as the 'port' input, and 'dir1' is of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+
     """
     def __init__(self, wgt, port=(0,0), direction='EAST', focus_distance=None,
                     width=20, length=50, period=1.0, dutycycle=0.5,
@@ -131,10 +149,9 @@ class GratingCouplerFocusing(gdspy.Cell):
         self.build_ports()
 
     def build_cell(self):
-        """
-        Sequentially build all the geometric shapes using gdspy path functions
-        then add it to the Cell
-        """
+        # Sequentially build all the geometric shapes using gdspy path functions
+        # then add it to the Cell
+
         num_teeth = int(self.length//self.period)
         assert self.focus_distance > 0
         neff = self.wavelength / float(self.period) + self.sin_theta
@@ -192,9 +209,9 @@ class GratingCouplerFocusing(gdspy.Cell):
         self.add(path)
 
     def build_ports(self):
-        """ Portlist format:
-            example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        """
+        # Portlist format:
+        #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
+
         self.portlist["output"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
 
 if __name__ == "__main__":

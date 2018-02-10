@@ -12,10 +12,32 @@ import gdspy
 TOL=1e-6
 
 def add(topcell, subcell, center=(0,0)):
+    """ First creates a CellReference to subcell, then adds this to topcell at location center
+
+        Args:
+           * **topcell** (gdspy.Cell):  Cell to be added to
+           * **subcell** (gdspy.Cell):  Cell being added
+
+        Keyword Args:
+           * **center** (tuple): center location for subcell to be added
+
+        Returns:
+           None
+
+    """
     topcell.add(gdspy.CellReference(subcell, origin=center))
 
-def get_keys(subcell):
-    return list(subcell.portlist.keys())
+def get_keys(cell):
+    """ Returns a list of the keys available in a portlist, such as 'input', 'output', 'top_output', etc.  Only works for picwriter components.
+
+        Args:
+           * **cell** (gdspy.Cell):  Cell from which to get get the portlist
+
+        Returns:
+           List of portlist keys corresponding to 'cell'.
+
+    """
+    return list(cell.portlist.keys())
 
 def get_angle(pt1, pt2):
     """
@@ -23,9 +45,8 @@ def get_angle(pt1, pt2):
     in *radians*.  Must be an integer multiple of pi/2.
 
     Args:
-       **pt1** (tuple):  Point 1
-
-       **pt2** (tuple):  Point 2
+       * **pt1** (tuple):  Point 1
+       * **pt2** (tuple):  Point 2
 
     Returns:
        float.  Angle (integer multiple of pi/2)
@@ -34,7 +55,8 @@ def get_angle(pt1, pt2):
 
         import picwriter.toolkit as tk
         print(tk.get_angle((0, 0), (0, 100)))
-        >> 1.5707963267948966
+
+    The above prints 1.5707963267948966
 
     """
     dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
@@ -56,9 +78,8 @@ def dist(pt1, pt2):
     Given two cardinal points, returns the distance between the two.
 
     Args:
-       **pt1** (tuple):  Point 1
-
-       **pt2** (tuple):  Point 2
+       * **pt1** (tuple):  Point 1
+       * **pt2** (tuple):  Point 2
 
     Returns:
        float.  Distance
@@ -67,7 +88,8 @@ def dist(pt1, pt2):
 
         import picwriter.toolkit as tk
         print(tk.dist((0, 0), (100, 100)))
-        >> 141.42135623730951
+
+    The above prints 141.42135623730951
 
     """
     return np.sqrt((pt2[0]-pt1[0])**2 + (pt2[1]-pt1[1])**2)
@@ -78,9 +100,8 @@ def get_direction(pt1, pt2):
         TOWARDS a second point `pt2`
 
         Args:
-           **pt1** (tuple):  Point 1
-
-           **pt2** (tuple):  Point 2
+           * **pt1** (tuple):  Point 1
+           * **pt2** (tuple):  Point 2
 
         Returns:
            string.  (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, and ``'EAST'``)
@@ -89,7 +110,8 @@ def get_direction(pt1, pt2):
 
             import picwriter.toolkit as tk
             tk.get_direction((0,0), (-100,0))
-            >> 'WEST'
+
+        The above prints 'WEST'
 
     """
     dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
@@ -125,39 +147,3 @@ def translate_point(pt, length, direction):
         return (pt[0]-length, pt[1])
     elif direction=="EAST":
         return (pt[0]+length, pt[1])
-
-# def rotate_direction(dir1, angle):
-#     if not (abs(angle%(np.pi/2.0))<=TOL):
-#         raise ValueError("Warning! Angle for 'rotate_direction()' must be an integer multiple of pi/2")
-#     angle = angle%(2*np.pi) #Make angle either 0, 0.5pi, pi, or 1.5pi
-#     if (dir1=="NORTH" and abs(angle-0.0)<=TOL) or (dir1=="EAST" and abs(angle-np.pi/2.0)<=TOL) or (dir1=="SOUTH" and abs(angle-np.pi)<=TOL) or (dir1=="WEST" and abs(angle-1.5*np.pi)<=TOL):
-#         return "NORTH"
-#     elif (dir1=="WEST" and abs(angle-0.0)<=TOL) or (dir1=="NORTH" and abs(angle-np.pi/2.0)<=TOL) or (dir1=="EAST" and abs(angle-np.pi)<=TOL) or (dir1=="SOUTH" and abs(angle-1.5*np.pi)<=TOL):
-#         return "WEST"
-#     elif (dir1=="SOUTH" and abs(angle-0.0)<=TOL) or (dir1=="WEST" and abs(angle-np.pi/2.0)<=TOL) or (dir1=="NORTH" and abs(angle-np.pi)<=TOL) or (dir1=="EAST" and abs(angle-1.5*np.pi)<=TOL):
-#         return "SOUTH"
-#     elif (dir1=="EAST" and abs(angle-0.0)<=TOL) or (dir1=="SOUTH" and abs(angle-np.pi/2.0)<=TOL) or (dir1=="WEST" and abs(angle-np.pi)<=TOL) or (dir1=="NORTH" and abs(angle-1.5*np.pi)<=TOL):
-#         return "EAST"
-#     else:
-#         raise ValueError("No case found for rotate_direction()")
-
-# def get_portlist(subclass, center, rotation=0):
-#     """ Preferred over just grabbing a cell portlist, since this
-#     version rotates the position & direction as specified
-#     **ONLY WORKS** FOR 90degree turns!
-#     angle MUST be in radians"""
-#     if not (abs(rotation%(np.pi/2.0))<=TOL):
-#         raise ValueError("Warning! Rotation angle for 'rotate()' must be an integer multiple of pi/2")
-#     newportlist={}
-#     for key in list(subclass.portlist.keys()):
-#         newportlist[key] = {}
-#         port = subclass.portlist[key]["port"]
-#         direction = subclass.portlist[key]["direction"]
-#         newportlist[key]['direction']= rotate_direction(direction, rotation)
-#         v=np.array([[port[0]-center[0]], [port[1]-center[1]]])
-#         c, s = np.cos(rotation), np.sin(rotation)
-#         R = np.array([[c, -s],
-#                       [s, c]])
-#         vn = np.dot(R,v)
-#         newportlist[key]['port'] = (float(vn[0]+center[0]), float(vn[1]+center[1]))
-#     return newportlist

@@ -7,12 +7,26 @@ import uuid
 import picwriter.toolkit as tk
 
 class Taper(gdspy.Cell):
-    """
-    First initiate super properties (gdspy.Cell)
-    trace = list of TWO points [(x1, y1), (x2, y2)] that determine orientation
-    start_width = width at first trace point (determined through wgt)
-    end_width = width at second trace point
-    resist = type of resist used, determined through wgt
+    """ Standard Taper Cell class (subclass of gdspy.Cell).
+
+        Args:
+           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+           * **length** (float): Length of the taper
+           * **end_width** (float): Final width of the taper (initial width received from WaveguieTemplate)
+
+        Keyword Args:
+           * **port** (tuple): Cartesian coordinate of the input port
+           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+
+        Members:
+           * **portlist** (dict): Dictionary with the relevant port information
+
+        Portlist format:
+           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+
+        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+
     """
     def __init__(self, wgt, length, end_width, port=(0,0), direction='EAST'):
         gdspy.Cell.__init__(self, "Taper--"+str(uuid.uuid4()))
@@ -33,10 +47,10 @@ class Taper(gdspy.Cell):
         self.build_ports()
 
     def type_check_trace(self):
+        trace = []
         """ Round each trace value to the nearest 1e-6 -- prevents
         some typechecking errors
         """
-        trace = []
         for t in self.trace:
             trace.append((round(t[0], 6), round(t[1], 5)))
         self.trace = trace
@@ -51,10 +65,8 @@ class Taper(gdspy.Cell):
                              "or vertical tapers.")
 
     def build_cell(self):
-        """
-        Sequentially build all the geometric shapes using gdspy path functions
-        then add it to the Cell
-        """
+        # Sequentially build all the geometric shapes using gdspy path functions
+        # for waveguide, then add it to the Cell
         angle = tk.get_angle(self.trace[0], self.trace[1])
         if self.resist=='-':
             path = gdspy.Path(self.wgt.wg_width, self.trace[0])
@@ -69,9 +81,8 @@ class Taper(gdspy.Cell):
         self.add(path)
 
     def build_ports(self):
-        """ Portlist format:
-            example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        """
+        # Portlist format:
+        # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["input"] = {'port':self.trace[0],
                                     'direction':tk.flip_direction(self.direction)}
         self.portlist["output"] = {'port':self.trace[1],

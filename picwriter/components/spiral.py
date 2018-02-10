@@ -8,15 +8,29 @@ import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
 class Spiral(gdspy.Cell):
-    """
-    First initiate super properties (gdspy.Cell)
-    wgt = WaveguideTemplate
-    width = MAX width of the outermost part of the spiral
-    height = MAX height of the outermost part of the spiral
-    length = desired length of the waveguide
-    spacing = distance between parallel waveguides
-    parity = If 1 spiral on right side, if -1 spiral on left side (mirror flip)
-    port = position for the input of the spiral structure (Bottom)
+    """ Standard Spiral Cell class (subclass of gdspy.Cell).  The desired length of the spiral is first set, along with maximum heights and widths of the bounding box for the spiral.  Then, the exact spiral shape is automatically calculated, or an error is returned if the spiral cannot be generated from the input parameters.
+
+        Args:
+           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+           * **width** (float): MAX width of the outermost part of the spiral
+           * **height** (float): MAX height of the outermost part of the spiral
+           * **length** (float): desired length of the waveguide
+
+        Keyword Args:
+           * **spacing** (float): distance between parallel waveguides
+           * **parity** (int): If 1 spiral on right side, if -1 spiral on left side (mirror flip)
+           * **port** (tuple): Cartesian coordinate of the input port
+           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+
+        Members:
+           * **portlist** (dict): Dictionary with the relevant port information
+
+        Portlist format:
+           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+
+        Where in the above (x1,y1) are the first elements of the spiral trace, (x2, y2) are the last elements of the spiral trace, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+
     """
     def __init__(self, wgt, width, height, length, spacing=None, parity=1, port=(0,0), direction="NORTH"):
         gdspy.Cell.__init__(self, "Spiral--"+str(uuid.uuid4()))
@@ -40,19 +54,17 @@ class Spiral(gdspy.Cell):
         self.build_ports()
 
     def get_dh(self, corner_dl, n):
-        """
-        find the height or width difference required to make the spiral length exactly = to 'length'
-        """
+        # find the height or width difference required to make the spiral length exactly = to 'length'
+
         from scipy.optimize import fsolve
         func = lambda h0 : self.length - self.spiral_length(h0, corner_dl, n)
         hnew = fsolve(func, self.height)
         return hnew[0]
 
     def get_number_of_spirals(self, corner_dl):
-        """
-        Find the number of loops required to make the spiral length close to the desired length input
-        w=outer spiral width, h=outer spiral height, s=spacing between parallel waveguides, c=corner length difference
-        """
+        # Find the number of loops required to make the spiral length close to the desired length input
+        # w=outer spiral width, h=outer spiral height, s=spacing between parallel waveguides, c=corner length difference
+
         nmax = 0
         lengthmin = 0
         for n in range(50): # Do not exceed 50 iterations
@@ -78,12 +90,11 @@ class Spiral(gdspy.Cell):
         return length
 
     def build_cell(self):
-        """
-        Determine the correct set of waypoints, then feed this over to a
-        Waveguide() class.
-        I'm sure there's better ways of generating spiral structures, though
-        this seems to work, so... ¯\_(ツ)_/¯
-        """
+        # Determine the correct set of waypoints, then feed this over to a
+        # Waveguide() class.
+        # I'm sure there's better ways of generating spiral structures, though
+        # this seems to work, so... ¯\_(ツ)_/¯
+
         width = self.width
         height = self.height
         length = self.length
@@ -184,9 +195,9 @@ class Spiral(gdspy.Cell):
         self.add(wgr)
 
     def build_ports(self):
-        """ Portlist format:
-            example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        """
+        # Portlist format:
+        #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
+
         self.portlist["input"] = {'port':self.port,
                                     'direction':tk.flip_direction(self.direction)}
         self.portlist["output"] = {'port':self.portlist_output,
