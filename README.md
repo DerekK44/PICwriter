@@ -3,7 +3,7 @@ Windows: [![Build status](https://ci.appveyor.com/api/projects/status/f9q96u9na6
 Documentation: [![Documentation Status](https://readthedocs.org/projects/picwriter/badge/?version=latest)](http://picwriter.readthedocs.io/en/latest/?badge=latest)
 
 # PICwriter README
-Picwriter (Photonic-Integrated-Circuit Writer) is a Python module, built above the [gdspy](https://github.com/heitzmann/gdspy) module, aimed at simplifying the process of designing complex masks for photonic integrated circuits through a prebuilt library of easy-to-implement PCells (technically all sub-classes of the gdspy Cell class).  Supported blocks currently include: waveguides, straight grating couplers, focusing grating couplers, tapers, spiral structures, 1x2 multi-mode interferometers.  2x2 Multi-mode interferometers (MMI's), resonators, and more are coming soon!
+Picwriter (Photonic-Integrated-Circuit Writer) is a Python module, built above the [gdspy](https://github.com/heitzmann/gdspy) module, aimed at simplifying the process of designing complex masks for photonic integrated circuits through a prebuilt library of easy-to-implement PCells (technically all sub-classes of the gdspy Cell class).  Supported blocks currently include: waveguides, straight grating couplers, focusing grating couplers, tapers, spiral structures, 1x2 multi-mode interferometers, 2x2 Multi-mode interferometers (MMI's), ring resonators, and disk resonators.  More are coming soon!
 
 ## Features
 The ultimate goal of this module is to reduce the time required to generate photonic integrated circuit mask designs, by extending the functionality of the gdspy library.
@@ -27,7 +27,7 @@ With a working version of python, all dependencies should be automatically insta
 ### Linux / OS X
 Both options should automatically install all dependencies (like gdspy, numpy, etc.).  This module is in the early planning stage, so stay tuned for the actual release :)
 
-Option 1: using [pip](https://docs.python.org/3/installing/) (coming soon):
+Option 1: using [pip](https://docs.python.org/3/installing/):
 
 ```sh
 pip install picwriter
@@ -40,15 +40,17 @@ python setup.py install
 ```
 
 ### Windows
+
 The best way of obtaining the library is by installing the prebuilt binaries.
-* First, download gdspy by going [here](https://ci.appveyor.com/project/heitzmann/gdspy), then click the python environment that matches your python environment, click the **Artifacts** tab, and then download the corresponding `dist\gdspy-1.X.X.X.whl` wheel file.
-* Open up a command prompt (type `cmd` in the search bar), navigate to your downloads, then install via:
-```sh
-pip install dist\gdspy-1.X.X.X.whl
-```
-* Next, install the PICwriter library by following the same procedure [here](https://ci.appveyor.com/project/DerekK88/picwriter) to install the corresponding prebuilt picwriter `.whl` file.
-* In a command prompt, install with pip
-```sh
-pip install dist\picwriter-1.X.X.X.whl
-```
-Building from source is also possible.  For installing gdspy, an appropriate [build environment](https://wiki.python.org/moin/WindowsCompilers) is required for compilation of the C extension modules.
+
+* First, go to the `gdspy appveyor project page <https://ci.appveyor.com/project/heitzmann/gdspy>`_, then click the python environment that matches your python version and processor type.  For example, if you have a 64-bit processor with Python version 3.5 (you can check by running `python --version` in a command prompt) then you would click 'PYTHON=C:\Python35-x64'.  Then, click the **Artifacts** tab and download the corresponding `dist\gdspy-1.X.X.X.whl` wheel file.
+* Open up a command prompt (type `cmd` in the search bar), navigate to your downloads, then install via::
+
+    pip install dist\gdspy-1.X.X.X.whl
+    
+* Next, install the PICwriter library by following the same procedure as before at the `picwriter appveyor page <https://ci.appveyor.com/project/DerekK88/picwriter>`_ to install the corresponding prebuilt picwriter `.whl` file.
+* In a command prompt, navigate to your downloads and install with pip::
+
+    pip install dist\picwriter-1.X.X.X.whl
+    
+Building from source is also possible. For installing gdspy, an appropriate build environment is required for compilation of the C extension modules.
