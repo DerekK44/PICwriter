@@ -16,8 +16,8 @@ The ultimate goal of this module is to reduce the time required to generate phot
 Contribute
 ----------
 
-- Issue Tracker: www.github.com/DerekK88/PICwriter/issues
-- Source Code: www.github.com/DerekK88/PICwriter
+- Issue Tracker: `github.com/DerekK88/PICwriter/issues <https://github.com/DerekK88/PICwriter/issues>`_
+- Source Code: `github.com/DerekK88/PICwriter <https://github.com/DerekK88/PICwriter>`_
 
 Guide
 ^^^^^
