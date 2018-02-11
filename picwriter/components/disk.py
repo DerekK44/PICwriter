@@ -15,6 +15,7 @@ class Disk(gdspy.Cell):
            * **coupling_gap** (float): Distance between the bus waveguide and resonator
 
         Keyword Args:
+           * **wrap_angle** (float): Angle in *radians* between 0 and pi (defaults to 0) that determines how much the bus waveguide wraps along the resonator.  0 corresponds to a straight bus waveguide, and pi corresponds to a bus waveguide wrapped around half of the resonator.
            * **parity** (1 or -1): If 1, resonator to left of bus waveguide, if -1 resonator to the right
            * **port** (tuple): Cartesian coordinate of the input port (x1, y1)
            * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
@@ -29,17 +30,20 @@ class Disk(gdspy.Cell):
         Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
 
     """
-    def __init__(self, wgt, radius, coupling_gap, parity=1, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "Taper--"+str(uuid.uuid4()))
+    def __init__(self, wgt, radius, coupling_gap, wrap_angle=0, parity=1, port=(0,0), direction='EAST'):
+        gdspy.Cell.__init__(self, "Disk--"+str(uuid.uuid4()))
 
         self.portlist = {}
 
         self.port = port
-        self.trace=[port, tk.translate_point(port, 2*radius, direction)]
+        # self.trace=[port, tk.translate_point(port, 2*radius, direction)]
         self.direction = direction
 
         self.radius = radius
         self.coupling_gap = coupling_gap
+        self.wrap_angle = wrap_angle
+        if (wrap_angle > np.pi) or (wrap_angle < 0):
+            raise ValueError("Warning! Wrap_angle is nor a valid angle between 0 and pi.")
         self.parity = parity
         self.resist = wgt.resist
         self.wgt = wgt
@@ -53,34 +57,88 @@ class Disk(gdspy.Cell):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
 
-        # Add bus waveguide with cladding
-        path = gdspy.Path(self.wgt.wg_width, self.trace[0])
-        path.segment(2*self.radius, direction='+x', **self.wg_spec)
-        clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, self.trace[0])
-        clad.segment(2*self.radius, direction='+x', **self.clad_spec)
+        if self.wrap_angle==0:
+            bus_length = 2*self.radius
+            # Add bus waveguide with cladding
+            path = gdspy.Path(self.wgt.wg_width, self.port)
+            path.segment(2*self.radius, direction='+x', **self.wg_spec)
+            clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, self.port)
+            clad.segment(2*self.radius, direction='+x', **self.clad_spec)
 
-        # Ring resonator
-        if self.parity==1:
-            ring = gdspy.Round((self.port[0]+self.radius, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap),
-                                self.radius+self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
-            clad_ring = gdspy.Round((self.port[0]+self.radius, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap),
-                                     self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
-        elif self.parity==-1:
-            ring = gdspy.Round((self.port[0]+self.radius, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap),
-                                self.radius+self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
-            clad_ring = gdspy.Round((self.port[0]+self.radius, self.port[1] - self.radius - self.wgt.wg_width - self.coupling_gap),
-                                     self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
-        else:
-            raise ValueError("Warning!  Parity value is not an acceptable value (must be +1 or -1).")
+            # Ring resonator
+            if self.parity==1:
+                ring = gdspy.Round((self.port[0]+self.radius, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap),
+                                    self.radius+self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
+                clad_ring = gdspy.Round((self.port[0]+self.radius, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap),
+                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
+            elif self.parity==-1:
+                ring = gdspy.Round((self.port[0]+self.radius, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap),
+                                    self.radius+self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
+                clad_ring = gdspy.Round((self.port[0]+self.radius, self.port[1] - self.radius - self.wgt.wg_width - self.coupling_gap),
+                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
+            else:
+                raise ValueError("Warning!  Parity value is not an acceptable value (must be +1 or -1).")
+        elif self.wrap_angle>0:
+            theta = self.wrap_angle/2.0
+            rp = self.radius + self.wgt.wg_width + self.coupling_gap
+            dx, dy = rp*np.sin(theta), rp - rp*np.cos(theta)
+            bus_length = 2*self.radius if (4*dx < 2*self.radius) else 4*dx
+
+            # Add bus waveguide with cladding that wraps
+            path = gdspy.Path(self.wgt.wg_width, self.port)
+            clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, self.port)
+            if 4*dx < bus_length:
+                path.segment((bus_length-4*dx)/2.0, direction='+x', **self.wg_spec)
+                clad.segment((bus_length-4*dx)/2.0, direction='+x', **self.clad_spec)
+                xcenter = self.port[0] + self.radius
+            else:
+                xcenter = self.port[0] + 2*dx
+
+            if self.parity==1:
+                path.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=0.1, **self.wg_spec)
+                path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=0.1, **self.wg_spec)
+                path.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=0.1, **self.wg_spec)
+                clad.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=0.1, **self.clad_spec)
+                clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=0.1, **self.clad_spec)
+                clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=0.1, **self.clad_spec)
+
+                # Make the disk resonator
+                ring = gdspy.Round((xcenter, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap - 2*dy),
+                                    self.radius+self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
+                clad_ring = gdspy.Round((xcenter, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap - 2*dy),
+                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
+
+            elif self.parity==-1:
+                path.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=0.1, **self.wg_spec)
+                path.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=0.1, **self.wg_spec)
+                path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=0.1, **self.wg_spec)
+                clad.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=0.1, **self.clad_spec)
+                clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=0.1, **self.clad_spec)
+                clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=0.1, **self.clad_spec)
+
+                # Make the disk resonator
+                ring = gdspy.Round((xcenter, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
+                                    self.radius+self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
+                clad_ring = gdspy.Round((xcenter, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
+                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
+
+
+            if 4*dx < bus_length:
+                path.segment((bus_length-4*dx)/2.0, **self.wg_spec)
+                clad.segment((bus_length-4*dx)/2.0, **self.clad_spec)
 
         angle=0
         if self.direction=="EAST":
+            self.port_output = (self.port[0]+bus_length, self.port[1])
             angle=0
         elif self.direction=="NORTH":
+            self.port_output = (self.port[0], self.port[1]+bus_length)
             angle=np.pi/2.0
         elif self.direction=="WEST":
+            self.port_output = (self.port[0]-bus_length, self.port[1])
             angle=np.pi
         elif self.direction=="SOUTH":
+            self.port_output = (self.port[0], self.port[1]-bus_length)
             angle=-np.pi/2.0
 
         ring.rotate(angle, self.port)
@@ -96,9 +154,9 @@ class Disk(gdspy.Cell):
     def build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':self.trace[0],
+        self.portlist["input"] = {'port':self.port,
                                     'direction':tk.flip_direction(self.direction)}
-        self.portlist["output"] = {'port':self.trace[1],
+        self.portlist["output"] = {'port':self.port_output,
                                     'direction':self.direction}
 
 if __name__ == "__main__":
@@ -109,12 +167,12 @@ if __name__ == "__main__":
     wg1=Waveguide([(0,0), (100,0)], wgt)
     tk.add(top, wg1)
 
-    r1 = Disk(wgt, 60.0, 1.0, parity=1, **wg1.portlist["output"])
+    r1 = Disk(wgt, 60.0, 1.0, wrap_angle=np.pi/2., parity=1, **wg1.portlist["output"])
 
     wg2=Waveguide([r1.portlist["output"]["port"], (r1.portlist["output"]["port"][0]+100, r1.portlist["output"]["port"][1])], wgt)
     tk.add(top, wg2)
 
-    r2 = Disk(wgt, 50.0, 0.8, parity=1, **wg2.portlist["output"])
+    r2 = Disk(wgt, 50.0, 0.8, wrap_angle=np.pi, parity=-1, **wg2.portlist["output"])
 
     wg3=Waveguide([r2.portlist["output"]["port"], (r2.portlist["output"]["port"][0]+100, r2.portlist["output"]["port"][1])], wgt)
     tk.add(top, wg3)

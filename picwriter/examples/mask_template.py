@@ -48,10 +48,7 @@ tk.add(spiral_unit, gc_top)
 for i in range(9):
     top.add(gdspy.CellReference(spiral_unit, (i*1100.0, 0)))
 
-""" Visualize layout using gdspy's LayoutViewer"""
+tk.build_mask(top, wgt, final_layer=3, final_datatype=0)
+
 gdspy.LayoutViewer()
-""" Or save the file to a .GDSII file """
-print("Writing mask...")
-print("dependencies="+str(top.get_dependencies()))
 gdspy.write_gds('mask_template.gds', unit=1.0e-6, precision=1.0e-9)
-print("EOF")

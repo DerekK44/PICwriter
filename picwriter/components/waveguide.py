@@ -134,6 +134,12 @@ class Waveguide(gdspy.Cell):
             path.segment(br, **self.wg_spec)
             path2.segment(br, **self.clad_spec)
 
+        if len(self.trace)==2 and tk.dist(self.trace[1], self.trace[0])<=self.wgt.bend_radius:
+            path = gdspy.Path(self.wgt.wg_width, self.trace[0])
+            path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_angle(self.trace[0], self.trace[1]), **self.wg_spec)
+            path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
+            path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_angle(self.trace[0], self.trace[1]), **self.clad_spec)
+
         self.add(path)
         self.add(path2)
 

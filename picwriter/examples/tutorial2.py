@@ -9,7 +9,10 @@ from picwriter.components import *
 top = gdspy.Cell('top')
 wgt = WaveguideTemplate(wg_width=0.45, clad_width=10.0, bend_radius=100, resist='+', fab='ETCH', wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0)
 
-wg1 = Waveguide([(0,0), (200,0)], wgt)
+gc1 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=40, period=1.0, dutycycle=0.7, port=(100,0), direction='WEST')
+tk.add(top, gc1)
+
+wg1 = Waveguide([gc1.portlist['output']['port'], (200,0)], wgt)
 tk.add(top, wg1)
 
 mmi1 = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **wg1.portlist['output'])
@@ -45,10 +48,12 @@ wg3 = Waveguide([(xbot, ybot),
                  (xmmi_top, ybot)], wgt)
 tk.add(top, wg3)
 
-wg_out = Waveguide([mmi2.portlist['input']['port'],
-                    (mmi2.portlist['input']['port'][0]+200, mmi2.portlist['input']['port'][1])], wgt)
-tk.add(top, wg_out)
+gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=40, period=1.0, dutycycle=0.7,
+                             port=(mmi2.portlist['input']['port'][0]+100, mmi2.portlist['input']['port'][1]), direction='EAST')
+tk.add(top, gc2)
 
+wg_gc2 = Waveguide([mmi2.portlist['input']['port'], gc2.portlist['output']['port']], wgt)
+tk.add(top, wg_gc2)
 
 tk.build_mask(top, wgt, final_layer=3, final_datatype=0)
 

@@ -3,6 +3,11 @@ Installation
 
 PICwriter is tested on python versions 2.7, 3.4, 3.5, and 3.6 on Linux, OS X, and Windows.  Please check `here <https://github.com/DerekK88/PICwriter>`_ for the current build status (if building from source).
 
+Requirements
+------------
+
+A working version of python is required for using the PICwriter library.  You can go to `python.org <https://www.python.org/downloads/>`_ to download python (or check if it's installed on your computer by running `python --version` in a command prompt or terminal.  I personally recommend downloading `Anaconda <https://www.anaconda.com/download/>`_ since it includes several nice scientific libraries, the conda package manager, Spyder IDE, and other niceties.
+
 Installation (Linux / OS X)
 ---------------------------
 
@@ -10,7 +15,7 @@ Installation (Linux / OS X)
 
     python setup.py install
 
-(**Option 2: coming soon!**) Install PICwriter by running::
+(**Option 2:**) Install PICwriter by running::
 
     pip install picwriter
     
