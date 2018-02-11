@@ -10,7 +10,7 @@ Installation (Linux / OS X)
 
     python setup.py install
 
-(**Option 2**) Install PICwriter by running::
+(**Option 2: coming soon!**) Install PICwriter by running::
 
     pip install picwriter
     
@@ -19,13 +19,13 @@ Installation (Windows)
 
 The best way of obtaining the library is by installing the prebuilt binaries.
 
-* First, go to the `gdspy avvpeyor project page <https://ci.appveyor.com/project/heitzmann/gdspy>`_, then click the python environment that matches your python environment, click the **Artifacts** tab, and then download the corresponding `dist\gdspy-1.X.X.X.whl` wheel file.
+* First, go to the `gdspy appveyor project page <https://ci.appveyor.com/project/heitzmann/gdspy>`_, then click the python environment that matches your python version and processor type.  For example, if you have a 64-bit processor with Python version 3.5 (you can check by running `python --version` in a command prompt) then you would click 'PYTHON=C:\Python35-x64'.  Then, click the **Artifacts** tab and download the corresponding `dist\gdspy-1.X.X.X.whl` wheel file.
 * Open up a command prompt (type `cmd` in the search bar), navigate to your downloads, then install via::
 
     pip install dist\gdspy-1.X.X.X.whl
     
-* Next, install the PICwriter library by following the same procedure at the `picwriter appveyor page <https://ci.appveyor.com/project/DerekK88/picwriter>`_ to install the corresponding prebuilt picwriter `.whl` file.
-* In a command prompt, install with pip::
+* Next, install the PICwriter library by following the same procedure as before at the `picwriter appveyor page <https://ci.appveyor.com/project/DerekK88/picwriter>`_ to install the corresponding prebuilt picwriter `.whl` file.
+* In a command prompt, navigate to your downloads and install with pip::
 
     pip install dist\picwriter-1.X.X.X.whl
     
@@ -34,7 +34,7 @@ Building from source is also possible. For installing gdspy, an appropriate buil
 Getting Started
 ---------------
 
-You can check that PICwriter and gdspy are installed by running::
+You can check that PICwriter and gdspy are properly installed by running::
 
     import gdspy
     import picwriter

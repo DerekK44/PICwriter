@@ -27,6 +27,32 @@ def add(topcell, subcell, center=(0,0)):
     """
     topcell.add(gdspy.CellReference(subcell, origin=center))
 
+def build_mask(cell, wgt, final_layer=None, final_datatype=None):
+    """ Builds the appropriate mask according to the resist specifications and fabrication type.  Does this by applying a boolean 'XOR' or 'AND' operation on the waveguide and clad masks.
+
+        Args:
+           * **cell** (gdspy.Cell):  Cell with components.  Final mask is placed in this cell.
+           * **wgt** (WaveguideTemplate):  Waveguide template containing the resist information, and layers/datatypes for the waveguides and cladding.
+
+        Keyword Args:
+           * **final_layer** (int): layer to place the mask on (defaults to `wgt.clad_layer + 1`)
+           * **final_datatype** (int): datatype to place the mask on (defaults to `0`)
+
+        Returns:
+           None
+
+    """
+    fl = wgt.clad_layer+1 if final_layer==None else final_layer
+    fd = 0 if final_datatype==None else final_datatype
+
+    polygons = cell.get_polygons(by_spec=True)
+    pWG = polygons[(wgt.wg_layer, wgt.wg_datatype)]
+    pCLAD = polygons[(wgt.clad_layer, wgt.clad_datatype)]
+    if wgt.resist=='+':
+        cell.add(gdspy.fast_boolean(pWG, pCLAD, 'xor', precision=0.001, max_points=199, layer=fl, datatype=fd))
+    elif wgt.resist=='-':
+        cell.add(gdspy.fast_boolean(pWG, pCLAD, 'and', precision=0.001, max_points=199, layer=fl, datatype=fd))
+
 def get_keys(cell):
     """ Returns a list of the keys available in a portlist, such as 'input', 'output', 'top_output', etc.  Only works for picwriter components.
 
@@ -49,7 +75,7 @@ def get_angle(pt1, pt2):
        * **pt2** (tuple):  Point 2
 
     Returns:
-       float.  Angle (integer multiple of pi/2)
+       float  Angle (integer multiple of pi/2)
 
     Example::
 
@@ -82,7 +108,7 @@ def dist(pt1, pt2):
        * **pt2** (tuple):  Point 2
 
     Returns:
-       float.  Distance
+       float  Distance
 
     Example::
 
@@ -104,7 +130,7 @@ def get_direction(pt1, pt2):
            * **pt2** (tuple):  Point 2
 
         Returns:
-           string.  (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, and ``'EAST'``)
+           string  (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, and ``'EAST'``)
 
         Example::
 
@@ -125,20 +151,49 @@ def get_direction(pt1, pt2):
         return "EAST"
 
 def get_turn(dir1, dir2):
-    """ Returns an angle (+pi/2 or -pi/2) corresponding to the CW or CCW
-    turns that takes you from direction dir1 to dir2 """
+    """  Returns an angle (+pi/2 or -pi/2) corresponding to the CW or CCW turns that takes you from direction `dir1` to `dir2`, where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
+
+        Args:
+           * **dir1** (direction):  Point 1
+           * **pt2** (tuple):  Point 2
+
+        Returns:
+           float  (+pi/2 or -pi/2)
+
+    """
     if (dir1=="NORTH" and dir2=="WEST") or (dir1=="WEST" and dir2=="SOUTH") or (dir1=="SOUTH" and dir2=="EAST") or (dir1=="EAST" and dir2=="NORTH"):
         return np.pi/2.0
     elif (dir1=="NORTH" and dir2=="EAST") or (dir1=="EAST" and dir2=="SOUTH") or (dir1=="SOUTH" and dir2=="WEST") or (dir1=="WEST" and dir2=="NORTH"):
         return -np.pi/2.0
 
 def flip_direction(direction):
+    """  Returns the opposite of `direction`, where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
+
+        Args:
+           * **direction** (direction):  Direction to be flipped
+           * **pt2** (tuple):  Point 2
+
+        Returns:
+           direction (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``)
+
+    """
     if direction=="NORTH": return "SOUTH"
     if direction=="SOUTH": return "NORTH"
     if direction=="WEST": return "EAST"
     if direction=="EAST": return "WEST"
 
 def translate_point(pt, length, direction):
+    """  Returns the point (tuple) corresponding to `pt` translated by distance `length` in direction `direction` where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
+
+        Args:
+           * **pt** (tuple):  Starting point
+           * **length** (float): Distance to move
+           * **direction** (direction):  Direction to move in
+
+        Returns:
+           point, tuple (x, y)
+
+    """
     if direction=="NORTH":
         return (pt[0], pt[1]+length)
     elif direction=="SOUTH":
