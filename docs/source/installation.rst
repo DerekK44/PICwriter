@@ -11,13 +11,13 @@ A working version of python is required for using the PICwriter library.  You ca
 Installation (Linux / OS X)
 ---------------------------
 
-(**Option 1**) Install PICwriter by first downloading the source code `here <https://github.com/DerekK88/PICwriter>`_. and then in the picwriter directory run::
-
-    python setup.py install
-
-(**Option 2:**) Install PICwriter by running::
+(**Option 1:**) Install PICwriter by running::
 
     pip install picwriter
+
+(**Option 2**) Install PICwriter by first downloading the source code `here <https://github.com/DerekK88/PICwriter>`_. and then in the picwriter directory run::
+
+    python setup.py install
     
 Installation (Windows)
 ----------------------
