@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Waveguides &amp; Waveguide Templates &mdash; picwriter 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="picwriter 0.0.1 documentation" href="index.html"/>
+        <link rel="up" title="Component Documentation" href="component-documentation.html"/>
+        <link rel="next" title="Tapers" href="tapers.html"/>
+        <link rel="prev" title="Component Documentation" href="component-documentation.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> picwriter
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="toolkit-documentation.html">Toolkit Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="component-documentation.html">Component Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Waveguides &amp; Waveguide Templates</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-picwriter.components">Waveguide Template</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-picwriter.components">Waveguides</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tapers.html">Tapers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gratingcouplers.html">Grating Couplers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spirals.html">Spirals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mmis.html">Multi-Mode Interferometers (MMI’s)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resonators.html">Cavities and Resonators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">picwriter</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="component-documentation.html">Component Documentation</a> &raquo;</li>
+        
+      <li>Waveguides &amp; Waveguide Templates</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/waveguides.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="waveguides-waveguide-templates">
+<h1>Waveguides &amp; Waveguide Templates<a class="headerlink" href="#waveguides-waveguide-templates" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-picwriter.components">
+<span id="waveguide-template"></span><h2>Waveguide Template<a class="headerlink" href="#module-picwriter.components" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="picwriter.components.WaveguideTemplate">
+<em class="property">class </em><code class="descclassname">picwriter.components.</code><code class="descname">WaveguideTemplate</code><span class="sig-paren">(</span><em>bend_radius=50.0</em>, <em>wg_width=2.0</em>, <em>clad_width=10.0</em>, <em>resist=u'+'</em>, <em>fab=u'ETCH'</em>, <em>wg_layer=1</em>, <em>wg_datatype=0</em>, <em>clad_layer=2</em>, <em>clad_datatype=0</em><span class="sig-paren">)</span><a class="headerlink" href="#picwriter.components.WaveguideTemplate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard template for waveguides (as well as other structures) that contains some standard information about the fabrication process and waveguides.</p>
+<dl class="docutils">
+<dt>Keyword Args:</dt>
+<dd><ul class="first last simple">
+<li><strong>bend_radius</strong> (float): Radius of curvature for waveguide bends (circular)</li>
+<li><strong>wg_width</strong> (float): Width of the waveguide as shown on the mask</li>
+<li><strong>clad_width</strong> (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff)</li>
+<li><strong>resist</strong> (string): Must be either ‘+’ or ‘-‘.  Specifies the type of photoresist used</li>
+<li><strong>fab</strong> (string): If ‘ETCH’, then keeps resist as is, otherwise changes it from ‘+’ to ‘-‘ (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is ‘LIFTOFF’</li>
+<li><strong>wg_layer</strong> (int): Layer type used for waveguides</li>
+<li><strong>wg_datatype</strong> (int): Data type used for waveguides</li>
+<li><strong>clad_layer</strong> (int): Layer type used for cladding</li>
+<li><strong>clad_datatype</strong> (int): Data type used for cladding</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<img alt="_images/waveguide.png" src="_images/waveguide.png" />
+</div>
+<div class="section" id="module-picwriter.components">
+<span id="waveguides"></span><h2>Waveguides<a class="headerlink" href="#module-picwriter.components" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="picwriter.components.Waveguide">
+<em class="property">class </em><code class="descclassname">picwriter.components.</code><code class="descname">Waveguide</code><span class="sig-paren">(</span><em>trace</em>, <em>wgt</em><span class="sig-paren">)</span><a class="headerlink" href="#picwriter.components.Waveguide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard Waveguide Cell class (subclass of gdspy.Cell).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li><strong>trace</strong> (list):  List of coordinates used to generate the waveguide (such as ‘[(x1,y1), (x2,y2), …]’)</li>
+<li><strong>wgt</strong> (WaveguideTemplate):  WaveguideTemplate object</li>
+</ul>
+</dd>
+<dt>Members:</dt>
+<dd><ul class="first last simple">
+<li><strong>portlist</strong> (dict): Dictionary with the relevant port information</li>
+</ul>
+</dd>
+<dt>Portlist format:</dt>
+<dd><ul class="first last simple">
+<li>portlist[‘input’] = {‘port’: (x1,y1), ‘direction’: ‘dir1’}</li>
+<li>portlist[‘output’] = {‘port’: (x2, y2), ‘direction’: ‘dir2’}</li>
+</ul>
+</dd>
+</dl>
+<p>Where in the above (x1,y1) are the first elements of ‘trace’, (x2, y2) are the last elements of ‘trace’, and ‘dir1’, ‘dir2’ are of type <cite>‘NORTH’</cite>, <cite>‘WEST’</cite>, <cite>‘SOUTH’</cite>, <cite>‘EAST’</cite>.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tapers.html" class="btn btn-neutral float-right" title="Tapers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="component-documentation.html" class="btn btn-neutral" title="Component Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Derek Kita.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
