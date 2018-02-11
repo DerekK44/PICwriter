@@ -6,7 +6,7 @@ PICwriter is tested on python versions 2.7, 3.4, 3.5, and 3.6 on Linux, OS X, an
 Requirements
 ------------
 
-A working version of python is required for using the PICwriter library.  You can go to `python.org <https://www.python.org/downloads/>`_ to download python (or check if it's installed on your computer by running `python --version` in a command prompt or terminal.  I personally recommend downloading `Anaconda <https://www.anaconda.com/download/>`_ since it includes several nice scientific libraries, the conda package manager, Spyder IDE, and other niceties.
+A working version of python is required for using the PICwriter library.  You can go to `python.org <https://www.python.org/downloads/>`_ to download python (or check if it's installed on your computer by running `python -\\-version` in a command prompt or terminal.  I personally recommend downloading `Anaconda <https://www.anaconda.com/download/>`_ since it includes several nice scientific libraries, the conda package manager, Spyder IDE, and other niceties.
 
 Installation (Linux / OS X)
 ---------------------------
