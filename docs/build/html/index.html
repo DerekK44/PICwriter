@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PICwriter Documentation &mdash; picwriter 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="picwriter 0.0.1 documentation" href="#"/>
+        <link rel="next" title="Installation" href="installation.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> picwriter
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="toolkit-documentation.html">Toolkit Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="component-documentation.html">Component Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">picwriter</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>PICwriter Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="picwriter-documentation">
+<h1>PICwriter Documentation<a class="headerlink" href="#picwriter-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Picwriter (Photonic-Integrated-Circuit Writer) is a free Python module, built above the gdspy module, aimed at simplifying the process of designing complex masks for photonic integrated circuits through a prebuilt library of easy-to-implement PCells (technically all sub-classes of the gdspy Cell class). Supported blocks include waveguides, straight grating couplers, focusing grating couplers, tapers, multi-mode interferometers (MMI’s), resonators, spiral structures, and more that are coming soon!</p>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<p>The ultimate goal of this module is to reduce the time required to generate photonic integrated circuit mask designs, by extending the functionality of the gdspy library.</p>
+<ul class="simple">
+<li>High-level specification of common building blocks for photonic-integrated circuits</li>
+<li>Fabrication specific masks. Specify the photoresist type (<cite>‘+’</cite> or <cite>‘-‘</cite>) and fabrication type (such as <cite>‘ETCH’</cite>) and PICwriter will generate the appropriate mask files for single-layer electron-beam or photolithography.</li>
+<li>All library components are subclasses of the <a class="reference external" href="http://gdspy.readthedocs.io/en/latest/library.html#cell">gdspy Cell class</a>, so gdspy Cell features such as <cite>rotation()</cite>, <cite>copy()</cite>, <cite>flatten()</cite>, <cite>get_bounding_box()</cite>, etc. are all supported.</li>
+<li>Unique cell identifiers. Add components to your mask layout without worrying about name-clashes.</li>
+</ul>
+</div>
+<div class="section" id="contribute">
+<h2>Contribute<a class="headerlink" href="#contribute" title="Permalink to this headline">¶</a></h2>
+<p>This project got started because I wanted to make it easier to generate simple lithography masks for in-house fabrication of PICs at MIT.  If you find this project useful, or have ideas for new components to add to the library, please feel free to contribute to the project!</p>
+<ul class="simple">
+<li>Issue Tracker: <a class="reference external" href="https://github.com/DerekK88/PICwriter/issues">github.com/DerekK88/PICwriter/issues</a></li>
+<li>Source Code: <a class="reference external" href="https://github.com/DerekK88/PICwriter">github.com/DerekK88/PICwriter</a></li>
+</ul>
+<div class="section" id="guide">
+<h3>Guide<a class="headerlink" href="#guide" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-linux-os-x">Installation (Linux / OS X)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-windows">Installation (Windows)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#getting-started">Getting Started</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#basic-code-structure">Basic code structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#putting-multiple-components-together">Putting multiple components together</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#generating-hierarchical-pcells">Generating Hierarchical PCells</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="toolkit-documentation.html">Toolkit Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="component-documentation.html">Component Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="waveguides.html">Waveguides &amp; Waveguide Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tapers.html">Tapers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gratingcouplers.html">Grating Couplers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spirals.html">Spirals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mmis.html">Multi-Mode Interferometers (MMI’s)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resonators.html">Cavities and Resonators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Derek Kita.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,513 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorial &mdash; picwriter 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="picwriter 0.0.1 documentation" href="index.html"/>
+        <link rel="next" title="Toolkit Documentation" href="toolkit-documentation.html"/>
+        <link rel="prev" title="Installation" href="installation.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> picwriter
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-code-structure">Basic code structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tutorial-1-program">Tutorial 1 program</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#putting-multiple-components-together">Putting multiple components together</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#unbalanced-mach-zehnder-interferometer-with-spiral-arm">Unbalanced Mach-Zehnder interferometer with spiral arm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tutorial-2-program">Tutorial 2 program</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#generating-hierarchical-pcells">Generating Hierarchical PCells</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="toolkit-documentation.html">Toolkit Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="component-documentation.html">Component Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">picwriter</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Tutorial</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/tutorial.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<p>Getting started with PICwriter is easy.  In the examples below, we’ll walk you through quickly generating a couple lithography masks.</p>
+<div class="section" id="basic-code-structure">
+<h2>Basic code structure<a class="headerlink" href="#basic-code-structure" title="Permalink to this headline">¶</a></h2>
+<p>Every file should start with the following import statements:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gdspy</span>
+<span class="kn">from</span> <span class="nn">picwriter</span> <span class="k">import</span> <span class="n">toolkit</span> <span class="k">as</span> <span class="n">tk</span>
+<span class="kn">from</span> <span class="nn">picwriter.components</span> <span class="k">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>The first statement allows us to use the base commands from the gdspy library.  The second provides additional functionality for working with the picwriter components, which are imported with the third statement.  Next, we can create a top-level cell that we will add all of our PIC components to:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">top</span> <span class="o">=</span> <span class="n">gdspy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, we can just add a simple geometric shape from the gdspy library, such as a square:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">top</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gdspy</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span> <span class="n">layer</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Let’s add a simple waveguide with a bend.  To do this, we only need a reference to a WaveguideTemplate reference, and a set of waypoints (i.e. a list of (x,y) tuples).  The WaveguideTemplate class specifies all important parameters, such as resist type, waveguide width, cladding width, bending radius, then the layer and datatype:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">wgt</span> <span class="o">=</span> <span class="n">WaveguideTemplate</span><span class="p">(</span><span class="n">wg_width</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">clad_width</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">bend_radius</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">resist</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">fab</span><span class="o">=</span><span class="s1">&#39;ETCH&#39;</span><span class="p">,</span>
+                            <span class="n">wg_layer</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wg_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">clad_layer</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">clad_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">wg</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="p">(</span><span class="mi">975</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="p">(</span><span class="mi">975</span><span class="p">,</span><span class="mi">500</span><span class="p">),</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">500</span><span class="p">),(</span><span class="mi">25</span><span class="p">,</span><span class="mi">975</span><span class="p">),(</span><span class="mi">975</span><span class="p">,</span><span class="mi">975</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We then add this to the top cell using the toolkit “add” method:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wg</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is simply a shortcut for the gdspy add method (which would look like <cite>top.add(gdspy.CellReference(subcell))</cite>.  Both are equivalent, though the first is slightly less typing.  To generate the mask according to the fab specifications (positive/negative resist, and fabrication type), we can call the <cite>tk.build_mask()</cite> function:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">tk</span><span class="o">.</span><span class="n">build_mask</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wgt</span><span class="p">,</span> <span class="n">final_layer</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">final_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This simply takes the waveguide layer and the cladding layer, then does the appropraite ‘xor’ operation (or just simply returns the waveguide layer).  Lastly, we can visualize everything by either visualizing with the built-in gdspy LayoutViewer, or exporting to a GDSII file in the working directory of your python script:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gdspy</span><span class="o">.</span><span class="n">LayoutViewer</span><span class="p">()</span>
+<span class="n">gdspy</span><span class="o">.</span><span class="n">write_gds</span><span class="p">(</span><span class="s1">&#39;tutorial.gds&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="mf">1.0e-6</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The ‘units’ specifies we are using microns as the base unit, and ‘precision’ specifies 1 nm precision.</p>
+<div class="section" id="tutorial-1-program">
+<h3>Tutorial 1 program<a class="headerlink" href="#tutorial-1-program" title="Permalink to this headline">¶</a></h3>
+<p>Below is the entire program, along with an image of the GDSII file it generates:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gdspy</span>
+<span class="kn">from</span> <span class="nn">picwriter</span> <span class="k">import</span> <span class="n">toolkit</span> <span class="k">as</span> <span class="n">tk</span>
+<span class="kn">from</span> <span class="nn">picwriter.components</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="n">top</span> <span class="o">=</span> <span class="n">gdspy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">)</span>
+<span class="n">wgt</span> <span class="o">=</span> <span class="n">WaveguideTemplate</span><span class="p">(</span><span class="n">wg_width</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">clad_width</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">bend_radius</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">resist</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">fab</span><span class="o">=</span><span class="s1">&#39;ETCH&#39;</span><span class="p">,</span>
+                            <span class="n">wg_layer</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wg_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">clad_layer</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">clad_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">top</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gdspy</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span> <span class="n">layer</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">wg</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="p">(</span><span class="mi">975</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="p">(</span><span class="mi">975</span><span class="p">,</span><span class="mi">500</span><span class="p">),</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">500</span><span class="p">),(</span><span class="mi">25</span><span class="p">,</span><span class="mi">975</span><span class="p">),(</span><span class="mi">975</span><span class="p">,</span><span class="mi">975</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wg</span><span class="p">)</span>
+
+<span class="n">tk</span><span class="o">.</span><span class="n">build_mask</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wgt</span><span class="p">,</span> <span class="n">final_layer</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">final_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">gdspy</span><span class="o">.</span><span class="n">LayoutViewer</span><span class="p">()</span>
+<span class="n">gdspy</span><span class="o">.</span><span class="n">write_gds</span><span class="p">(</span><span class="s1">&#39;tutorial.gds&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="mf">1.0e-6</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The results should look like this, if we select only the final layer (3/0) and layer for the square (100/0):</p>
+<img alt="_images/tutorial1.png" src="_images/tutorial1.png" />
+</div>
+</div>
+<div class="section" id="putting-multiple-components-together">
+<h2>Putting multiple components together<a class="headerlink" href="#putting-multiple-components-together" title="Permalink to this headline">¶</a></h2>
+<p>Here we show how to generate a slightly more complex mask using the set of supported components that come standard in the picwriter library.  Let’s build up an interesting object, a Mach-Zehnder interferometer, which consists of two 1x2 MMI’s, and one arm that is much longer than the other.  But to make it longer, we need to use a <cite>spiral</cite> type of waveguide (for compactness).</p>
+<div class="section" id="unbalanced-mach-zehnder-interferometer-with-spiral-arm">
+<h3>Unbalanced Mach-Zehnder interferometer with spiral arm<a class="headerlink" href="#unbalanced-mach-zehnder-interferometer-with-spiral-arm" title="Permalink to this headline">¶</a></h3>
+<p>As usual, we begin with the import statements, a ‘top’ cell, and a standard waveguide template.  We then place a grating coupler for light to be coupled onto the PIC.  The ‘port’ and ‘direction’ keyword arguments (kwargs) specify the location of the port, and the direction that light goes <em>into</em> the device, so we specify (0,0) and <cite>‘WEST’</cite>.  We also specify a waveguide that extends for 200 um:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gdspy</span>
+<span class="kn">from</span> <span class="nn">picwriter</span> <span class="k">import</span> <span class="n">toolkit</span> <span class="k">as</span> <span class="n">tk</span>
+<span class="kn">from</span> <span class="nn">picwriter.components</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="n">top</span> <span class="o">=</span> <span class="n">gdspy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+<span class="n">wgt</span> <span class="o">=</span> <span class="n">WaveguideTemplate</span><span class="p">(</span><span class="n">wg_width</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">clad_width</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">bend_radius</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">resist</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">fab</span><span class="o">=</span><span class="s1">&#39;ETCH&#39;</span><span class="p">,</span> <span class="n">wg_layer</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wg_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">clad_layer</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">clad_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">gc1</span> <span class="o">=</span> <span class="n">GratingCouplerFocusing</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="n">focus_distance</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dutycycle</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;WEST&#39;</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">gc1</span><span class="p">)</span>
+
+<span class="n">wg1</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([</span><span class="n">gc1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">],</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="mi">0</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wg1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can now add a 1x2 MMI.  Rather than calculate the location of each port and direction the waveguide should go in, we can <em>unpack</em> the relevant port and direction information from the component we are connecting to.  We do this by passing <cite>**wg1.portlist[‘output’]</cite> to the input of the MMI1x2 class.  wg1.portlist is simply a python dictionary that contains the keys ‘port’ and ‘direction’, and the two asterisks unpack the corresponding port and direction values the new MMI1x2 object.  We can then add the second MMI, which will be some distance away from the first one:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mmi1</span> <span class="o">=</span> <span class="n">MMI1x2</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">taper_width</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">wg_sep</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="o">**</span><span class="n">wg1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">])</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">mmi1</span><span class="p">)</span>
+
+<span class="n">mmi2</span> <span class="o">=</span> <span class="n">MMI1x2</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">taper_width</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">wg_sep</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="p">(</span><span class="mi">1750</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;WEST&#39;</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">mmi2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can explicitly get the (x,y) value of the ports by referencing the corresponding ‘port’ in the MMI’s portlist, then use these values to build a waveguide bend up towards where we will create the spiral:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">xtop</span><span class="p">,</span> <span class="n">ytop</span><span class="p">)</span> <span class="o">=</span> <span class="n">mmi1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output_top&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span>
+<span class="n">wg2</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([(</span><span class="n">xtop</span><span class="p">,</span> <span class="n">ytop</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xtop</span><span class="o">+</span><span class="mi">100</span><span class="p">,</span> <span class="n">ytop</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xtop</span><span class="o">+</span><span class="mi">100</span><span class="p">,</span> <span class="n">ytop</span><span class="o">+</span><span class="mi">200</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xtop</span><span class="o">+</span><span class="mi">200</span><span class="p">,</span> <span class="n">ytop</span><span class="o">+</span><span class="mi">200</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wg2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Next, we add the spiral at the location where the previous waveguide ended.  Then at the output of the spiral, we place another waveguide connecting to the spiral output to the 2x1 MMI:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sp</span> <span class="o">=</span> <span class="n">Spiral</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="mf">600.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">8000.0</span><span class="p">,</span> <span class="n">parity</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">wg2</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">])</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">sp</span><span class="p">)</span>
+
+<span class="p">(</span><span class="n">xtop_out</span><span class="p">,</span> <span class="n">ytop_out</span><span class="p">)</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span>
+<span class="p">(</span><span class="n">xmmi_top</span><span class="p">,</span> <span class="n">ymmi_top</span><span class="p">)</span> <span class="o">=</span> <span class="n">mmi2</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output_bot&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span>
+<span class="n">wg_spiral_out</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([(</span><span class="n">xtop_out</span><span class="p">,</span> <span class="n">ytop_out</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">xmmi_top</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">ytop_out</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">xmmi_top</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">ytop_out</span><span class="o">-</span><span class="mi">200</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">xmmi_top</span><span class="p">,</span> <span class="n">ytop_out</span><span class="o">-</span><span class="mi">200</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We then add a waveguide for the bottom ‘arm’ of the Mach-Zehnder that directly connects the first MMI to the second MMI:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">xbot</span><span class="p">,</span> <span class="n">ybot</span><span class="p">)</span> <span class="o">=</span> <span class="n">mmi1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output_bot&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span>
+<span class="n">wg3</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([(</span><span class="n">xbot</span><span class="p">,</span> <span class="n">ybot</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xbot</span><span class="o">+</span><span class="mi">100</span><span class="p">,</span> <span class="n">ybot</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xbot</span><span class="o">+</span><span class="mi">100</span><span class="p">,</span> <span class="n">ybot</span><span class="o">-</span><span class="mi">200</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xmmi_top</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">ybot</span><span class="o">-</span><span class="mi">200</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xmmi_top</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">ybot</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xmmi_top</span><span class="p">,</span> <span class="n">ybot</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wg3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The last grating coupler then is placed at the location of the second MMI ‘port’, plus an additional 100 um in the ‘+x’ direction.</p>
+<blockquote>
+<div><p>gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=40, period=1.0, dutycycle=0.7,
+port=(mmi2.portlist[‘input’][‘port’][0]+100, mmi2.portlist[‘input’][‘port’][1]), direction=’EAST’)
+tk.add(top, gc2)</p>
+<p>wg_gc2 = Waveguide([mmi2.portlist[‘input’][‘port’], gc2.portlist[‘output’][‘port’]], wgt)
+tk.add(top, wg_gc2)</p>
+</div></blockquote>
+<p>Our mask is now ready to be ‘built’ and visualized:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">tk</span><span class="o">.</span><span class="n">build_mask</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wgt</span><span class="p">,</span> <span class="n">final_layer</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">final_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">gdspy</span><span class="o">.</span><span class="n">LayoutViewer</span><span class="p">()</span>
+<span class="n">gdspy</span><span class="o">.</span><span class="n">write_gds</span><span class="p">(</span><span class="s1">&#39;tutorial2.gds&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="mf">1.0e-6</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tutorial-2-program">
+<h3>Tutorial 2 program<a class="headerlink" href="#tutorial-2-program" title="Permalink to this headline">¶</a></h3>
+<p>Altogether, the entire code for the example is shown below:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gdspy</span>
+<span class="kn">from</span> <span class="nn">picwriter</span> <span class="k">import</span> <span class="n">toolkit</span> <span class="k">as</span> <span class="n">tk</span>
+<span class="kn">from</span> <span class="nn">picwriter.components</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="n">top</span> <span class="o">=</span> <span class="n">gdspy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+<span class="n">wgt</span> <span class="o">=</span> <span class="n">WaveguideTemplate</span><span class="p">(</span><span class="n">wg_width</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">clad_width</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">bend_radius</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">resist</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">fab</span><span class="o">=</span><span class="s1">&#39;ETCH&#39;</span><span class="p">,</span> <span class="n">wg_layer</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wg_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">clad_layer</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">clad_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">gc1</span> <span class="o">=</span> <span class="n">GratingCouplerFocusing</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="n">focus_distance</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dutycycle</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;WEST&#39;</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">gc1</span><span class="p">)</span>
+
+<span class="n">wg1</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([</span><span class="n">gc1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">],</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="mi">0</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wg1</span><span class="p">)</span>
+
+<span class="n">mmi1</span> <span class="o">=</span> <span class="n">MMI1x2</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">taper_width</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">wg_sep</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="o">**</span><span class="n">wg1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">])</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">mmi1</span><span class="p">)</span>
+
+<span class="n">mmi2</span> <span class="o">=</span> <span class="n">MMI1x2</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">taper_width</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">wg_sep</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="p">(</span><span class="mi">1750</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;WEST&#39;</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">mmi2</span><span class="p">)</span>
+
+<span class="p">(</span><span class="n">xtop</span><span class="p">,</span> <span class="n">ytop</span><span class="p">)</span> <span class="o">=</span> <span class="n">mmi1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output_top&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span>
+<span class="n">wg2</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([(</span><span class="n">xtop</span><span class="p">,</span> <span class="n">ytop</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xtop</span><span class="o">+</span><span class="mi">100</span><span class="p">,</span> <span class="n">ytop</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xtop</span><span class="o">+</span><span class="mi">100</span><span class="p">,</span> <span class="n">ytop</span><span class="o">+</span><span class="mi">200</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xtop</span><span class="o">+</span><span class="mi">200</span><span class="p">,</span> <span class="n">ytop</span><span class="o">+</span><span class="mi">200</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wg2</span><span class="p">)</span>
+
+<span class="n">sp</span> <span class="o">=</span> <span class="n">Spiral</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="mf">600.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">8000.0</span><span class="p">,</span> <span class="n">parity</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">wg2</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">])</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">sp</span><span class="p">)</span>
+
+<span class="p">(</span><span class="n">xtop_out</span><span class="p">,</span> <span class="n">ytop_out</span><span class="p">)</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span>
+<span class="p">(</span><span class="n">xmmi_top</span><span class="p">,</span> <span class="n">ymmi_top</span><span class="p">)</span> <span class="o">=</span> <span class="n">mmi2</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output_bot&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span>
+<span class="n">wg_spiral_out</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([(</span><span class="n">xtop_out</span><span class="p">,</span> <span class="n">ytop_out</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">xmmi_top</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">ytop_out</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">xmmi_top</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">ytop_out</span><span class="o">-</span><span class="mi">200</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">xmmi_top</span><span class="p">,</span> <span class="n">ytop_out</span><span class="o">-</span><span class="mi">200</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wg_spiral_out</span><span class="p">)</span>
+
+<span class="p">(</span><span class="n">xbot</span><span class="p">,</span> <span class="n">ybot</span><span class="p">)</span> <span class="o">=</span> <span class="n">mmi1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output_bot&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span>
+<span class="n">wg3</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([(</span><span class="n">xbot</span><span class="p">,</span> <span class="n">ybot</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xbot</span><span class="o">+</span><span class="mi">100</span><span class="p">,</span> <span class="n">ybot</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xbot</span><span class="o">+</span><span class="mi">100</span><span class="p">,</span> <span class="n">ybot</span><span class="o">-</span><span class="mi">200</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xmmi_top</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">ybot</span><span class="o">-</span><span class="mi">200</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xmmi_top</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="n">ybot</span><span class="p">),</span>
+             <span class="p">(</span><span class="n">xmmi_top</span><span class="p">,</span> <span class="n">ybot</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wg3</span><span class="p">)</span>
+
+<span class="n">gc2</span> <span class="o">=</span> <span class="n">GratingCouplerFocusing</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="n">focus_distance</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dutycycle</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+                         <span class="n">port</span><span class="o">=</span><span class="p">(</span><span class="n">mmi2</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">100</span><span class="p">,</span> <span class="n">mmi2</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;EAST&#39;</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">gc2</span><span class="p">)</span>
+
+<span class="n">wg_gc2</span> <span class="o">=</span> <span class="n">Waveguide</span><span class="p">([</span><span class="n">mmi2</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">],</span> <span class="n">gc2</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wg_gc2</span><span class="p">)</span>
+
+<span class="n">tk</span><span class="o">.</span><span class="n">build_mask</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wgt</span><span class="p">,</span> <span class="n">final_layer</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">final_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">gdspy</span><span class="o">.</span><span class="n">LayoutViewer</span><span class="p">()</span>
+<span class="n">gdspy</span><span class="o">.</span><span class="n">write_gds</span><span class="p">(</span><span class="s1">&#39;tutorial2.gds&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="mf">1.0e-6</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The resulting GDSII file looks like this:</p>
+<img alt="_images/tutorial2.png" src="_images/tutorial2.png" />
+<p>And the waveguide &amp; cladding layers that are generated are shown below:</p>
+<img alt="_images/tutorial2_layers.png" src="_images/tutorial2_layers.png" />
+</div>
+</div>
+<div class="section" id="generating-hierarchical-pcells">
+<h2>Generating Hierarchical PCells<a class="headerlink" href="#generating-hierarchical-pcells" title="Permalink to this headline">¶</a></h2>
+<p>In the next example, we show how easy it is to generate and reuse hierarchical PCells to quickly populate a mask with many similar components in different locations.  In the program below, we create a gdspy.Cell class called ‘spiral_unit’, then add different components, just like we would have added them to the ‘top’ cell before.  However, we can now create multiple references to this cell through gdspy.CellReference, and place them in several different locations on our mask.  This has several advantages:  (1) the time to making a mask with repeating units is reduced, and (2) the GDSII file size is reduced since we only need to store the information about one ‘cell’ and the locations of all the cell references (as opposed to storing the memory for each cell multiplied by the number of cells we place!).  The full program is below:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">gdspy</span>
+<span class="kn">from</span> <span class="nn">picwriter</span> <span class="k">import</span> <span class="n">toolkit</span> <span class="k">as</span> <span class="n">tk</span>
+<span class="kn">from</span> <span class="nn">picwriter.components</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="n">X_SIZE</span><span class="p">,</span> <span class="n">Y_SIZE</span> <span class="o">=</span> <span class="mi">15000</span><span class="p">,</span> <span class="mi">15000</span>
+<span class="n">exclusion_region</span> <span class="o">=</span> <span class="mf">2000.0</span> <span class="c1">#region where no devices are to be fabricated</span>
+<span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">X_SIZE</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">Y_SIZE</span><span class="o">/</span><span class="mf">2.0</span> <span class="c1">#define origin of the die</span>
+<span class="n">step</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="c1">#standard spacing between components</span>
+
+<span class="n">top</span> <span class="o">=</span> <span class="n">gdspy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">)</span>
+
+<span class="n">wgt</span> <span class="o">=</span> <span class="n">WaveguideTemplate</span><span class="p">(</span><span class="n">wg_width</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">clad_width</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">bend_radius</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                        <span class="n">resist</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">fab</span><span class="o">=</span><span class="s1">&#39;ETCH&#39;</span><span class="p">,</span> <span class="n">wg_layer</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wg_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">clad_layer</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">clad_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot; Add a die outline, with exclusion, from gdspy geometries found at</span>
+<span class="sd">    http://gdspy.readthedocs.io/en/latest/&quot;&quot;&quot;</span>
+<span class="n">top</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gdspy</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">X_SIZE</span><span class="p">,</span> <span class="n">Y_SIZE</span><span class="p">),</span> <span class="n">layer</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">top</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gdspy</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">Y_SIZE</span><span class="o">-</span><span class="n">exclusion_region</span><span class="p">),</span> <span class="p">(</span><span class="n">X_SIZE</span><span class="p">,</span> <span class="n">Y_SIZE</span><span class="p">),</span> <span class="n">layer</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">top</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gdspy</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">X_SIZE</span><span class="p">,</span> <span class="n">exclusion_region</span><span class="p">),</span> <span class="n">layer</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">top</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gdspy</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">exclusion_region</span><span class="p">,</span> <span class="n">Y_SIZE</span><span class="p">),</span> <span class="n">layer</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">top</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gdspy</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="n">X_SIZE</span><span class="o">-</span><span class="n">exclusion_region</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">X_SIZE</span><span class="p">,</span> <span class="n">Y_SIZE</span><span class="p">),</span> <span class="n">layer</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="sd">&quot;&quot;&quot; Add some components from the PICwriter library &quot;&quot;&quot;</span>
+<span class="n">spiral_unit</span> <span class="o">=</span> <span class="n">gdspy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="s2">&quot;spiral_unit&quot;</span><span class="p">)</span>
+<span class="n">sp1</span> <span class="o">=</span> <span class="n">Spiral</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="n">parity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="p">(</span><span class="mf">500.0</span><span class="o">+</span><span class="n">exclusion_region</span><span class="o">+</span><span class="mi">4</span><span class="o">*</span><span class="n">step</span><span class="p">,</span><span class="n">y0</span><span class="p">))</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">spiral_unit</span><span class="p">,</span> <span class="n">sp1</span><span class="p">)</span>
+
+<span class="n">wg1</span><span class="o">=</span><span class="n">Waveguide</span><span class="p">([</span><span class="n">sp1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s2">&quot;port&quot;</span><span class="p">],</span> <span class="p">(</span><span class="n">sp1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">][</span><span class="s2">&quot;port&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="mf">4000.0</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">wg2</span><span class="o">=</span><span class="n">Waveguide</span><span class="p">([</span><span class="n">sp1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="s2">&quot;port&quot;</span><span class="p">],</span> <span class="p">(</span><span class="n">sp1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="s2">&quot;port&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">Y_SIZE</span><span class="o">-</span><span class="mf">4000.0</span><span class="p">)],</span> <span class="n">wgt</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">spiral_unit</span><span class="p">,</span> <span class="n">wg1</span><span class="p">)</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">spiral_unit</span><span class="p">,</span> <span class="n">wg2</span><span class="p">)</span>
+
+<span class="n">tp_bot</span> <span class="o">=</span> <span class="n">Taper</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">end_width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">wg1</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">])</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">spiral_unit</span><span class="p">,</span> <span class="n">tp_bot</span><span class="p">)</span>
+
+<span class="n">gc_top</span> <span class="o">=</span> <span class="n">GratingCouplerFocusing</span><span class="p">(</span><span class="n">wgt</span><span class="p">,</span> <span class="n">focus_distance</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+                                <span class="n">period</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">dutycycle</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="mf">1.55</span><span class="p">,</span>
+                                <span class="n">sin_theta</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">8</span><span class="o">/</span><span class="mi">180</span><span class="p">),</span> <span class="o">**</span><span class="n">wg2</span><span class="o">.</span><span class="n">portlist</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">])</span>
+<span class="n">tk</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">spiral_unit</span><span class="p">,</span> <span class="n">gc_top</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+    <span class="n">top</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gdspy</span><span class="o">.</span><span class="n">CellReference</span><span class="p">(</span><span class="n">spiral_unit</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="mf">1100.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+
+<span class="n">tk</span><span class="o">.</span><span class="n">build_mask</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">wgt</span><span class="p">,</span> <span class="n">final_layer</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">final_datatype</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">gdspy</span><span class="o">.</span><span class="n">LayoutViewer</span><span class="p">()</span>
+<span class="n">gdspy</span><span class="o">.</span><span class="n">write_gds</span><span class="p">(</span><span class="s1">&#39;mask_template.gds&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="mf">1.0e-6</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mf">1.0e-9</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/mask_template.png" src="_images/mask_template.png" />
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="toolkit-documentation.html" class="btn btn-neutral float-right" title="Toolkit Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Derek Kita.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
