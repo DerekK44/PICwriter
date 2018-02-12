@@ -50,5 +50,7 @@ deploy:
   provider: GitHub
   tag: $(appveyor_repo_tag_name)
   description: Release $(appveyor_repo_tag_name)
+  auth_token:
+    secure: edb2f5e16229142d9f845b8f3de2c3313c92bdc4
   on:
     appveyor_repo_tag: true
