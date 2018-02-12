@@ -51,7 +51,7 @@ deploy:
   tag: $(appveyor_repo_tag_name)
   description: Release $(appveyor_repo_tag_name)
   auth_token:
-    secure: "edb2f5e16229142d9f845b8f3de2c3313c92bdc4"
+    secure: a/Pq9koPPpBIMd/voA8OisDMF2F+X37E7klugJoaAlAFa1nzn8wPq5hRqB/Wdr4g
   artifact: /picwriter.*\.whl/
   prerelease: false
   draft: true
