@@ -44,13 +44,17 @@ python setup.py install
 The best way of obtaining the library is by installing the prebuilt binaries.
 
 * First, go to the [gdspy appveyor project page](https://ci.appveyor.com/project/heitzmann/gdspy), then click the python environment that matches your python version and processor type.  For example, if you have a 64-bit processor with Python version 3.5 (you can check by running `python --version` in a command prompt) then you would click 'PYTHON=C:\Python35-x64'.  Then, click the **Artifacts** tab and download the corresponding `dist\gdspy-1.X.X.X.whl` wheel file.
-* Open up a command prompt (type `cmd` in the search bar), navigate to your downloads, then install via::
+* Open up a command prompt (type `cmd` in the search bar), navigate to your downloads, then install via:
 
-    pip install dist\gdspy-1.X.X.X.whl
+```sh
+pip install dist\gdspy-1.X.X.X.whl
+```
     
 * Next, install the PICwriter library by following the same procedure as before at the [picwriter appveyor page](https://ci.appveyor.com/project/DerekK88/picwriter) to install the corresponding prebuilt picwriter `.whl` file.
-* In a command prompt, navigate to your downloads and install with pip::
+* In a command prompt, navigate to your downloads and install with pip:
 
-    pip install dist\picwriter-1.X.X.X.whl
-    
+```sh
+pip install dist\picwriter-1.X.X.X.whl
+```
+
 Building from source is also possible. For installing gdspy, an appropriate build environment is required for compilation of the C extension modules.
