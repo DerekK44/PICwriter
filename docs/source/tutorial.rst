@@ -17,7 +17,7 @@ The first statement allows us to use the base commands from the gdspy library.  
 
     top = gdspy.Cell("top")
                         	
-Now, we can just add a simple geometric shape from the gdspy library, such as a square::
+Note: some IDE's such as Spyder do not reload the GdsLibrary() between subsequent runs, and so adding `gdspy.current_library = gdspy.GdsLibrary()` below the import statements may fix potential name-clashes.  Now, we can just add a simple geometric shape from the gdspy library, such as a square::
 
     top.add(gdspy.Rectangle((0,0), (1000, 1000), layer=100, datatype=0))
     

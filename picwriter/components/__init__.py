@@ -10,3 +10,4 @@ from .mmi1x2 import MMI1x2
 from .mmi2x2 import MMI2x2
 from .ring import Ring
 from .disk import Disk
+from .alignmentmarker import AlignmentCross, AlignmentTarget
