@@ -47,7 +47,6 @@ class MMI2x2(gdspy.Cell):
         self.port = port
         self.direction = direction
         self.resist = wgt.resist
-        self.wgt = wgt
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 

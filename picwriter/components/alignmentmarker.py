@@ -20,7 +20,7 @@ class AlignmentCross(gdspy.Cell):
            * **datatype** (int): Datatype to place the marker on.  Defaults to 0
 
     """
-    def __init__(self, cross_length, cross_width, center=(0,0), layer=1, datatype=0, small_cross_width=None):
+    def __init__(self, cross_length, cross_width, small_cross_width=None, center=(0,0), layer=1, datatype=0):
         gdspy.Cell.__init__(self, "Cross--"+str(uuid.uuid4()))
 
         self.cross_length = cross_length

@@ -15,9 +15,10 @@ class Taper(gdspy.Cell):
            * **end_width** (float): Final width of the taper (initial width received from WaveguieTemplate)
 
         Keyword Args:
-           * **port** (tuple): Cartesian coordinate of the input port
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.  Defaults to `'EAST'`.
            * **end_clad_width** (float): Clad width at the end of the taper.  Defaults to the regular clad width.
+           * **extra_clad_length** (float): Extra cladding beyond the end of the taper.  Defaults to 2*end_clad_width.
 
         Members:
            * **portlist** (dict): Dictionary with the relevant port information
@@ -29,7 +30,7 @@ class Taper(gdspy.Cell):
         Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
 
     """
-    def __init__(self, wgt, length, end_width, end_clad_width=None, port=(0,0), direction='EAST'):
+    def __init__(self, wgt, length, end_width, end_clad_width=None, extra_clad_length=None, port=(0,0), direction='EAST'):
         gdspy.Cell.__init__(self, "Taper--"+str(uuid.uuid4()))
 
         self.portlist = {}
@@ -40,6 +41,7 @@ class Taper(gdspy.Cell):
         self.start_width = wgt.wg_width
         self.end_width = end_width
         self.end_clad_width = wgt.clad_width if end_clad_width==None else end_clad_width
+        self.extra_clad_length = 2*self.end_clad_width if extra_clad_length==None else extra_clad_length
         self.resist = wgt.resist
         self.wgt = wgt
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
@@ -79,6 +81,7 @@ class Taper(gdspy.Cell):
         path2 = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, self.trace[0])
         path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=angle,
                      final_width=2*self.end_clad_width+self.end_width, **self.clad_spec)
+        path2.segment(self.extra_clad_length, **self.clad_spec)
 
         self.add(path)
         self.add(path2)
@@ -86,10 +89,8 @@ class Taper(gdspy.Cell):
     def build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':self.trace[0],
-                                    'direction':tk.flip_direction(self.direction)}
-        self.portlist["output"] = {'port':self.trace[1],
-                                    'direction':self.direction}
+        self.portlist["input"] = {'port':self.trace[0], 'direction':tk.flip_direction(self.direction)}
+        self.portlist["output"] = {'port':self.trace[1], 'direction':self.direction}
 
 if __name__ == "__main__":
     from . import *

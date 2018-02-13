@@ -14,11 +14,11 @@ class MMI1x2(gdspy.Cell):
            * **width** (float): Width of the MMI region (perpendicular to direction of propagation)
 
         Keyword Args:
-           * **taper_width** (float): Maximum width of the taper region (default = wg_width from wg_template)
-           * **taper_length** (float): Length of the taper leading up to the MMI
-           * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to width/3.0)
-           * **port** (tuple): Cartesian coordinate of the input port
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+           * **taper_width** (float): Maximum width of the taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
+           * **taper_length** (float): Length of the taper leading up to the MMI.  Defaults to None (taper_length=20).
+           * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to width/3.0).  Defaults to None (width/3.0).
+           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.  Defaults to `'EAST'`.
 
         Members:
            * **portlist** (dict): Dictionary with the relevant port information
@@ -46,7 +46,6 @@ class MMI1x2(gdspy.Cell):
         self.port = port
         self.direction = direction
         self.resist = wgt.resist
-        self.wgt = wgt
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 

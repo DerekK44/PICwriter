@@ -23,6 +23,15 @@ class TestPICwriter(TestCase):
 		self.assertTrue(len(top.elements)==2)
 		self.assertTrue(abs(top.area()-33939.818854) <= 1e-6)
 
+	def test_metal_creation(self):
+		top = gdspy.Cell("t-electrical")
+		mt = MetalTemplate(bend_radius=0, resist='+', fab="ETCH")
+		mt1=MetalRoute([(0,0), (0,250), (100,250), (100,500), (400,500)], mt)
+		tk.add(top, mt1)
+		# print("MetalRoute area = "+str(top.area()))
+		self.assertTrue(len(top.elements)==1)
+		self.assertTrue(abs(top.area()-88800.0) <= 1e-6)
+
 	def test_taper_creation(self):
 		top = gdspy.Cell("t2")
 		wgt = WaveguideTemplate(bend_radius=50, resist='+')
@@ -34,7 +43,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, tp2)
 		# print("Taper area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==3)
-		self.assertTrue(abs(top.area()-26199.909427) <= 1e-6)
+		self.assertTrue(abs(top.area()-27005.909427) <= 1e-6)
 
 	def test_grating_coupler_creation(self):
 		top = gdspy.Cell("t3")
@@ -108,3 +117,20 @@ class TestPICwriter(TestCase):
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
 		self.assertTrue(abs(top.area()-31953.5046652) <= 1e-6)
+
+	def test_mzi_creation(self):
+		top = gdspy.Cell("t-mzi")
+		wgt = WaveguideTemplate(bend_radius=50, wg_width=1.0, resist='+')
+		htr_mt = MetalTemplate(width=25, clad_width=25, bend_radius=wgt.bend_radius, resist='+', fab="ETCH", metal_layer=13, metal_datatype=0, clad_layer=14, clad_datatype=0)
+		mt = MetalTemplate(width=25, clad_width=25, resist='+', fab="ETCH", metal_layer=11, metal_datatype=0, clad_layer=12, clad_datatype=0)
+
+		wg_in = Waveguide([(0,0), (300,0)], wgt)
+		tk.add(top, wg_in)
+		mzi = MachZehnder(wgt, MMIlength=50, MMIwidth=10, MMItaper_width=2.0, MMIwg_sep=3, arm1=0, arm2=100, heater=True, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
+		tk.add(top, mzi)
+		wg_out = Waveguide([mzi.portlist["output"]["port"], (mzi.portlist["output"]["port"][0]+300, mzi.portlist["output"]["port"][1])], wgt)
+		tk.add(top, wg_out)
+		# print("MZI area = "+str(top.area()))
+		print(len(top.elements))
+		self.assertTrue(len(top.elements)==3)
+		self.assertTrue(abs(top.area()-179518.918964) <= 1e-6)

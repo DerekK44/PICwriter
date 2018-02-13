@@ -43,7 +43,7 @@ class Waveguide(gdspy.Cell):
     """ Standard Waveguide Cell class (subclass of gdspy.Cell).
 
         Args:
-           * **trace** (list):  List of coordinates used to generate the waveguide (such as '[(x1,y1), (x2,y2), ...]')
+           * **trace** (list):  List of coordinates used to generate the waveguide (such as '[(x1,y1), (x2,y2), ...]').  For now, all trace points must specify 90 degree turns.
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
 
         Members:
