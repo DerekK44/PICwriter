@@ -28,8 +28,8 @@ Guide
 
    installation.rst
    tutorial.rst
-   toolkit-documentation.rst
    component-documentation.rst
+   toolkit-documentation.rst
    license.rst
 
 Indices and tables
