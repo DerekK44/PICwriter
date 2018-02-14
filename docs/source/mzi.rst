@@ -6,7 +6,7 @@ Mach-Zehnder Interferometer
    
 .. image:: imgs/mzi.png
 
-The above image is generated from the following code::
+The above image of an unbalanced Mach-Zehnder with heaters for thermo-optic phase modulation is easily generated from the following code::
 
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, wg_width=1.0, resist='+')
