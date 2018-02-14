@@ -194,8 +194,6 @@ if __name__ == "__main__":
     mt2=MetalRoute([mzi.portlist["heater_top_out"]["port"],
                     (mzi.portlist["heater_top_out"]["port"][0]+150, mzi.portlist["heater_top_out"]["port"][1]),
                     (mzi.portlist["heater_top_out"]["port"][0]+150, mzi.portlist["heater_top_out"]["port"][1]+200)], mt)
-    tk.add(top, mt1)
-    tk.add(top, mt2)
     mt3=MetalRoute([mzi.portlist["heater_bot_in"]["port"],
                     (mzi.portlist["heater_bot_in"]["port"][0]-150, mzi.portlist["heater_bot_in"]["port"][1]),
                     (mzi.portlist["heater_bot_in"]["port"][0]-150, mzi.portlist["heater_bot_in"]["port"][1]-200)], mt)
