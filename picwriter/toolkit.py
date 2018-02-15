@@ -46,8 +46,11 @@ def build_mask(cell, wgt, final_layer=None, final_datatype=None):
     fd = 0 if final_datatype==None else final_datatype
 
     polygons = cell.get_polygons(by_spec=True)
-    pWG = polygons[(wgt.wg_layer, wgt.wg_datatype)]
-    pCLAD = polygons[(wgt.clad_layer, wgt.clad_datatype)]
+    try:
+        pWG = polygons[(wgt.wg_layer, wgt.wg_datatype)]
+        pCLAD = polygons[(wgt.clad_layer, wgt.clad_datatype)]
+    except KeyError:
+        print("Warning! No objects written to layer/datatype specified by WaveguideTemplate")
     if wgt.resist=='+':
         cell.add(gdspy.fast_boolean(pWG, pCLAD, 'xor', precision=0.001, max_points=199, layer=fl, datatype=fd))
     elif wgt.resist=='-':

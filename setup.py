@@ -11,7 +11,7 @@ def readme():
         return f.read()
 
 setup(name='picwriter',
-      version='0.1',
+      version='0.2',
       description='Mask generation tool',
       long_description=readme(),
       url='http://github.com/DerekK88/picwriter',

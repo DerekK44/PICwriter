@@ -174,6 +174,190 @@ class MachZehnder(gdspy.Cell):
             self.portlist["heater_bot_in"] = {'port': self.htr_bot_in, 'direction':self.htr_bot_in_dir}
             self.portlist["heater_bot_out"] = {'port': self.htr_bot_out, 'direction':self.htr_bot_out_dir}
 
+class MachZehnderSwitch(gdspy.Cell):
+    """ Standard Mach-Zehnder Optical Switch Cell class with thermo-optic option (subclass of gdspy.Cell).  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
+
+        Args:
+           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+           * **MMI1x2length** (float): Length of the 1x2 MMI region (along direction of propagation)
+           * **MMI1x2width** (float): Width of the 1x2 MMI region (perpendicular to direction of propagation).
+           * **MMI2x2length** (float): Length of the 2x2 MMI region (along direction of propagation)
+           * **MMI2x2width** (float): Width of the 2x2 MMI region (perpendicular to direction of propagation).
+
+        Keyword Args:
+           * **MMI1x2taper_width** (float): Maximum width of the 1x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
+           * **MMI1x2taper_length** (float): Length of the taper leading up to the 1x2 MMI.  Defaults to None (taper_length=20).
+           * **MMI1x2wg_sep** (float): Separation between waveguides on the 2-port side of the 1x2 MMI (defaults to width/3.0)
+           * **MMI2x2taper_width** (float): Maximum width of the 2x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
+           * **MMI2x2taper_length** (float): Length of the taper leading up to the 2x2 MMI.  Defaults to None (taper_length=20).
+           * **MMI2x2wg_sep** (float): Separation between waveguides of the 2x2 MMI (defaults to width/3.0)
+           * **arm1** (float): Additional length of the top arm (when going `'EAST'`).  Defaults to zero.
+           * **arm2** (float): Additional length of the bottom arm (when going `'EAST'`).  Defaults to zero.
+           * **heater** (boolean): If true, adds heater on-top of one MZI arm.  Defaults to False.
+           * **heater_length** (float): Specifies the length of the heater along the waveguide. Doesn't include the length of the 180 degree bend.  Defaults to 400.0.
+           * **mt** (MetalTemplate): If 'heater' is true, must specify a Metal Template that defines heater & heater cladding layers.
+           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.  Defaults to `'EAST'`
+
+        Members:
+           * **portlist** (dict): Dictionary with the relevant port information
+
+        Portlist format:
+           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+           * portlist['heater_top_in'] = {'port', (x3, y3), 'direction': 'dir3'}
+           * portlist['heater_top_out'] = {'port', (x4, y4), 'direction': 'dir4'}
+           * portlist['heater_bot_in'] = {'port', (x5, y5), 'direction': 'dir5'}
+           * portlist['heater_bot_out'] = {'port', (x6, y6), 'direction': 'dir6'}
+
+        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+        Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
+
+    """
+    def __init__(self, wgt, MMI1x2length, MMI1x2width, MMI2x2length, MMI2x2width, MMI1x2taper_width=None,
+                 MMI1x2taper_length=None, MMI1x2wg_sep=None, MMI2x2taper_width=None, MMI2x2taper_length=None, MMI2x2wg_sep=None,
+                 arm1=0, arm2=0, heater=False, heater_length=400, mt=None, port=(0,0), direction='EAST'):
+        gdspy.Cell.__init__(self, "MZI--"+str(uuid.uuid4()))
+
+        self.portlist = {}
+
+        self.wgt = wgt
+        self.arm1 = arm1
+        self.arm2 = arm2
+
+        self.MMI1x2length = MMI1x2length
+        self.MMI1x2width = MMI1x2width
+        self.MMI1x2taper_width = wgt.wg_width if MMI1x2taper_width==None else MMI1x2taper_width
+        self.MMI1x2taper_length = 20 if MMI1x2taper_length==None else MMI1x2taper_length
+        self.MMI1x2wg_sep = MMI1x2width/3.0 if MMI1x2wg_sep==None else MMI1x2wg_sep
+
+        self.MMI2x2length = MMI2x2length
+        self.MMI2x2width = MMI2x2width
+        self.MMI2x2taper_width = wgt.wg_width if MMI2x2taper_width==None else MMI2x2taper_width
+        self.MMI2x2taper_length = 20 if MMI2x2taper_length==None else MMI2x2taper_length
+        self.MMI2x2wg_sep = MMI2x2width/3.0 if MMI2x2wg_sep==None else MMI2x2wg_sep
+
+        self.mmi1x2length = self.MMI1x2length + 2*self.MMI1x2taper_length
+        self.mmi2x2length = self.MMI2x2length + 2*self.MMI2x2taper_length
+
+        self.heater = heater
+        if heater:
+            self.heater_length = heater_length
+            self.mt = mt
+        else:
+            self.heater_length = 0
+
+        self.port = port
+        self.direction = direction
+
+        self.build_cell()
+        self.build_ports()
+
+    def build_cell(self):
+        # Sequentially build all the geometric shapes using gdspy path functions
+        # then add it to the Cell
+
+        mmi1 = MMI1x2(self.wgt, self.MMI1x2length, self.MMI1x2width, self.MMI1x2taper_width, self.MMI1x2taper_length, self.MMI1x2wg_sep,
+                      port=(0,0), direction='EAST')
+        mmi2 = MMI2x2(self.wgt, self.MMI2x2length, self.MMI2x2width, self.MMI2x2taper_width, self.MMI2x2taper_length, self.MMI2x2wg_sep,
+                      port=(self.mmi2x2length+self.mmi1x2length+4*self.wgt.bend_radius, -self.MMI2x2wg_sep/2.0), direction='WEST')
+
+        (x0, y0) = mmi1.portlist["output_top"]["port"]
+        trace1 = [(x0, y0),
+                  (x0+self.wgt.bend_radius, y0),
+                  (x0+self.wgt.bend_radius, y0+2*self.wgt.bend_radius + self.arm1/2.0 + self.heater_length/2.0),
+                  (x0+3*self.wgt.bend_radius, y0+2*self.wgt.bend_radius + self.arm1/2.0 + self.heater_length/2.0),
+                  (x0+3*self.wgt.bend_radius, y0),
+                  (x0+4*self.wgt.bend_radius, y0)]
+        wg_top = Waveguide(trace1, self.wgt)
+
+        (x1, y1) = mmi1.portlist["output_bot"]["port"]
+        trace2 = [(x1, y1),
+                  (x1+self.wgt.bend_radius, y1),
+                  (x1+self.wgt.bend_radius, y1-2*self.wgt.bend_radius - self.arm2/2.0 - self.heater_length/2.0),
+                  (x1+3*self.wgt.bend_radius, y1-2*self.wgt.bend_radius - self.arm2/2.0 - self.heater_length/2.0),
+                  (x1+3*self.wgt.bend_radius, y1),
+                  (x1+4*self.wgt.bend_radius, y1)]
+        wg_bot = Waveguide(trace2, self.wgt)
+
+        if self.heater:
+            heater_trace1 = [(x0+self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius),
+                             (x0+self.wgt.bend_radius, y0+2*self.wgt.bend_radius + self.arm1/2.0 + self.heater_length/2.0),
+                             (x0+3*self.wgt.bend_radius, y0+2*self.wgt.bend_radius + self.arm1/2.0 + self.heater_length/2.0),
+                             (x0+3*self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius)]
+            heater_top = MetalRoute(heater_trace1, self.mt)
+            heater_trace2 = [(x0+self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius),
+                             (x0+self.wgt.bend_radius, y1-2*self.wgt.bend_radius - self.arm2/2.0 - self.heater_length/2.0),
+                             (x0+3*self.wgt.bend_radius, y1-2*self.wgt.bend_radius - self.arm2/2.0 - self.heater_length/2.0),
+                             (x0+3*self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius)]
+            heater_bot = MetalRoute(heater_trace2, self.mt)
+
+        if self.direction=='EAST':
+            angle=0
+            self.port_output_top = (self.port[0]+self.mmi2x2length+self.mmi1x2length+4*self.wgt.bend_radius, self.port[1]+self.MMI2x2wg_sep/2.0)
+            self.port_output_bot = (self.port[0]+self.mmi2x2length+self.mmi1x2length+4*self.wgt.bend_radius, self.port[1]-self.MMI2x2wg_sep/2.0)
+            self.htr_top_in_dir ='WEST'
+            self.htr_top_out_dir = 'EAST'
+            self.htr_bot_in_dir = 'WEST'
+            self.htr_bot_out_dir = 'EAST'
+        elif self.direction=='NORTH':
+            angle=90
+            self.port_output_top = (self.port[0]-self.MMI2x2wg_sep/2.0, self.port[1]+self.mmi2x2length+self.mmi1x2length+4*self.wgt.bend_radius)
+            self.port_output_bot = (self.port[0]+self.MMI2x2wg_sep/2.0, self.port[1]+self.mmi2x2length+self.mmi1x2length+4*self.wgt.bend_radius)
+            self.htr_top_in_dir ='SOUTH'
+            self.htr_top_out_dir = 'NORTH'
+            self.htr_bot_in_dir = 'SOUTH'
+            self.htr_bot_out_dir = 'NORTH'
+        elif self.direction=='WEST':
+            angle=180
+            self.port_output_top = (self.port[0]-self.mmi2x2length+self.mmi1x2length-4*self.wgt.bend_radius, self.port[1]-self.MMI2x2wg_sep/2.0)
+            self.port_output_bot = (self.port[0]-self.mmi2x2length+self.mmi1x2length-4*self.wgt.bend_radius, self.port[1]+self.MMI2x2wg_sep/2.0)
+            self.htr_top_in_dir ='EAST'
+            self.htr_top_out_dir = 'WEST'
+            self.htr_bot_in_dir = 'EAST'
+            self.htr_bot_out_dir = 'WEST'
+        elif self.direction=='SOUTH':
+            angle=-90
+            self.port_output_top = (self.port[0]+self.MMI2x2wg_sep/2.0, self.port[1]-self.mmi2x2length+self.mmi1x2length-4*self.wgt.bend_radius)
+            self.port_output_bot = (self.port[0]-self.MMI2x2wg_sep/2.0, self.port[1]-self.mmi2x2length+self.mmi1x2length-4*self.wgt.bend_radius)
+            self.htr_top_in_dir ='NORTH'
+            self.htr_top_out_dir = 'SOUTH'
+            self.htr_bot_in_dir = 'NORTH'
+            self.htr_bot_out_dir = 'SOUTH'
+
+        htr_top_in = (x0+self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
+        htr_top_out = (x0+3*self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
+        htr_bot_in = (x0+self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
+        htr_bot_out = (x0+3*self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
+        R = np.array([[np.cos(angle*np.pi/180.0), -np.sin(angle*np.pi/180.0)],
+                     [np.sin(angle*np.pi/180.0), np.cos(angle*np.pi/180.0)]])
+        hti = np.dot(R, htr_top_in)
+        hto = np.dot(R, htr_top_out)
+        hbi = np.dot(R, htr_bot_in)
+        hbo = np.dot(R, htr_bot_out)
+        self.htr_top_in = (hti[0]+self.port[0], hti[1]+self.port[1])
+        self.htr_top_out = (hto[0]+self.port[0], hto[1]+self.port[1])
+        self.htr_bot_in = (hbi[0]+self.port[0], hbi[1]+self.port[1])
+        self.htr_bot_out = (hbo[0]+self.port[0], hbo[1]+self.port[1])
+
+        """ Add all the components """
+        components = [mmi1, mmi2, wg_top, wg_bot, heater_top, heater_bot]
+        for c in components:
+            self.add(gdspy.CellReference(c, origin=self.port, rotation=angle))
+
+    def build_ports(self):
+        # Portlist format:
+        #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
+
+        self.portlist["input"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
+        self.portlist["output_top"] = {'port':self.port_output_top, 'direction':self.direction}
+        self.portlist["output_bot"] = {'port':self.port_output_bot, 'direction':self.direction}
+        if self.heater:
+            self.portlist["heater_top_in"] = {'port': self.htr_top_in, 'direction':self.htr_top_in_dir}
+            self.portlist["heater_top_out"] = {'port': self.htr_top_out, 'direction':self.htr_top_out_dir}
+            self.portlist["heater_bot_in"] = {'port': self.htr_bot_in, 'direction':self.htr_bot_in_dir}
+            self.portlist["heater_bot_out"] = {'port': self.htr_bot_out, 'direction':self.htr_bot_out_dir}
+
 if __name__ == "__main__":
     from . import *
     top = gdspy.Cell("top")
@@ -183,10 +367,20 @@ if __name__ == "__main__":
 
     wg_in = Waveguide([(0,0), (300,0)], wgt)
     tk.add(top, wg_in)
-    mzi = MachZehnder(wgt, MMIlength=50, MMIwidth=10, MMItaper_width=2.0, MMIwg_sep=3, arm1=0, arm2=100, heater=True, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
+    # mzi = MachZehnder(wgt, MMIlength=50, MMIwidth=10, MMItaper_width=2.0, MMIwg_sep=3, arm1=0, arm2=100, heater=True, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
+    mzi = MachZehnderSwitch(wgt, MMI1x2length=50, MMI1x2width=10, MMI1x2taper_width=2.0, MMI1x2wg_sep=3, MMI2x2length=100, MMI2x2width=10, MMI2x2taper_width=2.0, MMI2x2wg_sep=3,
+                      arm1=0, arm2=100, heater=True, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
     tk.add(top, mzi)
-    wg_out = Waveguide([mzi.portlist["output"]["port"], (mzi.portlist["output"]["port"][0]+300, mzi.portlist["output"]["port"][1])], wgt)
-    tk.add(top, wg_out)
+    wg_out_top = Waveguide([mzi.portlist["output_top"]["port"],
+                       (mzi.portlist["output_top"]["port"][0]+wgt.bend_radius, mzi.portlist["output_top"]["port"][1]),
+                       (mzi.portlist["output_top"]["port"][0]+wgt.bend_radius, mzi.portlist["output_top"]["port"][1]+2*wgt.bend_radius),
+                       (mzi.portlist["output_top"]["port"][0]+wgt.bend_radius+300, mzi.portlist["output_top"]["port"][1]+2*wgt.bend_radius)], wgt)
+    tk.add(top, wg_out_top)
+    wg_out_bot = Waveguide([mzi.portlist["output_bot"]["port"],
+                       (mzi.portlist["output_bot"]["port"][0]+wgt.bend_radius, mzi.portlist["output_bot"]["port"][1]),
+                       (mzi.portlist["output_bot"]["port"][0]+wgt.bend_radius, mzi.portlist["output_bot"]["port"][1]-2*wgt.bend_radius),
+                       (mzi.portlist["output_bot"]["port"][0]+wgt.bend_radius+300, mzi.portlist["output_bot"]["port"][1]-2*wgt.bend_radius)], wgt)
+    tk.add(top, wg_out_bot)
 
     mt1=MetalRoute([mzi.portlist["heater_top_in"]["port"],
                     (mzi.portlist["heater_top_in"]["port"][0]-150, mzi.portlist["heater_top_in"]["port"][1]),
