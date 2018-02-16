@@ -5,6 +5,7 @@ import gdspy
 import uuid
 import picwriter.toolkit as tk
 from picwriter.components.mmi1x2 import MMI1x2
+from picwriter.components.mmi2x2 import MMI2x2
 from picwriter.components.waveguide import Waveguide
 from picwriter.components.electrical import MetalRoute
 
@@ -218,7 +219,7 @@ class MachZehnderSwitch(gdspy.Cell):
     def __init__(self, wgt, MMI1x2length, MMI1x2width, MMI2x2length, MMI2x2width, MMI1x2taper_width=None,
                  MMI1x2taper_length=None, MMI1x2wg_sep=None, MMI2x2taper_width=None, MMI2x2taper_length=None, MMI2x2wg_sep=None,
                  arm1=0, arm2=0, heater=False, heater_length=400, mt=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "MZI--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, "MZISwitch--"+str(uuid.uuid4()))
 
         self.portlist = {}
 
