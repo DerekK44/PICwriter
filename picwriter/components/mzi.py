@@ -39,7 +39,7 @@ class MachZehnder(gdspy.Cell):
            * portlist['heater_bot_in'] = {'port', (x5, y5), 'direction': 'dir5'}
            * portlist['heater_bot_out'] = {'port', (x6, y6), 'direction': 'dir6'}
 
-        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+        Where in the above (x1,y1) is the input port, (x2, y2) is the output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
         Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
 
     """
@@ -204,13 +204,14 @@ class MachZehnderSwitch(gdspy.Cell):
 
         Portlist format:
            * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
-           * portlist['heater_top_in'] = {'port', (x3, y3), 'direction': 'dir3'}
-           * portlist['heater_top_out'] = {'port', (x4, y4), 'direction': 'dir4'}
-           * portlist['heater_bot_in'] = {'port', (x5, y5), 'direction': 'dir5'}
-           * portlist['heater_bot_out'] = {'port', (x6, y6), 'direction': 'dir6'}
+           * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
+           * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
+           * portlist['heater_top_in'] = {'port', (x4, y4), 'direction': 'dir4'}
+           * portlist['heater_top_out'] = {'port', (x5, y5), 'direction': 'dir5'}
+           * portlist['heater_bot_in'] = {'port', (x6, y6), 'direction': 'dir6'}
+           * portlist['heater_bot_out'] = {'port', (x7, y7), 'direction': 'dir7'}
 
-        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
         Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
 
     """
