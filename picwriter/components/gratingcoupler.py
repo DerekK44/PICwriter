@@ -24,7 +24,7 @@ class GratingCouplerStraight(gdspy.Cell):
            **portlist** (dict): Dictionary with the relevant port information
 
         Portlist format:
-           portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+           portlist['output'] = {'port': (x1,y1), 'direction': 'dir1'}
 
         Where in the above (x1,y1) is the same as the 'port' input, and 'dir1' is of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
 
@@ -115,7 +115,7 @@ class GratingCouplerFocusing(gdspy.Cell):
            **portlist** (dict): Dictionary with the relevant port information
 
         Portlist format:
-           portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+           portlist['output'] = {'port': (x1,y1), 'direction': 'dir1'}
 
         Where in the above (x1,y1) is the same as the 'port' input, and 'dir1' is of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
 
