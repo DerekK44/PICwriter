@@ -95,7 +95,7 @@ class DBR(gdspy.Cell):
         startx = self.trace[0][0] + self.taper_length + self.length/2.0 -(num_blocks-1)*self.period/2.0 - blockx/2.0
         y0 = self.trace[0][1]
         block_list = []
-        for i in xrange(int(num_blocks)):
+        for i in range(int(num_blocks)):
             x = startx + i*self.period
             block_list.append(gdspy.Rectangle((x, y0-self.wgt.wg_width/2.0), (x+blockx, y0+self.wgt.wg_width/2.0), **self.wg_spec))
 
