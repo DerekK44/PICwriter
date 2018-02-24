@@ -93,7 +93,7 @@ class Waveguide(gdspy.Cell):
                 print("Index = "+str(i)+" of tracelist.  dx="+str(dx)+" and dy="+str(dy))
                 raise ValueError("Warning!  All waypoints *must* be greater than "
                                  "two waveguide bend radii apart.")
-            if ((i == 0) or (i==len(self.trace)-2)) and (dx < self.wgt.bend_radius and dy < self.wgt.bend_radius):
+            if ((i == 0) or (i==len(self.trace)-2)) and ((dx+1E-8) < self.wgt.bend_radius and (dy+1E-8) < self.wgt.bend_radius):
                 raise ValueError("Warning! Start and end waypoints *must be greater "
                                  "than one waveguide bend radius apart.")
             if dx>=1e-6 and dy>=1e-6:
