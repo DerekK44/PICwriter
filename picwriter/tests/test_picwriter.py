@@ -134,3 +134,23 @@ class TestPICwriter(TestCase):
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==3)
 		self.assertTrue(abs(top.area()-179518.918964) <= 1e-6)
+	def test_dbr_creation(self):
+		top = gdspy.Cell("t-dbr")
+		wgt = WaveguideTemplate(bend_radius=50, resist='+')
+
+		wg1=Waveguide([(0,0), (100,0)], wgt)
+		tk.add(top, wg1)
+
+		dbr1 = DBR(wgt, 10.0, 0.85, 0.5, 0.4, **wg1.portlist["output"])
+		tk.add(top, dbr1)
+
+		(x1, y1) = dbr1.portlist["output"]["port"]
+		wg2=Waveguide([(x1,y1), (x1+100,y1), (x1+100,y1+100)], wgt)
+		tk.add(top, wg2)
+
+		dbr2 = DBR(wgt, 10.0, 0.85, 0.5, 0.6, **wg2.portlist["output"])
+		tk.add(top, dbr2)
+		# print("DBR area = "+str(top.area()))
+		print(len(top.elements))
+		self.assertTrue(len(top.elements)==4)
+		self.assertTrue(abs(top.area()-9095.25471349) <= 1e-6)

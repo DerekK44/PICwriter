@@ -12,6 +12,7 @@ Below is the set of supported components that come standard in the picwriter lib
    spirals.rst
    mmis.rst
    resonators.rst
+   dbr.rst
    mzi.rst
    markers.rst
    metalroutes.rst
