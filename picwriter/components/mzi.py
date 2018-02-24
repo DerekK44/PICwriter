@@ -84,7 +84,7 @@ class MachZehnder(gdspy.Cell):
         mmi2 = MMI1x2(self.wgt, self.MMIlength, self.MMIwidth, self.MMItaper_width, self.MMItaper_length, self.MMIwg_sep,
                       port=(0+2*self.mmilength+4*self.wgt.bend_radius, 0), direction='WEST')
 
-        y_end_top, y_end_bot = mmi2.portlist["input_top"]["port"][1], mmi2.portlist["input_bot"]["port"][1]
+        y_end_top, y_end_bot = mmi2.portlist["output_top"]["port"][1], mmi2.portlist["output_bot"]["port"][1]
 
         (x0, y0) = mmi1.portlist["output_top"]["port"]
         trace1 = [(x0, y0),
@@ -266,7 +266,7 @@ class MachZehnderSwitch(gdspy.Cell):
         mmi2 = MMI2x2(self.wgt, self.MMI2x2length, self.MMI2x2width, self.MMI2x2taper_width, self.MMI2x2taper_length, self.MMI2x2wg_sep,
                       port=(self.mmi2x2length+self.mmi1x2length+4*self.wgt.bend_radius, -self.MMI2x2wg_sep/2.0), direction='WEST')
 
-        y_end_top, y_end_bot = mmi2.portlist["input_top"]["port"][1], mmi2.portlist["input_bot"]["port"][1]
+        y_end_top, y_end_bot = mmi2.portlist["output_top"]["port"][1], mmi2.portlist["output_bot"]["port"][1]
 
         (x0, y0) = mmi1.portlist["output_top"]["port"]
         trace1 = [(x0, y0),
