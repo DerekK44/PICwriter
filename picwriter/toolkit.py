@@ -56,6 +56,25 @@ def build_mask(cell, wgt, final_layer=None, final_datatype=None):
     elif wgt.resist=='-':
         cell.add(gdspy.fast_boolean(pWG, pCLAD, 'and', precision=0.001, max_points=199, layer=fl, datatype=fd))
 
+def get_trace_length(trace, wgt):
+    """ Returns the total length of a curved waveguide trace.
+
+    Args:
+       * **trace** (list): tracelist of (x,y) points all specifying 90 degree angles.
+       * **wgt** (WaveguideTemplate): template for the waveguide, the bend_radius of which is used to compute the length of the curved section.
+
+    Returns:
+       float corresponding to the length of the waveguide trace
+
+    """
+    length = 0.0
+    dbr = 2*wgt.bend_radius - 0.5*np.pi*wgt.bend_radius
+    for i in range(len(trace)-1):
+        pt2, pt1 = trace[i+1], trace[i]
+        length += np.sqrt((pt2[0]-pt1[0])**2 + (pt2[1]-pt1[1])**2)
+    length = length - (dbr*(len(trace)-1))
+    return length
+
 def get_keys(cell):
     """ Returns a list of the keys available in a portlist, such as 'input', 'output', 'top_output', etc.  Only works for picwriter components.
 
