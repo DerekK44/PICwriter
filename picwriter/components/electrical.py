@@ -10,7 +10,7 @@ class MetalTemplate:
     """ Standard template for electrical wires that contains some standard information about the fabrication process and metal wire.
 
         Keyword Args:
-           * **bend_radius** (float): Radius of curvature for waveguide bends (circular).  Defaults to zero.
+           * **bend_radius** (float): Radius of curvature for bends in the metal route.  Defaults to zero.
            * **width** (float): Width of the metal route as shown on the mask.  Defaults to 20.
            * **clad_width** (float): Width of the cladding (region next to route, mainly used for positive-type photoresists + etching, or negative-type and liftoff).  Defaults to 20.
            * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used.  Defaults to `'+'`.
@@ -28,10 +28,10 @@ class MetalTemplate:
         self.clad_width = clad_width
         if resist != '+' and resist != '-':
             raise ValueError("Warning, invalid input for type resist in "
-                             "WaveguideTemplate")
+                             "MetalTemplate")
         if fab=='ETCH':
             self.resist = resist #default state assumes 'etching'
-        else: #reverse waveguide type if liftoff or something else
+        else: #reverse resist type if liftoff or something else
             self.resist = '+' if resist=='-' else '-'
 
         self.metal_layer = metal_layer
@@ -43,7 +43,7 @@ class MetalRoute(gdspy.Cell):
     """ Standard MetalRoute Cell class (subclass of gdspy.Cell).
 
         Args:
-           * **trace** (list):  List of coordinates used to generate the waveguide (such as '[(x1,y1), (x2,y2), ...]').  For now, all trace points must specify 90 degree turns.
+           * **trace** (list):  List of coordinates used to generate the route (such as '[(x1,y1), (x2,y2), ...]').  For now, all trace points must specify 90 degree turns.
            * **mt** (MetalTemplate):  MetalTemplate object
 
         Members:
