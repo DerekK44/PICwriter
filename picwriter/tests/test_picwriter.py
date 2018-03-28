@@ -154,3 +154,29 @@ class TestPICwriter(TestCase):
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==4)
 		self.assertTrue(abs(top.area()-9095.25471349) <= 1e-6)
+
+	def test_dc_creation(self):
+		top = gdspy.Cell("t-dc")
+		wgt = WaveguideTemplate(bend_radius=100, resist='+')
+
+		wg1=Waveguide([(0,0), (100,0)], wgt)
+		tk.add(top, wg1)
+
+		import numpy as np
+		dc1 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **wg1.portlist["output"])
+		dc2 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=-1, **dc1.portlist["output_top"])
+		dc3 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc1.portlist["output_bot"])
+		dc4 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc2.portlist["output_bot"])
+		dc5 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=-1, **dc2.portlist["output_top"])
+		dc6 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc3.portlist["output_bot"])
+		tk.add(top, dc1)
+		tk.add(top, dc2)
+		tk.add(top, dc3)
+		tk.add(top, dc4)
+		tk.add(top, dc5)
+		tk.add(top, dc6)
+
+		# print("DC area = "+str(top.area()))
+		print(len(top.elements))
+		self.assertTrue(len(top.elements)==7)
+		self.assertTrue(abs(top.area()-65615.8506033) <= 1e-6)

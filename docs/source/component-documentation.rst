@@ -10,6 +10,7 @@ Below is the set of supported components that come standard in the picwriter lib
    tapers.rst
    gratingcouplers.rst
    spirals.rst
+   dc.rst
    mmis.rst
    resonators.rst
    dbr.rst
