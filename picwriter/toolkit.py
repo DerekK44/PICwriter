@@ -7,6 +7,7 @@ and work with gdspy subclasses defined in **components** miodule
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import numpy as np
+import math
 import gdspy
 
 TOL=1e-6
@@ -121,6 +122,29 @@ def get_angle(pt1, pt2):
                          "integer multiples of 90deg from each other")
     return angle
 
+def get_exact_angle(pt1, pt2):
+    """
+    Given two cardinal points, returns the corresponding angle
+    in *radians*.
+
+    Args:
+       * **pt1** (tuple):  Point 1
+       * **pt2** (tuple):  Point 2
+
+    Returns:
+       float  Angle (in radians)
+
+    Example::
+
+        import picwriter.toolkit as tk
+        print(tk.get_angle((0, 0), (100, 100)))
+
+    The above prints 0.785398163
+
+    """
+    dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
+    return math.atan2(dy,dx)
+
 def dist(pt1, pt2):
     """
     Given two cardinal points, returns the distance between the two.
@@ -203,6 +227,8 @@ def flip_direction(direction):
     if direction=="SOUTH": return "NORTH"
     if direction=="WEST": return "EAST"
     if direction=="EAST": return "WEST"
+    elif isinstance(direction, float):
+        return (direction + np.pi)%(2*np.pi)
 
 def translate_point(pt, length, direction):
     """  Returns the point (tuple) corresponding to `pt` translated by distance `length` in direction `direction` where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
@@ -224,3 +250,6 @@ def translate_point(pt, length, direction):
         return (pt[0]-length, pt[1])
     elif direction=="EAST":
         return (pt[0]+length, pt[1])
+    elif isinstance(direction, float):
+        # direction is a float (in radians)
+        return (pt[0]+length*np.cos(direction), pt[1]+length*np.sin(direction))

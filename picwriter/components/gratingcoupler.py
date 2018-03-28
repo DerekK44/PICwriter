@@ -13,7 +13,7 @@ class GratingCouplerStraight(gdspy.Cell):
 
         Keyword Args:
            * **port** (tuple): Cartesian coordinate of the input port
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
            * **width** (float): Width of the grating region
            * **length** (float): Length of the grating region
            * **taper_length** (float): Length of the taper before the grating coupler
@@ -26,7 +26,8 @@ class GratingCouplerStraight(gdspy.Cell):
         Portlist format:
            portlist['output'] = {'port': (x1,y1), 'direction': 'dir1'}
 
-        Where in the above (x1,y1) is the same as the 'port' input, and 'dir1' is of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+        Where in the above (x1,y1) is the same as the 'port' input, and 'dir1' is of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+        'Direction' points *towards* the waveguide that will connect to it.
 
     """
     def __init__(self, wgt, port=(0,0), direction='EAST', width=20, length=50,
@@ -76,14 +77,18 @@ class GratingCouplerStraight(gdspy.Cell):
             teeth.rotate(np.pi/2.0, self.port)
             path.rotate(np.pi/2.0, self.port)
             clad_path.rotate(np.pi/2.0, self.port)
-        if self.direction=="SOUTH":
+        elif self.direction=="SOUTH":
             teeth.rotate(np.pi, self.port)
             path.rotate(np.pi, self.port)
             clad_path.rotate(np.pi, self.port)
-        if self.direction=="EAST":
+        elif self.direction=="EAST":
             teeth.rotate(-np.pi/2.0, self.port)
             path.rotate(-np.pi/2.0, self.port)
             clad_path.rotate(-np.pi/2.0, self.port)
+        elif isinstance(self.direction, float):
+            teeth.rotate(self.direction - np.pi/2.0, self.port)
+            path.rotate(self.direction -np.pi/2.0, self.port)
+            clad_path.rotate(self.direction-np.pi/2.0, self.port)
         self.add(teeth)
         self.add(path)
         self.add(clad_path)
@@ -101,7 +106,7 @@ class GratingCouplerFocusing(gdspy.Cell):
 
         Keyword Args:
            * **port** (tuple): Cartesian coordinate of the input port
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
            * **focus_distance** (float): Distance over which the light is focused to the waveguide port
            * **width** (float): Width of the grating region
            * **length** (float): Length of the grating region
@@ -117,7 +122,8 @@ class GratingCouplerFocusing(gdspy.Cell):
         Portlist format:
            portlist['output'] = {'port': (x1,y1), 'direction': 'dir1'}
 
-        Where in the above (x1,y1) is the same as the 'port' input, and 'dir1' is of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+        Where in the above (x1,y1) is the same as the 'port' input, and 'dir1' is of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+        'Direction' points *towards* the waveguide that will connect to it.
 
     """
     def __init__(self, wgt, port=(0,0), direction='EAST', focus_distance=None,
@@ -198,6 +204,10 @@ class GratingCouplerFocusing(gdspy.Cell):
             teeth.rotate(-np.pi/2.0, self.port)
             path.rotate(-np.pi/2.0, self.port)
             clad_path.rotate(-np.pi/2.0, self.port)
+        elif isinstance(self.direction, float):
+            teeth.rotate(self.direction - np.pi/2.0, self.port)
+            path.rotate(self.direction -np.pi/2.0, self.port)
+            clad_path.rotate(self.direction-np.pi/2.0, self.port)
         self.add(teeth)
         self.add(path)
         self.add(clad_path)

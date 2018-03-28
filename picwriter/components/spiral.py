@@ -20,7 +20,7 @@ class Spiral(gdspy.Cell):
            * **spacing** (float): distance between parallel waveguides
            * **parity** (int): If 1 spiral on right side, if -1 spiral on left side (mirror flip)
            * **port** (tuple): Cartesian coordinate of the input port
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
         Members:
            * **portlist** (dict): Dictionary with the relevant port information
@@ -29,7 +29,8 @@ class Spiral(gdspy.Cell):
            * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
            * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) are the first elements of the spiral trace, (x2, y2) are the last elements of the spiral trace, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+        Where in the above (x1,y1) are the first elements of the spiral trace, (x2, y2) are the last elements of the spiral trace, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+        'Direction' points *towards* the waveguide that will connect to it.
 
     """
     def __init__(self, wgt, width, height, length, spacing=None, parity=1, port=(0,0), direction="NORTH"):
@@ -69,7 +70,7 @@ class Spiral(gdspy.Cell):
         for n in range(50): # Do not exceed 50 iterations
             n = n+1 #start with 1
             ml = self.spiral_length(self.height, corner_dl, n)
-            print("spiral length n="+str(n)+" is "+str(ml))
+            print("For spiral with n="+str(n)+" loops, minimum length in constrained area is "+str(ml)+"um long")
             if n==1:
                 lengthmin = ml
             if self.length <= ml:
@@ -101,7 +102,7 @@ class Spiral(gdspy.Cell):
         spacing = self.spacing
         corner_dl = 2*bend_radius- 0.25*(2*np.pi*bend_radius)
         n, lengthmin = self.get_number_of_spirals(corner_dl)
-        print("length="+str(length)+" lengthmin="+str(lengthmin))
+        print("Desired length="+str(length)+" obtained with n="+str(n)+" loops")
 
         if length < lengthmin:
             raise ValueError("Spiral length is too small for desired spiral width/height.  Please specify either (1) smaller height/width or (2) larger spiral length inputs.")
@@ -175,20 +176,22 @@ class Spiral(gdspy.Cell):
 
         wg = Waveguide(waypoints, self.wgt)
 
+        dist = h+self.bend_radius
         if self.direction=="WEST":
             wgr = gdspy.CellReference(wg, rotation=90)
-            self.portlist_output = (self.port[0]-h-self.bend_radius, self.port[1])
+            self.portlist_output = (self.port[0]-dist, self.port[1])
         elif self.direction=="SOUTH":
             wgr = gdspy.CellReference(wg, rotation=180)
-            self.portlist_output = (self.port[0], self.port[1]-h-self.bend_radius)
+            self.portlist_output = (self.port[0], self.port[1]-dist)
         elif self.direction=="EAST":
             wgr = gdspy.CellReference(wg, rotation=-90)
-            self.portlist_output = (self.port[0]+h+self.bend_radius, self.port[1])
+            self.portlist_output = (self.port[0]+dist, self.port[1])
         elif self.direction=="NORTH":
             wgr = gdspy.CellReference(wg)
-            self.portlist_output = (self.port[0], self.port[1]+h+self.bend_radius)
-        else:
-            raise ValueError("Warning! Cardinal direction not provided for 'direction'")
+            self.portlist_output = (self.port[0], self.port[1]+dist)
+        elif isinstance(self.direction, float):
+            wgr = gdspy.CellReference(wg, rotation=(self.direction*180/np.pi)-90.0)
+            self.portlist_output = (self.port[0]+dist*np.cos(self.direction), self.port[1]+dist*np.sin(self.direction))
 
         wgr.translate(self.port[0], self.port[1])
         self.add(wgr)
@@ -207,7 +210,7 @@ if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, resist='-')
 
-    sp1 = Spiral(wgt, 500.0, 1000.0, 10000.0, port=(100,200), direction="EAST")
+    sp1 = Spiral(wgt, 500.0, 1000.0, 10000.0, port=(100,200), direction=np.pi/4.0)
     tk.add(top, sp1)
 
     gdspy.LayoutViewer()

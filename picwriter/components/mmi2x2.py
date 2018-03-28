@@ -18,7 +18,7 @@ class MMI2x2(gdspy.Cell):
            * **taper_length** (float): Length of the taper leading up to the MMI
            * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to width/3.0)
            * **port** (tuple): Cartesian coordinate of the **top** input port
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
         Members:
            * **portlist** (dict): Dictionary with the relevant port information
@@ -29,7 +29,8 @@ class MMI2x2(gdspy.Cell):
            * portlist['output_top'] = {'port': (x3, y3), 'direction': 'dir3'}
            * portlist['output_bot'] = {'port': (x4, y4), 'direction': 'dir4'}
 
-        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and 'dir1', 'dir2', 'dir3' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and 'dir1', 'dir2', 'dir3' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+        'Direction' points *towards* the waveguide that will connect to it.
 
     """
     def __init__(self, wgt, length, width, taper_width=None, taper_length=None, wg_sep=None, port=(0,0), direction='EAST'):
@@ -114,6 +115,18 @@ class MMI2x2(gdspy.Cell):
             self.output_port_top = (self.port[0], self.port[1]-2*self.taper_length-self.length)
             self.output_port_bot = (self.port[0]-self.wg_sep, self.port[1]-2*self.taper_length-self.length)
             angle=-np.pi/2.0
+        elif isinstance(self.direction, float):
+            angle=self.direction
+            totlength = 2*self.taper_length+self.length
+            x0, y0 = 0, -self.wg_sep
+            x0r, y0r = np.cos(angle)*x0 - np.sin(angle)*y0, np.sin(angle)*x0 + np.cos(angle)*y0
+            x1, y1 = totlength, 0.0
+            x1r, y1r = np.cos(angle)*x1 - np.sin(angle)*y1, np.sin(angle)*x1 + np.cos(angle)*y1
+            x2, y2 = totlength, -self.wg_sep
+            x2r, y2r = np.cos(angle)*x2 - np.sin(angle)*y2, np.sin(angle)*x2 + np.cos(angle)*y2
+            self.input_port_bot = (self.port[0]+x0r, self.port[1]+y0r)
+            self.output_port_top = (self.port[0]+x1r, self.port[1]+y1r)
+            self.output_port_bot = (self.port[0]+x2r, self.port[1]+y2r)
 
         path1.rotate(angle, self.port)
         path2.rotate(angle, self.port)
@@ -146,8 +159,9 @@ if __name__ == "__main__":
     # tk.add(top, wg1)
 
     # mmi = MMI2x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3.0, **wg1.portlist["output"])
-    mmi = MMI2x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3.0, port=(0,0), direction='EAST')
+    mmi = MMI2x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3.0, port=(0,0), direction=np.pi/4.0)
     tk.add(top, mmi)
+    print(mmi.portlist)
 
-    # gdspy.LayoutViewer()
-    gdspy.write_gds('mmi2x2.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.LayoutViewer()
+    # gdspy.write_gds('mmi2x2.gds', unit=1.0e-6, precision=1.0e-9)

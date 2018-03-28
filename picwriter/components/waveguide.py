@@ -43,7 +43,7 @@ class Waveguide(gdspy.Cell):
     """ Standard Waveguide Cell class (subclass of gdspy.Cell).
 
         Args:
-           * **trace** (list):  List of coordinates used to generate the waveguide (such as '[(x1,y1), (x2,y2), ...]').  For now, all trace points must specify 90 degree turns.
+           * **trace** (list):  List of coordinates used to generate the waveguide (such as '[(x1,y1), (x2,y2), ...]').
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
 
         Members:
@@ -53,7 +53,7 @@ class Waveguide(gdspy.Cell):
            * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
            * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) are the first elements of 'trace', (x2, y2) are the last elements of 'trace', and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+        Where in the above (x1,y1) are the first elements of 'trace', (x2, y2) are the last elements of 'trace', and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*. 'Direction' points *towards* the component that the waveguide will connect to.
 
     """
     def __init__(self, trace, wgt):
@@ -80,27 +80,15 @@ class Waveguide(gdspy.Cell):
             trace.append((round(t[0], 6), round(t[1], 5)))
         self.trace = trace
 
-        """ Make sure that each waypoint is spaced > 2*bend_radius apart
-        as a conservative estimate ¯\_(ツ)_/¯
-        Make sure all waypoints specify 90degree angles.  This might be
-        updated in the future to allow for 45deg, or arbitrary bends
+        """ Type-check trace ¯\_(ツ)_/¯
         """
-        prev_dx, prev_dy = 1,1 #initialize to safe value
+        prev_dx, prev_dy = 1,1 #initialize to arbitrary value
         for i in range(len(self.trace)-1):
             dx = abs(self.trace[i+1][0]-self.trace[i][0])+1E-10
             dy = abs(self.trace[i+1][1]-self.trace[i][1])+1E-10
-            if (dx < 2*self.wgt.bend_radius and dy < 2*self.wgt.bend_radius) and (i != 0) and (i!=len(self.trace)-2):
-                raise ValueError("Warning!  All waypoints *must* be greater than "
-                                 "two waveguide bend radii apart.")
-            if ((i == 0) or (i==len(self.trace)-2)) and (dx < self.wgt.bend_radius and dy < self.wgt.bend_radius):
-                raise ValueError("Warning! Start and end waypoints *must be greater "
-                                 "than one waveguide bend radius apart.")
-            if dx>=1e-6 and dy>=1e-6:
-                raise ValueError("Warning! All waypoints *must* specify turns "
-                                 "that are 90degrees")
             if ((prev_dx <= 1e-6 and dx<=1e-6) or (prev_dy <= 1e-6 and dy<=1e-6)):
                 raise ValueError("Warning! Unnecessary waypoint specified.  All"
-                                 " waypoints must specify a valid 90deg bend")
+                                 " waypoints must specify a valid bend")
             prev_dx, prev_dy = dx, dy
 
     def build_cell(self):
@@ -108,37 +96,44 @@ class Waveguide(gdspy.Cell):
         # for waveguide, then add it to the Cell
         br = self.wgt.bend_radius
 
-        path = gdspy.Path(self.wgt.wg_width, self.trace[0])
-        path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
-
-        prior_direction = tk.get_direction(self.trace[0], self.trace[1])
-        path.segment(tk.dist(self.trace[0], self.trace[1])-br,
-                     direction=tk.get_angle(self.trace[0], self.trace[1]),
-                     **self.wg_spec)
-        path2.segment(tk.dist(self.trace[0], self.trace[1])-br,
-                     direction=tk.get_angle(self.trace[0], self.trace[1]),
-                     **self.clad_spec)
-        for i in range(len(self.trace)-2):
-            direction = tk.get_direction(self.trace[i+1], self.trace[i+2])
-            turn = tk.get_turn(prior_direction, direction)
-            path.turn(br, turn, number_of_points=0.1, **self.wg_spec)
-            path2.turn(br, turn, number_of_points=0.1, **self.clad_spec)
-            if tk.dist(self.trace[i+1], self.trace[i+2])-2*br > 0: #ONLY False for last points if spaced br < distance < 2br
-                path.segment(tk.dist(self.trace[i+1], self.trace[i+2])-2*br, **self.wg_spec)
-                path2.segment(tk.dist(self.trace[i+1], self.trace[i+2])-2*br, **self.clad_spec)
-            prior_direction = direction
-        if tk.dist(self.trace[-2],self.trace[-1]) < 2*br:
-            path.segment(tk.dist(self.trace[-2],self.trace[-1])-br, **self.wg_spec)
-            path2.segment(tk.dist(self.trace[-2],self.trace[-1])-br, **self.clad_spec)
-        else:
-            path.segment(br, **self.wg_spec)
-            path2.segment(br, **self.clad_spec)
-
-        if len(self.trace)==2 and tk.dist(self.trace[1], self.trace[0])<=self.wgt.bend_radius:
+        if len(self.trace)==2:
             path = gdspy.Path(self.wgt.wg_width, self.trace[0])
-            path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_angle(self.trace[0], self.trace[1]), **self.wg_spec)
+            path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.wg_spec)
             path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
-            path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_angle(self.trace[0], self.trace[1]), **self.clad_spec)
+            path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.clad_spec)
+
+        else:
+            path = gdspy.Path(self.wgt.wg_width, self.trace[0])
+            path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
+
+            prev_dl = 0.0
+            for i in range(len(self.trace)-2):
+                start_angle = tk.get_exact_angle(self.trace[i], self.trace[i+1])
+                next_angle = tk.get_exact_angle(self.trace[i+1], self.trace[i+2])
+
+                #dl is the amount of distance that is taken *off* the waveguide from the curved section
+                dl = abs(br*np.tan((next_angle-start_angle)/2.0))
+                if (dl+prev_dl) > tk.dist(self.trace[i], self.trace[i+1]):
+                    raise ValueError("Warning! The waypoints "+str(self.trace[i])+" and "+str(self.trace[i+1])+" are too close to accommodate "
+                                     " the necessary bend-radius of "+str(br))
+
+                path.segment(tk.dist(self.trace[i], self.trace[i+1])-dl-prev_dl,
+                             direction=start_angle, **self.wg_spec)
+                path2.segment(tk.dist(self.trace[i], self.trace[i+1])-dl-prev_dl,
+                             direction=start_angle, **self.clad_spec)
+
+                # The following makes sure the turn-by angle is *always* between -pi and +pi
+                turnby = (next_angle - start_angle)%(2*np.pi)
+                turnby = turnby-2*np.pi if turnby > np.pi else turnby
+
+                path.turn(br, turnby, number_of_points=0.1, **self.wg_spec)
+                path2.turn(br, turnby, number_of_points=0.1, **self.clad_spec)
+                prev_dl = dl
+
+            path.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
+                         direction=next_angle, **self.wg_spec)
+            path2.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
+                         direction=next_angle, **self.clad_spec)
 
         self.add(path)
         self.add(path2)
@@ -147,17 +142,17 @@ class Waveguide(gdspy.Cell):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["input"] = {'port':(self.trace[0][0], self.trace[0][1]),
-                                  'direction': tk.get_direction(self.trace[1], self.trace[0])}
+                                  'direction': tk.get_exact_angle(self.trace[1], self.trace[0])}
         self.portlist["output"] = {'port':(self.trace[-1][0], self.trace[-1][1]),
-                                   'direction':tk.get_direction(self.trace[-2], self.trace[-1])}
+                                   'direction':tk.get_exact_angle(self.trace[-2], self.trace[-1])}
 
 if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, resist='+', fab="ETCH")
 
-    wg1=Waveguide([(0,0), (250,0), (250,100), (500,100)], wgt)
-
+    wg1=Waveguide([(0,0), (150,0), (150,100), (250,100),(350,0), (200,-150)], wgt)
     tk.add(top, wg1)
+    print(wg1.portlist)
 
     gdspy.LayoutViewer()
     # gdspy.write_gds('waveguide.gds', unit=1.0e-6, precision=1.0e-9)

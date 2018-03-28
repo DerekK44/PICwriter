@@ -18,7 +18,7 @@ class Ring(gdspy.Cell):
            * **wrap_angle** (float): Angle in *radians* between 0 and pi (defaults to 0) that determines how much the bus waveguide wraps along the resonator.  0 corresponds to a straight bus waveguide, and pi corresponds to a bus waveguide wrapped around half of the resonator.
            * **parity** (1 or -1): If 1, resonator to left of bus waveguide, if -1 resonator to the right
            * **port** (tuple): Cartesian coordinate of the input port (x1, y1)
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`
+           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
         Members:
            * **portlist** (dict): Dictionary with the relevant port information
@@ -27,7 +27,8 @@ class Ring(gdspy.Cell):
            * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
            * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the component, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+        'Direction' points *towards* the waveguide that will connect to it.
 
     """
     def __init__(self, wgt, radius, coupling_gap, wrap_angle=0, parity=1, port=(0,0), direction='EAST'):
@@ -140,6 +141,9 @@ class Ring(gdspy.Cell):
         elif self.direction=="SOUTH":
             self.port_output = (self.port[0], self.port[1]-bus_length)
             angle=-np.pi/2.0
+        elif isinstance(self.direction, float):
+            angle = self.direction
+            self.port_output = (self.port[0]+bus_length*np.cos(angle), self.port[1]+bus_length*np.sin(angle))
 
         ring.rotate(angle, self.port)
         clad_ring.rotate(angle, self.port)
@@ -186,5 +190,5 @@ if __name__ == "__main__":
     tk.add(top, r2)
     tk.add(top, r3)
 
-    # gdspy.LayoutViewer()
-    gdspy.write_gds('ring.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.LayoutViewer()
+    # gdspy.write_gds('ring.gds', unit=1.0e-6, precision=1.0e-9)

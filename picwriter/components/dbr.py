@@ -19,7 +19,7 @@ class DBR(gdspy.Cell):
         Keyword Args:
            * **taper_length** (float): Length of the taper between the input/output waveguide and the DBR region.  Defaults to 20.0.
            * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the DBR will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.  Defaults to `'EAST'`.
+           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
         Members:
            * **portlist** (dict): Dictionary with the relevant port information
@@ -28,7 +28,8 @@ class DBR(gdspy.Cell):
            * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
            * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the DBR, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the DBR, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+        'Direction' points *towards* the waveguide that will connect to it.
 
     """
     def __init__(self, wgt, length, period, dc, w_phc, taper_length=20.0, port=(0,0), direction='EAST'):
@@ -60,14 +61,14 @@ class DBR(gdspy.Cell):
         for t in self.trace:
             trace.append((round(t[0], 6), round(t[1], 5)))
         self.trace = trace
-        """ Make sure all waypoints specify 90degree angles.  This might be
-        updated in the future to allow for 45deg, or arbitrary bends.  For now,
-        though, rotations are supported via gdspy library
-        """
-        dx = abs(self.trace[1][0]-self.trace[0][0])
-        dy = abs(self.trace[1][1]-self.trace[0][1])
-        if dx>=1e-6 and dy>=1e-6:
-            raise ValueError("Warning! Both waypoints *must* be adjacent horizontally or vertically.")
+        # """ Make sure all waypoints specify 90degree angles.  This might be
+        # updated in the future to allow for 45deg, or arbitrary bends.  For now,
+        # though, rotations are supported via gdspy library
+        # """
+        # dx = abs(self.trace[1][0]-self.trace[0][0])
+        # dy = abs(self.trace[1][1]-self.trace[0][1])
+        # if dx>=1e-6 and dy>=1e-6:
+        #     raise ValueError("Warning! Both waypoints *must* be adjacent horizontally or vertically.")
 
         """ Make sure the photonic crystal waveguide width is smaller than the waveguide width """
         if self.w_phc > self.wgt.wg_width:
@@ -76,7 +77,7 @@ class DBR(gdspy.Cell):
     def build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
-        angle = tk.get_angle(self.trace[0], self.trace[1])
+        angle = tk.get_exact_angle(self.trace[0], self.trace[1])
         # Add waveguide tapers leading to DBR region
         taper = gdspy.Path(self.wgt.wg_width, self.trace[0])
         taper.segment(self.taper_length, direction=angle, final_width=self.w_phc, **self.wg_spec)
@@ -106,7 +107,8 @@ class DBR(gdspy.Cell):
             angle=np.pi
         elif self.direction=="SOUTH":
             angle=-np.pi/2.0
-
+        elif isinstance(self.direction, float):
+            angle = self.direction
         for block in block_list:
             block.rotate(angle, self.trace[0])
             self.add(block)
@@ -138,4 +140,4 @@ if __name__ == "__main__":
     tk.add(top, dbr2)
 
     gdspy.LayoutViewer()
-    gdspy.write_gds('dbr.gds', unit=1.0e-6, precision=1.0e-9)
+    # gdspy.write_gds('dbr.gds', unit=1.0e-6, precision=1.0e-9)
