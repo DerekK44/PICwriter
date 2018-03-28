@@ -1,7 +1,6 @@
 setuptools
 numpy
 scipy
-math
 future; python_version < "3"
 uuid
 gdspy
