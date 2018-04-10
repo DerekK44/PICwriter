@@ -8,6 +8,7 @@ Waveguide Template
    :members: WaveguideTemplate
    
 .. image:: imgs/waveguide.png
+.. image:: imgs/waveguide_zoom.png
    
 Waveguides
 ----------

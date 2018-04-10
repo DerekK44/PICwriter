@@ -9,6 +9,7 @@ Multi-Mode Interferometers (MMI's)
    
 .. image:: imgs/mmi1x2.png
    
+   
 2x2 MMI
 -------
 

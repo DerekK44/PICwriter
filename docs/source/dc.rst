@@ -1,13 +1,33 @@
+****************************
 Directional Couplers
-++++++++++++++++++++++++++++
+****************************
+
+============================
+Standard Directional Coupler
+============================
    
 .. automodule:: picwriter.components
    :members: DirectionalCoupler
    
 .. image:: imgs/dc.png
+
+==============================================
+Contra-Directional Coupler (Grating Assisted)
+==============================================
+
+.. automodule:: picwriter.components
+   :members: ContraDirectionalCoupler
+   
+.. image:: imgs/contradc.png
+.. image:: imgs/contradc_zoom.png
+   
+============================
+Example Usage
+============================
+
 .. image:: imgs/dc_matrix.png
 
-The directional coupler matrix is generated via the following::
+The directional coupler matrix in the image above is generated via the following::
 
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=100, resist='+')
@@ -27,3 +47,5 @@ The directional coupler matrix is generated via the following::
     tk.add(top, dc4)
     tk.add(top, dc5)
     tk.add(top, dc6)
+    
+

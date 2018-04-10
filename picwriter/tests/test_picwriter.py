@@ -7,6 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from unittest import TestCase
 
 import gdspy
+import numpy as np
 from picwriter.components import *
 from picwriter import toolkit as tk
 
@@ -180,3 +181,17 @@ class TestPICwriter(TestCase):
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==7)
 		self.assertTrue(abs(top.area()-65615.8506033) <= 1e-6)
+
+	def test_contradc_creation(self):
+		top = gdspy.Cell("t-contradc")
+		wgt = WaveguideTemplate(wg_width=1.0, bend_radius=50, resist='+')
+
+		wg1=Waveguide([(0,0), (20,0)], wgt)
+		tk.add(top, wg1)
+
+		cdc = ContraDirectionalCoupler(wgt, length=30.0, gap=0.5, period=0.220, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=0.75, input_bot=True, **wg1.portlist["output"])
+		tk.add(top, cdc)
+		# print("Contra DC area = "+str(top.area()))
+		print(len(top.elements))
+		self.assertTrue(len(top.elements)==2)
+		self.assertTrue(abs(top.area()-4222.12846627) <= 1e-6)

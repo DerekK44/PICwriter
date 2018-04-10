@@ -14,3 +14,4 @@ from .alignmentmarker import AlignmentCross, AlignmentTarget
 from .mzi import MachZehnder, MachZehnderSwitch
 from .dbr import DBR
 from .directionalcoupler import DirectionalCoupler
+from .contradc import ContraDirectionalCoupler
