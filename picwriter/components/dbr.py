@@ -18,7 +18,7 @@ class DBR(gdspy.Cell):
 
         Keyword Args:
            * **taper_length** (float): Length of the taper between the input/output waveguide and the DBR region.  Defaults to 20.0.
-           * **fins** (boolean): If `True`, adds fins to the input/output waveguides.  In this case a different template for the DBR region must be specified.  This feature is useful when performing electron-beam lithography and using different beam currents for fine features (helps to reduce stitching errors).  Defaults to `False`
+           * **fins** (boolean): If `True`, adds fins to the input/output waveguides.  In this case a different template for the component must be specified.  This feature is useful when performing electron-beam lithography and using different beam currents for fine features (helps to reduce stitching errors).  Defaults to `False`
            * **fin_size** ((x,y) Tuple): Specifies the x- and y-size of the `fins`.  Defaults to 200 nm x 50 nm
            * **dbr_wgt** (WaveguideTemplate): If `fins` above is True, a WaveguideTemplate (dbr_wgt) must be specified.  This defines the layertype / datatype of the DBR (which will be separate from the input/output waveguides).  Defaults to `None`
            * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).

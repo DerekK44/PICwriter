@@ -162,5 +162,5 @@ if __name__ == "__main__":
     # tk.add(top, dc5)
     # tk.add(top, dc6)
 
-    # gdspy.LayoutViewer()
-    gdspy.write_gds('dc2.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.LayoutViewer()
+    # gdspy.write_gds('dc2.gds', unit=1.0e-6, precision=1.0e-9)

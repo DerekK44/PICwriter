@@ -106,5 +106,5 @@ if __name__ == "__main__":
     tk.add(top, tp1)
     tk.add(top, tp2)
 
-    # gdspy.LayoutViewer()
-    gdspy.write_gds('taper.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.LayoutViewer()
+    # gdspy.write_gds('taper.gds', unit=1.0e-6, precision=1.0e-9)
