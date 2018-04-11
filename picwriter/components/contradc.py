@@ -220,16 +220,23 @@ if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(wg_width=2.0, bend_radius=50, resist='+')
 
-    wg1=Waveguide([(0,0), (20,0)], wgt)
-    tk.add(top, wg1)
+    # wg1=Waveguide([(0,0), (0, 20)], wgt)
+    # tk.add(top, wg1)
 
     contradc_wgt = WaveguideTemplate(bend_radius=50, resist='+', wg_layer=3, wg_datatype=0)
 
-    cdc = ContraDirectionalCoupler(wgt, length=30.0, gap=1.0, period=0.5, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=2.0, input_bot=True, **wg1.portlist["output"])
-    tk.add(top, cdc)
+    # cdc = ContraDirectionalCoupler(wgt, length=30.0, gap=1.0, period=0.5, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=2.0, input_bot=True, **wg1.portlist["output"])
+    # tk.add(top, cdc)
 
-    cdc2 = ContraDirectionalCoupler(wgt, length=30.0, gap=1.0, period=0.5, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=2.0, input_bot=False, contradc_wgt=contradc_wgt, fins=True, **cdc.portlist["output_bot"])
+    wg1=Waveguide([(0,0), (0,100), (50,200), (50, 215)], wgt)
+    tk.add(top, wg1)
+
+    cdc2 = ContraDirectionalCoupler(wgt, length=30.0, gap=1.0, period=0.5, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=2.0, input_bot=False, contradc_wgt=contradc_wgt, fins=True, **wg1.portlist["output"])
     tk.add(top, cdc2)
+
+    x0,y0 = cdc2.portlist["input_bot"]["port"]
+    wg2=Waveguide([(x0,y0), (x0,y0-15), (x0+50,y0-115), (x0+50, y0-215)], wgt)
+    tk.add(top, wg2)
 
     # dc1 = ContraDirectionalCoupler(wgt, length=30.0, gap=0.5, period=0.220, dc=0.5, angle=np.pi/6.0, width_top=2.0, width_bot=0.75, input_bot=False, **wg1.portlist["output"])
     # dc2 = ContraDirectionalCoupler(wgt, length=30.0, gap=0.5, period=0.220, dc=0.5, angle=np.pi/6.0, width_top=2.0, width_bot=0.75, input_bot=True, **dc1.portlist["output_top"])
