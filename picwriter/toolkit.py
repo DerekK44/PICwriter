@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Set of helper functions that make it easier to manipulate
-and work with gdspy subclasses defined in **components** miodule
+and work with gdspy subclasses defined in **components** module
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals

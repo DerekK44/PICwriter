@@ -29,6 +29,7 @@ Guide
    installation.rst
    tutorial.rst
    component-documentation.rst
+   picsim-documentation.rst
    toolkit-documentation.rst
    license.rst
 
