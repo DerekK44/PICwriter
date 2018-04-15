@@ -21,6 +21,8 @@ class ContraDirectionalCoupler(gdspy.Cell):
            * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
            * **width_top** (float): Width of the top waveguide in the coupling region.  Defaults to the WaveguideTemplate wg width.
            * **width_bot** (float): Width of the bottom waveguide in the coupling region.  Defaults to the WaveguideTemplate wg width.
+           * **dw_top** (float): Amplitude of the width variation on the top.  Default=gap/2.0.
+           * **dw_bot** (float): Amplitude of the width variation on the bottom.  Default=gap/2.0.
            * **input_bot** (boolean): If `True`, will make the default input the bottom waveguide (rather than the top).  Default=`False`
            * **fins** (boolean): If `True`, adds fins to the input/output waveguides.  In this case a different template for the component must be specified.  This feature is useful when performing electron-beam lithography and using different beam currents for fine features (helps to reduce stitching errors).  Defaults to `False`
            * **fin_size** ((x,y) Tuple): Specifies the x- and y-size of the `fins`.  Defaults to 200 nm x 50 nm
@@ -41,7 +43,7 @@ class ContraDirectionalCoupler(gdspy.Cell):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, length, gap, period, dc, angle=np.pi/6.0, width_top=None, width_bot=None, input_bot=False, fins=False, fin_size=(0.2, 0.05), contradc_wgt=None, port=(0,0), direction='EAST'):
+    def __init__(self, wgt, length, gap, period, dc, angle=np.pi/6.0, width_top=None, width_bot=None, dw_top=None, dw_bot=None, input_bot=False, fins=False, fin_size=(0.2, 0.05), contradc_wgt=None, port=(0,0), direction='EAST'):
         gdspy.Cell.__init__(self, "ContraDC--"+str(uuid.uuid4()))
 
         self.portlist = {}
@@ -67,6 +69,9 @@ class ContraDirectionalCoupler(gdspy.Cell):
             self.parity = -1
         else:
             self.parity = 1
+
+        self.dw_top = gap/2.0 if dw_top==None else dw_top
+        self.dw_bot = gap/2.0 if dw_bot==None else dw_bot
         self.length = length
         self.gap = gap
         self.dc = dc
@@ -148,7 +153,8 @@ class ContraDirectionalCoupler(gdspy.Cell):
         block_list = []
         for i in range(int(num_blocks)):
             x = startx + i*self.period
-            block_list.append(gdspy.Rectangle((x, y0-self.gap/2.0), (x+blockx, y0+self.gap/2.0), **self.wg_spec))
+            block_list.append(gdspy.Rectangle((x, y0-self.gap/2.0), (x+blockx, y0-self.gap/2.0+self.dw_bot), **self.wg_spec))
+            block_list.append(gdspy.Rectangle((x, y0+self.gap/2.0), (x+blockx, y0+self.gap/2.0-self.dw_top), **self.wg_spec))
 
         """ And add the 'fins' if self.fins==True """
         if self.fins:
@@ -228,15 +234,16 @@ if __name__ == "__main__":
     # cdc = ContraDirectionalCoupler(wgt, length=30.0, gap=1.0, period=0.5, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=2.0, input_bot=True, **wg1.portlist["output"])
     # tk.add(top, cdc)
 
-    wg1=Waveguide([(0,0), (0,100), (50,200), (50, 215)], wgt)
+    # wg1=Waveguide([(0,0), (0,100), (50,200), (50, 215)], wgt)
+    wg1=Waveguide([(0,0), (100,0)], wgt)
     tk.add(top, wg1)
 
-    cdc2 = ContraDirectionalCoupler(wgt, length=30.0, gap=1.0, period=0.5, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=2.0, input_bot=False, contradc_wgt=contradc_wgt, fins=True, **wg1.portlist["output"])
+    cdc2 = ContraDirectionalCoupler(wgt, length=30.0, gap=1.0, period=0.5, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=2.0, dw_top=0.4, dw_bot=0.2, input_bot=False, contradc_wgt=contradc_wgt, fins=True, **wg1.portlist["output"])
     tk.add(top, cdc2)
 
-    x0,y0 = cdc2.portlist["input_bot"]["port"]
-    wg2=Waveguide([(x0,y0), (x0,y0-15), (x0+50,y0-115), (x0+50, y0-215)], wgt)
-    tk.add(top, wg2)
+    # x0,y0 = cdc2.portlist["input_bot"]["port"]
+    # wg2=Waveguide([(x0,y0), (x0,y0-15), (x0+50,y0-115), (x0+50, y0-215)], wgt)
+    # tk.add(top, wg2)
 
     # dc1 = ContraDirectionalCoupler(wgt, length=30.0, gap=0.5, period=0.220, dc=0.5, angle=np.pi/6.0, width_top=2.0, width_bot=0.75, input_bot=False, **wg1.portlist["output"])
     # dc2 = ContraDirectionalCoupler(wgt, length=30.0, gap=0.5, period=0.220, dc=0.5, angle=np.pi/6.0, width_top=2.0, width_bot=0.75, input_bot=True, **dc1.portlist["output_top"])
@@ -251,5 +258,5 @@ if __name__ == "__main__":
     # tk.add(top, dc5)
     # tk.add(top, dc6)
 
-    gdspy.LayoutViewer()
-    # gdspy.write_gds('contradc.gds', unit=1.0e-6, precision=1.0e-9)
+    # gdspy.LayoutViewer(cells=top)
+    gdspy.write_gds('contradc.gds', unit=1.0e-6, precision=1.0e-9)
