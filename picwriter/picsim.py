@@ -275,7 +275,6 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
             exec_str = ("mpirun -np %d"
                         " python mcts.py"
                         " -fields %r"
-                        " -norm %r"
                         " -output_directory '%s/%s'"
                         " -eps_input_file '%s/%s'"
                         " -res %d"
@@ -295,7 +294,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
                         " -sy %0.3f"
                         " -sz %0.3f"
                         " -port_coords %r"
-                        " > '%s/%s-norm-res%d.out'") % (int(n_p), False, True, str(os.getcwd()), str(output_directory), str(os.getcwd()),
+                        " > '%s/%s-norm-res%d.out'") % (int(n_p), False, str(os.getcwd()), str(output_directory), str(os.getcwd()),
                         eps_norm_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
                         float(wl_span), float(port_vcenter), float(port_height), float(port_width),
                         float(source_offset), float(center[0]), float(center[1]), float(center[2]),
@@ -303,7 +302,6 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
         else:
             exec_str = ("python mcts.py"
                         " -fields %r"
-                        " -norm %r"
                         " -output_directory '%s/%s'"
                         " -eps_input_file '%s/%s'"
                         " -res %d"
@@ -323,7 +321,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
                         " -sy %0.3f"
                         " -sz %0.3f"
                         " -port_coords %r"
-                        " > '%s/%s-norm-res%d.out'") % (False, True, str(os.getcwd()), str(output_directory), str(os.getcwd()),
+                        " > '%s/%s-norm-res%d.out'") % (False, str(os.getcwd()), str(output_directory), str(os.getcwd()),
                         eps_norm_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
                         float(wl_span), float(port_vcenter), float(port_height), float(port_width),
                         float(source_offset), float(center[0]), float(center[1]), float(center[2]),
@@ -358,7 +356,6 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
         exec_str = ("mpirun -np %d"
                     " python mcts.py"
                     " -fields %r"
-                    " -norm %r"
                     " -output_directory '%s/%s'"
                     " -eps_input_file '%s/%s'"
                     " -res %d"
@@ -378,7 +375,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
                     " -sy %0.3f"
                     " -sz %0.3f"
                     " -port_coords %r"
-                    " > '%s/%s-res%d.out'") % (int(n_p), fields, False, str(os.getcwd()), str(output_directory), str(os.getcwd()),
+                    " > '%s/%s-res%d.out'") % (int(n_p), fields, str(os.getcwd()), str(output_directory), str(os.getcwd()),
                     eps_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
                     float(wl_span), float(port_vcenter), float(port_height), float(port_width),
                     float(source_offset), float(center[0]), float(center[1]), float(center[2]),
@@ -386,7 +383,6 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
     else:
         exec_str = ("python mcts.py"
                     " -fields %r"
-                    " -norm %r"
                     " -output_directory '%s/%s'"
                     " -eps_input_file '%s/%s'"
                     " -res %d"
@@ -406,7 +402,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
                     " -sy %0.3f"
                     " -sz %0.3f"
                     " -port_coords %r"
-                    " > '%s/%s-res%d.out'") % (fields, False, str(os.getcwd()), str(output_directory), str(os.getcwd()),
+                    " > '%s/%s-res%d.out'") % (fields, str(os.getcwd()), str(output_directory), str(os.getcwd()),
                     eps_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
                     float(wl_span), float(port_vcenter), float(port_height), float(port_width),
                     float(source_offset), float(center[0]), float(center[1]), float(center[2]),
@@ -426,7 +422,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
     """ Grab data and plot transmission/reflection spectra
     """
     norm_data = np.genfromtxt("%s/%s-norm-res%d.dat"%(str(os.getcwd()), str(output_directory), res), delimiter=",")
-    freq, trans0 = norm_data[:,1], norm_data[:,3]# refl0 = -norm_data[:,2]
+    freq, refl0, trans0 = norm_data[:,1], -norm_data[:,2], norm_data[:,3]# refl0 = -norm_data[:,2]
     comp_data = np.genfromtxt("%s/%s-res%d.dat"%(str(os.getcwd()), str(output_directory), res), delimiter=",")
 
     flux_data = []
@@ -438,7 +434,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
 
     # Plot a spectrum corresponding to each port (sign is calculated from the port "direction")
     colorlist = ['r-', 'b-', 'g-', 'c-', 'm-', 'y-']
-    plt.plot(wavelength, (flux_data[0])/trans0, colorlist[0], label='port 0')
+    plt.plot(wavelength, (flux_data[0]-refl0)/trans0, colorlist[0], label='port 0')
     for i in range(len(flux_data)-1):
         plt.plot(wavelength, flux_data[i+1]/trans0, colorlist[(i+1)%len(colorlist)], label='port '+str(i+1))
 

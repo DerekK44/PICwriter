@@ -32,7 +32,6 @@ def main(args):
     """
     Args:
        * **fields** (boolean): If true, outputs the fields at the relevant waveguide cross-sections (top-down and side-view)
-       * **norm** (boolean): If true, indicates a normalization run (straight waveguide)
        * **output_directory** (string): Name of the output directory (for storing the fields)
        * **eps_input_file** (string): Name of the epsilon hdf5 file that defines the geometry
        * **res** (int): Resolution of the MEEP simulation
@@ -55,7 +54,6 @@ def main(args):
     """
     #Boolean inputs
     fields = args.fields
-    norm = args.norm
 
     #String inputs
     output_directory=args.output_directory
@@ -129,9 +127,6 @@ def main(args):
     """ Run the simulation """
 
     """ Monitor the amplitude in the center of the structure """
-    if not norm:
-        sim.load_minus_flux("refl-flux", flux_plane_objects[0])
-
     decay_pt = mp.Vector3(0, port_vcenter, 0)
 
     sv = mp.Volume(size=mp.Vector3(sx, sy, 0), center=mp.Vector3(0,0,0))
@@ -147,8 +142,6 @@ def main(args):
     else:
         sim.run(until_after_sources=mp.stop_when_fields_decayed(20, mp.Ez, decay_pt, 1e-4))
 
-    if norm:
-        sim.save_flux("refl-flux", flux_plane_objects[0])
 
     sim.display_fluxes(*flux_plane_objects)
 
@@ -180,7 +173,6 @@ if __name__ == "__main__":
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('-fields', type=str2bool, nargs='?', const=True, default=False, help='If true, outputs the fields at the relevant waveguide cross-sections (top-down and side-view) (default=False)')
-    parser.add_argument('-norm', type=str2bool, nargs='?', const=True, default=False, help='If True, indicates a normalization using a straight waveguide (defulat=False)')
     parser.add_argument('-output_directory', type=str, default=None, help='Name of the output directory (for storing the fields) (default=None)')
     parser.add_argument('-eps_input_file', type=str, default=None, help='Name of the epsilon hdf5 file that defines the geometry (default=None)')
     parser.add_argument('-res', type=int, default=10, help='Resolution of the simulation [pixels/um] (default=10)')
