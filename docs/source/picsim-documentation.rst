@@ -54,7 +54,7 @@ With this, we can build a PICwriter component in the normal way and directly lau
     tk.add(simulated_component, PML_wg3)
     tk.add(simulated_component, PML_wg4)
     
-The gdspy Cell object `sc` now contains four short waveguides and a DirectionalCoupler object.  In order to launch a MEEP simulation and compute transmission/reflection spectra, we need to tell PICwriter what `ports` we want to monitor the flux through::
+The gdspy Cell object `simulated_component` now contains four short waveguides and a DirectionalCoupler object.  In order to launch a MEEP simulation and compute transmission/reflection spectra, we need to tell PICwriter what `ports` we want to monitor the flux through::
 
     ports = [dc.portlist['input_top'],
              dc.portlist['input_bot'],

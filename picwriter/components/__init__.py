@@ -15,3 +15,4 @@ from .mzi import MachZehnder, MachZehnderSwitch
 from .dbr import DBR
 from .directionalcoupler import DirectionalCoupler
 from .contradc import ContraDirectionalCoupler
+from .swgcontradc import SWGContraDirectionalCoupler

@@ -8,7 +8,7 @@ import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
 class ContraDirectionalCoupler(gdspy.Cell):
-    """ Standard Grating-Assisted Contra-Directional Coupler Cell class (subclass of gdspy.Cell).  For more details on the principles and operation behind this type of component, please see https://doi.org/10.1364/OE.21.003633.
+    """ Standard Grating-Assisted Contra-Directional Coupler Cell class (subclass of gdspy.Cell).
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

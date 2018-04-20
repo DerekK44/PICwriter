@@ -98,7 +98,7 @@ class DBR(gdspy.Cell):
         self.add(clad)
 
         """ Now add the periodic PhC components """
-        num_blocks = 1 + (2*self.taper_length + self.length)//self.period
+        num_blocks = (2*self.taper_length + self.length)//self.period
         blockx = self.period*self.dc
         startx = self.trace[0][0] + self.taper_length + self.length/2.0 -(num_blocks-1)*self.period/2.0 - blockx/2.0
         y0 = self.trace[0][1]

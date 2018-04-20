@@ -183,7 +183,7 @@ def export_timestep_fields_to_png(directory):
 
 def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, port_height, port_width, res, wl_center, wl_span,
                                  norm=False, wgt=None, nfreq=100, dpml=0.5, fields=False, source_offset=0.1, symmetry=None,
-                                 convert_component_to_hdf5=True, output_directory='meep-sim', parallel=False, n_p=2):
+                                 convert_component_to_hdf5=True, skip_sim=False, output_directory='meep-sim', parallel=False, n_p=2):
 
     """ Launches a MEEP simulation to compute the transmission/reflection spectra from each of the component's ports when light enters at the input `port`.
 
@@ -209,6 +209,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
        * **fields** (boolean): If true, outputs the epsilon and cross-sectional fields.  Defaults to false.
        * **source_offset** (float): Offset (in x-direction) between reflection monitor and source.  Defaults to 0.1 um.
        * **convert_component_to_hdf5** (boolean): Defaults to True.  If True, converts the `pic_component` to an hdf5 file (warning, this may take some time!).  If `False` (since it was already computed in a previous run), will not output to hdf5.  **NOTE** this will output the structure with resolution 50% higher than the meep `res` specified above (to reduce discretization errors).
+       * **skip_sim** (boolean): Defaults to False.  If True, skips the simulation (and hdf5 export).  Useful if you forgot to perform a normalization and don't want to redo the whole MEEP simulation.
        * **output_directory** (string): Output directory for files generated.  Defaults to 'meep-sim'.
        * **parallel** (boolean): If `True`, will run simulation on `np` cores (`np` must be specified below, and MEEP/MPB must be built from source with parallel-libraries).  Defaults to False.
        * **n_p** (int): Number of processors to run meep simulation on.  Defaults to `2`.
@@ -342,7 +343,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
     center = ((bb[1][0]+bb[0][0])/2.0, 0, (bb[1][1]+bb[0][1])/2.0)
 
     eps_input_file = str('epsilon-component.h5')
-    if convert_component_to_hdf5:
+    if convert_component_to_hdf5 and skip_sim==False:
         convert_to_hdf5(eps_input_file, pic_component, mstack, sx, sz, 1.5*res)
 
     # Launch MEEP simulation using correct inputs
@@ -408,10 +409,11 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
                     float(sx), float(sy), float(sz), port_string, str(os.getcwd()), str(output_directory), res)
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    print("Running MEEP simulation... (check .out file for current status)")
-    start = time.time()
-    call(exec_str, shell=True, cwd=dir_path)
-    print("Time to run MEEP simulation = "+str(time.time()-start)+" seconds")
+    if skip_sim==False:
+        print("Running MEEP simulation... (check .out file for current status)")
+        start = time.time()
+        call(exec_str, shell=True, cwd=dir_path)
+        print("Time to run MEEP simulation = "+str(time.time()-start)+" seconds")
 
     grep_str = "grep flux1: '%s/%s-res%d.out' > '%s/%s-res%d.dat'"%(str(os.getcwd()), str(output_directory), res,
                                                                     str(os.getcwd()), str(output_directory), res)

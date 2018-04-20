@@ -15,11 +15,25 @@ Standard Directional Coupler
 Contra-Directional Coupler (Grating Assisted)
 ==============================================
 
+For more details on the principles and operation behind this type of component, please see https://doi.org/10.1364/OE.21.003633. This component implements a grating in the gap in the coupler region.
+
 .. automodule:: picwriter.components
    :members: ContraDirectionalCoupler
    
 .. image:: imgs/contradc.png
 .. image:: imgs/contradc_zoom.png
+
+==========================================================
+Sub-wavelength Grating Assisted Contra-Directional Coupler
+==========================================================
+
+For more details on the principles and operation behind this type of component, please see https://doi.org/10.1364/OE.25.025310. This component one regular waveguide (at top) and one sub-wavelength grating (at bottom) to selectively reflect a certain spectral band to the `intput_bot` port.  Apodization of the top waveguide is also supported.
+
+.. automodule:: picwriter.components
+   :members: SWGContraDirectionalCoupler
+   
+.. image:: imgs/swgcontradc.png
+.. image:: imgs/swgcontradc_zoom.png
    
 ============================
 Example Usage
