@@ -202,7 +202,6 @@ class SWGContraDirectionalCoupler(gdspy.Cell):
                 block_list.append(gdspy.Rectangle((x, y0-self.gap/2.0), (x+blockx, y0-self.gap/2.0-self.width_bot), **self.wg_spec))
 
         """ And add the 'fins' if self.fins==True """
-        print("shift="+str(shift))
         if self.fins:
             num_fins = self.wgt.wg_width//(2*self.fin_size[1])
             x0, y0 = self.port[0], self.port[1] - num_fins*(2*self.fin_size[1])/2.0 + self.fin_size[1]/2.0
