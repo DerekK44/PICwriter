@@ -151,10 +151,10 @@ class TestPICwriter(TestCase):
 
 		dbr2 = DBR(wgt, 10.0, 0.85, 0.5, 0.6, **wg2.portlist["output"])
 		tk.add(top, dbr2)
-		# print("DBR area = "+str(top.area()))
+#		print("DBR area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==4)
-		self.assertTrue(abs(top.area()-9095.25471349) <= 1e-6)
+		self.assertTrue(abs(top.area()-9093.55471349) <= 1e-6)
 
 	def test_dc_creation(self):
 		top = gdspy.Cell("t-dc")
