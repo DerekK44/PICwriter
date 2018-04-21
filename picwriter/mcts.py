@@ -34,6 +34,7 @@ def main(args):
        * **fields** (boolean): If true, outputs the fields at the relevant waveguide cross-sections (top-down and side-view)
        * **output_directory** (string): Name of the output directory (for storing the fields)
        * **eps_input_file** (string): Name of the epsilon hdf5 file that defines the geometry
+       * **input_pol** (string): Either "TE", or "TM", corresponding to the desired input mode.  Defaults to "TE"
        * **res** (int): Resolution of the MEEP simulation
        * **nfreq** (int): The number of wavelength points to record in the transmission/reflection spectra
        * **input_direction** (1 or -1): Direction of propagation for the input eigenmode.  If +1, goes in +x, else if -1, goes in -x.  Defaults to +1.
@@ -58,6 +59,7 @@ def main(args):
     #String inputs
     output_directory=args.output_directory
     eps_input_file=args.eps_input_file
+    input_pol=args.input_pol
 
     #Int inputs
     res = args.res
@@ -79,6 +81,13 @@ def main(args):
     port_coords = [float(x) for x in args.port_coords[0].split(" ")]
     ports = [(port_coords[2*i], port_coords[2*i+1]) for i in range(int(len(port_coords)/2))]
 
+    if input_pol=="TE":
+        parity = mp.ODD_Z
+    elif input_pol=="TM":
+        parity = mp.EVEN_Z
+    else:
+        raise ValueError("Warning! Improper value of 'input_pol' was passed to mcts.py (input_pol given ="+str(input_pol)+")")
+
     if len(port_coords)%2 != 0:
         raise ValueError("Warning! Improper port_coords was passed to `meep_compute_transmission_spectra`.  Must be even number of port_coords in [x1, y1, x2, y2, ..] format.")
 
@@ -97,7 +106,7 @@ def main(args):
                                    size=mp.Vector3(0, 3*float(port_height), 3*float(port_width)),
                                    center=mp.Vector3(ports[0][0]+source_offset-center_x, float(port_vcenter)-center_y, ports[0][1]-center_z),
                                    eig_match_freq=True,
-                                   eig_parity=mp.ODD_Z,
+                                   eig_parity=parity,
                                    eig_kpoint=mp.Vector3(float(input_direction)*wl_center, 0, 0),
                                    eig_resolution = 2*res if res > 16 else 32,
                                    )]
@@ -175,6 +184,7 @@ if __name__ == "__main__":
     parser.add_argument('-fields', type=str2bool, nargs='?', const=True, default=False, help='If true, outputs the fields at the relevant waveguide cross-sections (top-down and side-view) (default=False)')
     parser.add_argument('-output_directory', type=str, default=None, help='Name of the output directory (for storing the fields) (default=None)')
     parser.add_argument('-eps_input_file', type=str, default=None, help='Name of the epsilon hdf5 file that defines the geometry (default=None)')
+    parser.add_argument('-input_pol', type=str, default='TE', help='Either "TE", or "TM", corresponding to the desired input mode polarization (default="TE")')
     parser.add_argument('-res', type=int, default=10, help='Resolution of the simulation [pixels/um] (default=10)')
     parser.add_argument('-nfreq', type=int, default=100, help='Number of frequencies sampled (for flux) between fcen-df/2 and fcen+df/2 (default=100)')
     parser.add_argument('-input_direction', type=int, default=1, help='Direction of propagation for the input eigenmode.  If +1, goes in +x, else if -1, goes in -x (default=+1)')

@@ -182,7 +182,7 @@ def export_timestep_fields_to_png(directory):
 
 
 def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, port_height, port_width, res, wl_center, wl_span,
-                                 norm=False, wgt=None, nfreq=100, dpml=0.5, fields=False, source_offset=0.1, symmetry=None,
+                                 norm=False, wgt=None, input_pol="TE", nfreq=100, dpml=0.5, fields=False, source_offset=0.1, symmetry=None,
                                  convert_component_to_hdf5=True, skip_sim=False, output_directory='meep-sim', parallel=False, n_p=2):
 
     """ Launches a MEEP simulation to compute the transmission/reflection spectra from each of the component's ports when light enters at the input `port`.
@@ -204,6 +204,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
     Keyword Args:
        * **norm** (boolean):  If True, first computes a normalization run (transmission through a straight waveguide defined by `wgt` above.  Defaults to `False`.  If `True`, a WaveguideTemplate must be specified.
        * **wgt** (WaveguideTemplate): Waveguide template, used for normalization run.  Defaults to None.
+       * **input_pol** (String): Input polarization of the waveguide mode.  Must be either "TE" or "TM".  Defaults to "TE" (z-antisymmetric).
        * **nfreq** (int): Number of frequencies (wavelengths) to compute the spectrum over.  Defaults to 100.
        * **dpml** (float): Length (in microns) of the perfectly-matched layer (PML) at simulation boundaries.  Defaults to 0.5 um.
        * **fields** (boolean): If true, outputs the epsilon and cross-sectional fields.  Defaults to false.
@@ -276,6 +277,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
             exec_str = ("mpirun -np %d"
                         " python mcts.py"
                         " -fields %r"
+                        " -input_pol %s"
                         " -output_directory '%s/%s'"
                         " -eps_input_file '%s/%s'"
                         " -res %d"
@@ -295,7 +297,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
                         " -sy %0.3f"
                         " -sz %0.3f"
                         " -port_coords %r"
-                        " > '%s/%s-norm-res%d.out'") % (int(n_p), False, str(os.getcwd()), str(output_directory), str(os.getcwd()),
+                        " > '%s/%s-norm-res%d.out'") % (int(n_p), False, input_pol, str(os.getcwd()), str(output_directory), str(os.getcwd()),
                         eps_norm_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
                         float(wl_span), float(port_vcenter), float(port_height), float(port_width),
                         float(source_offset), float(center[0]), float(center[1]), float(center[2]),
@@ -303,6 +305,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
         else:
             exec_str = ("python mcts.py"
                         " -fields %r"
+                        " -input_pol %s"
                         " -output_directory '%s/%s'"
                         " -eps_input_file '%s/%s'"
                         " -res %d"
@@ -322,7 +325,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
                         " -sy %0.3f"
                         " -sz %0.3f"
                         " -port_coords %r"
-                        " > '%s/%s-norm-res%d.out'") % (False, str(os.getcwd()), str(output_directory), str(os.getcwd()),
+                        " > '%s/%s-norm-res%d.out'") % (False, input_pol, str(os.getcwd()), str(output_directory), str(os.getcwd()),
                         eps_norm_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
                         float(wl_span), float(port_vcenter), float(port_height), float(port_width),
                         float(source_offset), float(center[0]), float(center[1]), float(center[2]),
@@ -357,6 +360,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
         exec_str = ("mpirun -np %d"
                     " python mcts.py"
                     " -fields %r"
+                    " -input_pol %s"
                     " -output_directory '%s/%s'"
                     " -eps_input_file '%s/%s'"
                     " -res %d"
@@ -376,7 +380,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
                     " -sy %0.3f"
                     " -sz %0.3f"
                     " -port_coords %r"
-                    " > '%s/%s-res%d.out'") % (int(n_p), fields, str(os.getcwd()), str(output_directory), str(os.getcwd()),
+                    " > '%s/%s-res%d.out'") % (int(n_p), fields, input_pol, str(os.getcwd()), str(output_directory), str(os.getcwd()),
                     eps_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
                     float(wl_span), float(port_vcenter), float(port_height), float(port_width),
                     float(source_offset), float(center[0]), float(center[1]), float(center[2]),
@@ -384,6 +388,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
     else:
         exec_str = ("python mcts.py"
                     " -fields %r"
+                    " -input_pol %s"
                     " -output_directory '%s/%s'"
                     " -eps_input_file '%s/%s'"
                     " -res %d"
@@ -403,7 +408,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
                     " -sy %0.3f"
                     " -sz %0.3f"
                     " -port_coords %r"
-                    " > '%s/%s-res%d.out'") % (fields, str(os.getcwd()), str(output_directory), str(os.getcwd()),
+                    " > '%s/%s-res%d.out'") % (fields, input_pol, str(os.getcwd()), str(output_directory), str(os.getcwd()),
                     eps_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
                     float(wl_span), float(port_vcenter), float(port_height), float(port_width),
                     float(source_offset), float(center[0]), float(center[1]), float(center[2]),
