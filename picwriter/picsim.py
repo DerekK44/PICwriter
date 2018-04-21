@@ -247,7 +247,8 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
     if norm:
         import picwriter.toolkit as tk
         import picwriter.components as pc
-        norm_component = gdspy.Cell('norm_straightwg')
+        import uuid
+        norm_component = gdspy.Cell('norm_straightwg'+str(uuid.uuid4()))
         wg1 = pc.Waveguide([(0,0), (1,0)], wgt)
         wg2 = pc.Waveguide([(1,0), (2,0)], wgt)
         wg3 = pc.Waveguide([(2,0), (3,0)], wgt)
