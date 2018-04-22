@@ -122,7 +122,8 @@ class Ring(gdspy.Cell):
                                     self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
                 clad_ring = gdspy.Round((xcenter, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
                                          self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
-
+            else:
+                raise ValueError("Warning!  Parity value is not an acceptable value (must be +1 or -1).")
 
             if 4*dx < bus_length:
                 path.segment((bus_length-4*dx)/2.0, **self.wg_spec)
