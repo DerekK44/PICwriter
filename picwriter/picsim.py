@@ -182,7 +182,7 @@ def export_timestep_fields_to_png(directory):
 
 
 def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, port_height, port_width, res, wl_center, wl_span,
-                                 norm=False, wgt=None, input_pol="TE", nfreq=100, dpml=0.5, fields=False, source_offset=0.1, symmetry=None,
+                                 norm=False, wgt=None, input_pol="TE", nfreq=100, dpml=0.5, fields=False, plot_window=False, source_offset=0.1, symmetry=None,
                                  convert_component_to_hdf5=True, skip_sim=False, output_directory='meep-sim', parallel=False, n_p=2):
 
     """ Launches a MEEP simulation to compute the transmission/reflection spectra from each of the component's ports when light enters at the input `port`.
@@ -208,6 +208,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
        * **nfreq** (int): Number of frequencies (wavelengths) to compute the spectrum over.  Defaults to 100.
        * **dpml** (float): Length (in microns) of the perfectly-matched layer (PML) at simulation boundaries.  Defaults to 0.5 um.
        * **fields** (boolean): If true, outputs the epsilon and cross-sectional fields.  Defaults to false.
+       * **plot_window** (boolean): If true, outputs the spectrum plot in a matplotlib window (in addition to saving).  Defaults to False.
        * **source_offset** (float): Offset (in x-direction) between reflection monitor and source.  Defaults to 0.1 um.
        * **convert_component_to_hdf5** (boolean): Defaults to True.  If True, converts the `pic_component` to an hdf5 file (warning, this may take some time!).  If `False` (since it was already computed in a previous run), will not output to hdf5.  **NOTE** this will output the structure with resolution 50% higher than the meep `res` specified above (to reduce discretization errors).
        * **skip_sim** (boolean): Defaults to False.  If True, skips the simulation (and hdf5 export).  Useful if you forgot to perform a normalization and don't want to redo the whole MEEP simulation.
@@ -449,6 +450,8 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
     plt.xlim([min(wavelength),max(wavelength)])
     plt.legend(loc='best')
     plt.savefig("%s/%s-res%d.png"%(str(os.getcwd()), str(output_directory), res))
+    if plot_window:
+        plt.show()
     plt.close()
 
     if fields:
