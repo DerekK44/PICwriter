@@ -271,11 +271,11 @@ class MachZehnderSwitch(gdspy.Cell):
         self.MMI2x2taper_length = 20 if MMI2x2taper_length==None else MMI2x2taper_length
         self.MMI2x2wg_sep = MMI2x2width/3.0 if MMI2x2wg_sep==None else MMI2x2wg_sep
 
-        angle_x_dist = 2*self.wgt.bend_radius*np.sin(self.angle)
-#        angle_y_dist = 2*self.wgt.bend_radius*(1-np.cos(self.angle))
+        self.angle_x_dist = 2*self.wgt.bend_radius*np.sin(self.angle)
+        self.angle_y_dist = 2*self.wgt.bend_radius*(1-np.cos(self.angle))
 
-        self.mmi1x2length = self.MMI1x2length + self.MMI1x2taper_length + angle_x_dist
-        self.mmi2x2length = self.MMI2x2length + 2*self.MMI2x2taper_length
+        self.mmi1x2length = self.MMI1x2length + self.MMI1x2taper_length + self.angle_x_dist
+        self.mmi2x2length = self.MMI2x2length + 2*self.angle_x_dist
 
         self.heater = heater
         if heater:
@@ -301,10 +301,11 @@ class MachZehnderSwitch(gdspy.Cell):
                       wg_sep=self.MMI1x2wg_sep,
                       port=(0,0), direction='EAST')
         mmi2 = MMI2x2(self.wgt, self.MMI2x2length, self.MMI2x2width,
+                      angle=self.angle,
                       taper_width=self.MMI2x2taper_width,
                       taper_length=self.MMI2x2taper_length,
                       wg_sep=self.MMI2x2wg_sep,
-                      port=(self.mmi2x2length+self.mmi1x2length+4*self.wgt.bend_radius, -self.MMI2x2wg_sep/2.0), direction='WEST')
+                      port=(self.mmi2x2length+self.mmi1x2length+4*self.wgt.bend_radius, -self.MMI2x2wg_sep/2.0-self.angle_y_dist), direction='WEST')
 
         y_end_top, y_end_bot = mmi2.portlist["output_top"]["port"][1], mmi2.portlist["output_bot"]["port"][1]
 
@@ -318,6 +319,7 @@ class MachZehnderSwitch(gdspy.Cell):
         wg_top = Waveguide(trace1, self.wgt)
 
         (x1, y1) = mmi1.portlist["output_bot"]["port"]
+        print("(x1, y1)="+str((x1,y1)))
         trace2 = [(x1, y1),
                   (x1+self.wgt.bend_radius, y1),
                   (x1+self.wgt.bend_radius, y1-2*self.wgt.bend_radius - self.arm2/2.0 - self.heater_length/2.0),
@@ -341,40 +343,40 @@ class MachZehnderSwitch(gdspy.Cell):
         totalxlen = self.mmi2x2length+self.mmi1x2length+4*self.wgt.bend_radius
         if self.direction=='EAST':
             angle=0
-            self.port_output_top = (self.port[0]+totalxlen, self.port[1]+self.MMI2x2wg_sep/2.0)
-            self.port_output_bot = (self.port[0]+totalxlen, self.port[1]-self.MMI2x2wg_sep/2.0)
+            self.port_output_top = (self.port[0]+totalxlen, self.port[1]+self.MMI2x2wg_sep/2.0+self.angle_y_dist)
+            self.port_output_bot = (self.port[0]+totalxlen, self.port[1]-self.MMI2x2wg_sep/2.0-self.angle_y_dist)
             self.htr_top_in_dir ='WEST'
             self.htr_top_out_dir = 'EAST'
             self.htr_bot_in_dir = 'WEST'
             self.htr_bot_out_dir = 'EAST'
         elif self.direction=='NORTH':
             angle=90
-            self.port_output_top = (self.port[0]-self.MMI2x2wg_sep/2.0, self.port[1]+totalxlen)
-            self.port_output_bot = (self.port[0]+self.MMI2x2wg_sep/2.0, self.port[1]+totalxlen)
+            self.port_output_top = (self.port[0]-self.MMI2x2wg_sep/2.0-self.angle_y_dist, self.port[1]+totalxlen)
+            self.port_output_bot = (self.port[0]+self.MMI2x2wg_sep/2.0+self.angle_y_dist, self.port[1]+totalxlen)
             self.htr_top_in_dir ='SOUTH'
             self.htr_top_out_dir = 'NORTH'
             self.htr_bot_in_dir = 'SOUTH'
             self.htr_bot_out_dir = 'NORTH'
         elif self.direction=='WEST':
             angle=180
-            self.port_output_top = (self.port[0]-totalxlen, self.port[1]-self.MMI2x2wg_sep/2.0)
-            self.port_output_bot = (self.port[0]-totalxlen, self.port[1]+self.MMI2x2wg_sep/2.0)
+            self.port_output_top = (self.port[0]-totalxlen, self.port[1]-self.MMI2x2wg_sep/2.0-self.angle_y_dist)
+            self.port_output_bot = (self.port[0]-totalxlen, self.port[1]+self.MMI2x2wg_sep/2.0+self.angle_y_dist)
             self.htr_top_in_dir ='EAST'
             self.htr_top_out_dir = 'WEST'
             self.htr_bot_in_dir = 'EAST'
             self.htr_bot_out_dir = 'WEST'
         elif self.direction=='SOUTH':
             angle=-90
-            self.port_output_top = (self.port[0]+self.MMI2x2wg_sep/2.0, self.port[1]-totalxlen)
-            self.port_output_bot = (self.port[0]-self.MMI2x2wg_sep/2.0, self.port[1]-totalxlen)
+            self.port_output_top = (self.port[0]+self.MMI2x2wg_sep/2.0+self.angle_y_dist, self.port[1]-totalxlen)
+            self.port_output_bot = (self.port[0]-self.MMI2x2wg_sep/2.0-self.angle_y_dist, self.port[1]-totalxlen)
             self.htr_top_in_dir ='NORTH'
             self.htr_top_out_dir = 'SOUTH'
             self.htr_bot_in_dir = 'NORTH'
             self.htr_bot_out_dir = 'SOUTH'
         elif isinstance(self.direction, float):
             angle = 180.0*self.direction/np.pi
-            self.port_output_top = (self.port[0] + totalxlen*np.cos(self.direction) - (self.MMI2x2wg_sep/2.0)*np.sin(self.direction), self.port[1] + totalxlen*np.sin(self.direction) + (self.MMI2x2wg_sep/2.0)*np.cos(self.direction))
-            self.port_output_bot = (self.port[0] + totalxlen*np.cos(self.direction) - (-self.MMI2x2wg_sep/2.0)*np.sin(self.direction), self.port[1] + totalxlen*np.sin(self.direction) + (-self.MMI2x2wg_sep/2.0)*np.cos(self.direction))
+            self.port_output_top = (self.port[0] + totalxlen*np.cos(self.direction) - (self.MMI2x2wg_sep/2.0+self.angle_y_dist)*np.sin(self.direction), self.port[1] + totalxlen*np.sin(self.direction) + (self.MMI2x2wg_sep/2.0+self.angle_y_dist)*np.cos(self.direction))
+            self.port_output_bot = (self.port[0] + totalxlen*np.cos(self.direction) - (-self.MMI2x2wg_sep/2.0-self.angle_y_dist)*np.sin(self.direction), self.port[1] + totalxlen*np.sin(self.direction) + (-self.MMI2x2wg_sep/2.0-self.angle_y_dist)*np.cos(self.direction))
 
             self.htr_top_in_dir = self.direction + np.pi/2.0
             self.htr_top_out_dir = self.direction + 3*np.pi/2.0

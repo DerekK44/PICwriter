@@ -125,8 +125,8 @@ class MMI1x2(gdspy.Cell):
             self.output_port_top = (self.port[0]+ylength, self.port[1]-totlength)
             self.output_port_bot = (self.port[0]-ylength, self.port[1]-totlength)
             angle=-np.pi/2.0
-        elif isinstance(self.direction, float):
-            angle=self.direction
+        elif isinstance(self.direction, float) or isinstance(self.direction, int):
+            angle=float(self.direction)
             x1, y1 = totlength, ylength
             x1r, y1r = np.cos(angle)*x1 - np.sin(angle)*y1, np.sin(angle)*x1 + np.cos(angle)*y1
             x2, y2 = totlength, -ylength
