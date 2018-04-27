@@ -69,16 +69,16 @@ class TestPICwriter(TestCase):
 		self.assertTrue(abs(top.area()-241199.988149) <= 1e-6)
 
 	def test_mmi1x2_creation(self):
-		top = gdspy.Cell("t5")
+		top = gdspy.Cell("t-mmi1x2")
 		wgt = WaveguideTemplate(bend_radius=50, resist='+')
 		wg1=Waveguide([(0,0), (250,0)], wgt)
 		tk.add(top, wg1)
 		mmi = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **wg1.portlist["output"])
 		tk.add(top, mmi)
-		# print("MMI1x2 area = "+str(top.area()))
+		print("MMI1x2 area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-9190.0) <= 1e-6)
+		self.assertTrue(abs(top.area()-11623.2729314) <= 1e-6)
 
 	def test_mmi2x2_creation(self):
 		top = gdspy.Cell("t6")
@@ -131,10 +131,10 @@ class TestPICwriter(TestCase):
 		tk.add(top, mzi)
 		wg_out = Waveguide([mzi.portlist["output"]["port"], (mzi.portlist["output"]["port"][0]+300, mzi.portlist["output"]["port"][1])], wgt)
 		tk.add(top, wg_out)
-		# print("MZI area = "+str(top.area()))
+		print("MZI area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==3)
-		self.assertTrue(abs(top.area()-179518.918964) <= 1e-6)
+		self.assertTrue(abs(top.area()-184111.305754) <= 1e-6)
 	def test_dbr_creation(self):
 		top = gdspy.Cell("t-dbr")
 		wgt = WaveguideTemplate(bend_radius=50, resist='+')
