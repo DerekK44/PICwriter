@@ -10,24 +10,35 @@ class WaveguideTemplate:
     """ Standard template for waveguides (as well as other structures) that contains some standard information about the fabrication process and waveguides.
 
         Keyword Args:
-           * **bend_radius** (float): Radius of curvature for waveguide bends (circular)
-           * **wg_width** (float): Width of the waveguide as shown on the mask
-           * **clad_width** (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff)
-           * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used
-           * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'
-           * **wg_layer** (int): Layer type used for waveguides
-           * **wg_datatype** (int): Data type used for waveguides
-           * **clad_layer** (int): Layer type used for cladding
-           * **clad_datatype** (int): Data type used for cladding
+           * **wg_type** (string): Type of waveguide used.  Options are "strip" and "slot".  Defaults to "strip".
+           * **bend_radius** (float): Radius of curvature for waveguide bends (circular).  Defaults to 50.
+           * **wg_width** (float): Width of the waveguide as shown on the mask.  Defaults to 2.
+           * **slot** (float): Size of the waveguide slot region.  This is only used if `wg_type`=`'slot'`.  Defaults to 0.1.
+           * **clad_width** (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff).  Defaults to 10.
+           * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used.  Defaults to '+'
+           * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.   Defaults to "ETCH".
+           * **wg_layer** (int): Layer type used for waveguides.  Defaults to 1.
+           * **wg_datatype** (int): Data type used for waveguides.  Defaults to 0.
+           * **clad_layer** (int): Layer type used for cladding.  Defaults to 2.
+           * **clad_datatype** (int): Data type used for cladding.  Defaults to 0.
 
     """
-    def __init__(self, bend_radius=50.0, wg_width=2.0, clad_width=10.0,
-                 resist='+', fab='ETCH', wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0):
+    def __init__(self, wg_type='strip', bend_radius=50.0, wg_width=2.0, clad_width=10.0,
+                 resist='+', fab='ETCH', slot=0.1,
+                 wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0):
         self.wg_width = wg_width
+        if wg_type in ['strip', 'slot']:
+            self.wg_type = wg_type
+        else:
+            raise ValueError("Warning, invalid input for kwarg wg_type.")
+        if self.wg_type =='slot':
+            self.slot = slot
+            self.rail = (self.wg_width - self.slot)/2.0
+            self.rail_dist = self.wg_width -self.rail
         self.bend_radius = bend_radius
         self.clad_width = clad_width
         if resist != '+' and resist != '-':
-            raise ValueError("Warning, invalid input for type resist in "
+            raise ValueError("Warning, invalid input for kwarg resist in "
                              "WaveguideTemplate")
         if fab=='ETCH':
             self.resist = resist #default state assumes 'etching'
@@ -97,13 +108,20 @@ class Waveguide(gdspy.Cell):
         br = self.wgt.bend_radius
 
         if len(self.trace)==2:
-            path = gdspy.Path(self.wgt.wg_width, self.trace[0])
-            path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.wg_spec)
+            if self.wgt.wg_type=='strip':
+                path = gdspy.Path(self.wgt.wg_width, self.trace[0])
+                path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.wg_spec)
+            elif self.wgt.wg_type=='slot':
+                path = gdspy.Path(self.wgt.rail, self.trace[0], number_of_paths=2, distance=self.wgt.rail_dist)
+                path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.wg_spec)
             path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
             path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.clad_spec)
 
         else:
-            path = gdspy.Path(self.wgt.wg_width, self.trace[0])
+            if self.wgt.wg_type=='strip':
+                path = gdspy.Path(self.wgt.wg_width, self.trace[0])
+            elif self.wgt.wg_type=='slot':
+                path = gdspy.Path(self.wgt.rail, self.trace[0], number_of_paths=2, distance=self.wgt.rail_dist)
             path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
 
             prev_dl = 0.0
@@ -148,7 +166,7 @@ class Waveguide(gdspy.Cell):
 
 if __name__ == "__main__":
     top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(bend_radius=50, resist='+', fab="ETCH")
+    wgt = WaveguideTemplate(wg_type='slot', wg_width=1.0, bend_radius=50, resist='+', fab="ETCH")
 
     wg1=Waveguide([(0,0), (150,0), (150,100), (250,100),(350,0), (200,-150)], wgt)
     tk.add(top, wg1)
