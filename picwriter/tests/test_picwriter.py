@@ -195,3 +195,21 @@ class TestPICwriter(TestCase):
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
 		self.assertTrue(abs(top.area()-4222.12846627) <= 1e-6)
+
+	def test_stripslotycoupler_creation(self):
+		top = gdspy.Cell("t-stripslotycoupler")
+		wgt_strip = WaveguideTemplate(bend_radius=50, wg_type='strip', wg_width=0.7)
+		wgt_slot = WaveguideTemplate(bend_radius=50, wg_type='slot', wg_width=0.7, slot=0.2)
+		wg1=Waveguide([(0,0), (100,0)], wgt_strip)
+		tk.add(top, wg1)
+
+		ycoup = StripSlotYCoupler(wgt_strip, wgt_slot, 10.0, 0.2, end_slot_width=0, **wg1.portlist["output"])
+		tk.add(top, ycoup)
+
+		(x1,y1)=ycoup.portlist["output"]["port"]
+		wg2=Waveguide([(x1, y1), (x1+100, y1)], wgt_slot)
+		tk.add(top, wg2)
+#		print("StripSlotYCoupler area = "+str(top.area()))
+		print(len(top.elements))
+		self.assertTrue(len(top.elements)==3)
+		self.assertTrue(abs(top.area()-4473.0) <= 1e-6)

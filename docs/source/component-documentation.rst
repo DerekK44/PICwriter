@@ -7,7 +7,7 @@ Below is the set of supported components that come standard in the picwriter lib
    :maxdepth: 2
    
    waveguides.rst
-   tapers.rst
+   couplers.rst
    gratingcouplers.rst
    spirals.rst
    dc.rst
