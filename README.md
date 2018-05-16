@@ -4,14 +4,14 @@ Documentation: [![Documentation Status](https://readthedocs.org/projects/picwrit
 
 # PICwriter README
 Picwriter (Photonic-Integrated-Circuit Writer) is a [Python](https://www.python.org/) module, built above the [gdspy](https://github.com/heitzmann/gdspy) module, aimed at simplifying the process of designing complex masks for photonic integrated circuits through a prebuilt library of easy-to-implement PCells (technically all sub-classes of the gdspy Cell class).  Supported blocks currently include: 
-* waveguides
+* waveguides (strip and slot)
 * grating couplers (straight and focusing)
 * tapers
 * directional couplers
 * spiral structures (auto-generated from specified waveguide length)
 * 1x2 multi-mode interferometers
-* 2x2 Multi-mode interferometers
-* ring & disk resonators with automatic wrapping
+* 2x2 multi-mode interferometers
+* ring & disk resonators with automatic bus waveguide wrapping
 * distributed bragg reflectors
 * Mach-Zehnder interferometers
 * alignment markers (for photolithography and ebeam lithography)
