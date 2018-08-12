@@ -109,45 +109,100 @@ def main(args):
     eps = ms.get_epsilon()
     ms.get_dfield(plot_mode_number)
     E = ms.get_efield(plot_mode_number)
-    Eabs = np.sqrt(np.square(E[:,:,0,2]) + np.square(E[:,:,0,1]) + np.square(E[:,:,0,0]))
+    Eabs = np.sqrt(np.multiply(E[:,:,0,2],E[:,:,0,2]) + np.multiply(E[:,:,0,1],E[:,:,0,1]) + np.multiply(E[:,:,0,0],E[:,:,0,0]))
     H = ms.get_hfield(plot_mode_number)
-    Habs = np.sqrt(np.square(H[:,:,0,2]) + np.square(H[:,:,0,1]) + np.square(H[:,:,0,0]))
+    Habs = np.sqrt(np.multiply(H[:,:,0,2],H[:,:,0,2]) + np.multiply(H[:,:,0,1],H[:,:,0,1]) + np.multiply(H[:,:,0,0],H[:,:,0,0]))
 
     plt_extent = [-sy/2.0, +sy/2.0, -sx/2.0, +sx/2.0]
 
-    plt.imshow(abs(E[:,:,0,2]),cmap='hot',origin='lower',aspect='auto', extent=plt_extent)
-    plt.title("Waveguide mode Ex")
+    cmap_fields = 'hot_r'
+    cmap_geom = 'viridis'
+
+    """
+    First plot electric field
+    """
+    plt.figure(figsize=(14,8))
+
+    plt.subplot(2, 3, 1)
+    plt.imshow(abs(E[:,:,0,2]),cmap=cmap_fields,origin='lower',aspect='auto', extent=plt_extent)
+    plt.title("Waveguide mode $E_x$")
     plt.ylabel("y-axis")
     plt.xlabel("x-axis")
     plt.colorbar()
+
+    plt.subplot(2, 3, 2)
+    plt.imshow(abs(E[:,:,0,1]),cmap=cmap_fields,origin='lower',aspect='auto', extent=plt_extent)
+    plt.title("Waveguide mode $E_y$")
+    plt.ylabel("y-axis")
+    plt.xlabel("x-axis")
+    plt.colorbar()
+
+    plt.subplot(2, 3, 3)
+    plt.imshow(abs(E[:,:,0,0]),cmap=cmap_fields,origin='lower',aspect='auto', extent=plt_extent)
+    plt.title("Waveguide mode $E_z$")
+    plt.ylabel("y-axis")
+    plt.xlabel("x-axis")
+    plt.colorbar()
+
+    plt.subplot(2, 3, 4)
+    plt.imshow(abs(Eabs),cmap=cmap_fields,origin='lower',aspect='auto', extent=plt_extent)
+    plt.title("Waveguide mode $|E|$")
+    plt.ylabel("y-axis")
+    plt.xlabel("x-axis")
+    plt.colorbar()
+
+    plt.subplot(2, 3, 5)
+    plt.imshow(eps,cmap=cmap_geom,origin='lower',aspect='auto', extent=plt_extent)
+    plt.title("Waveguide dielectric")
+    plt.ylabel("y-axis")
+    plt.xlabel("x-axis")
+    plt.colorbar()
+
+    plt.tight_layout()
     plt.show()
 
-    plt.imshow((E[:,:,0,1].real),cmap='hot',origin='lower',aspect='auto', extent=plt_extent)
-    plt.title("Waveguide mode Ey")
-    plt.ylabel("y-axis")
-    plt.xlabel("x-axis")
-    plt.colorbar()
-    plt.show()
+    """
+    Then plot magnetic field
+    """
 
-    plt.imshow(Eabs.real,cmap='hot',origin='lower',aspect='auto', extent=plt_extent)
-    plt.title("Waveguide mode |E|")
-    plt.ylabel("y-axis")
-    plt.xlabel("x-axis")
-    plt.colorbar()
-    plt.show()
+    plt.figure(figsize=(14,8))
 
-    plt.imshow((Habs.real),cmap='hot',origin='lower',aspect='auto', extent=plt_extent)
-    plt.title("Waveguide mode |H|")
+    plt.subplot(2, 3, 1)
+    plt.imshow(abs(H[:,:,0,2]),cmap=cmap_fields,origin='lower',aspect='auto', extent=plt_extent)
+    plt.title("Waveguide mode $H_x$")
     plt.ylabel("y-axis")
     plt.xlabel("x-axis")
     plt.colorbar()
-    plt.show()
 
-    plt.imshow(eps,cmap='viridis',origin='lower',aspect='auto', extent=plt_extent)
-    plt.title("Waveguide profile")
+    plt.subplot(2, 3, 2)
+    plt.imshow(abs(H[:,:,0,1]),cmap=cmap_fields,origin='lower',aspect='auto', extent=plt_extent)
+    plt.title("Waveguide mode $H_y$")
     plt.ylabel("y-axis")
     plt.xlabel("x-axis")
     plt.colorbar()
+
+    plt.subplot(2, 3, 3)
+    plt.imshow(abs(H[:,:,0,0]),cmap=cmap_fields,origin='lower',aspect='auto', extent=plt_extent)
+    plt.title("Waveguide mode $H_z$")
+    plt.ylabel("y-axis")
+    plt.xlabel("x-axis")
+    plt.colorbar()
+
+    plt.subplot(2, 3, 4)
+    plt.imshow(abs(Habs),cmap=cmap_fields,origin='lower',aspect='auto', extent=plt_extent)
+    plt.title("Waveguide mode $|H|$")
+    plt.ylabel("y-axis")
+    plt.xlabel("x-axis")
+    plt.colorbar()
+
+    plt.subplot(2, 3, 5)
+    plt.imshow(eps,cmap=cmap_geom,origin='lower',aspect='auto', extent=plt_extent)
+    plt.title("Waveguide dielectric")
+    plt.ylabel("y-axis")
+    plt.xlabel("x-axis")
+    plt.colorbar()
+
+    plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":

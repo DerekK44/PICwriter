@@ -398,7 +398,6 @@ def compute_mode(wgt, mstack, res, wavelength,
        * **mstack** (MaterialStack): MaterialStack object that maps the gds layers to a physical stack
        * **res** (int): Resolution of the MPB simulation (number of pixels per micron).
        * **wavelength** (float): Wavelength in microns.
-       * **wl_span** (float): Wavelength span (determines the pulse width).
        * **sx** (float): Size of the simulation region in the x-direction.
        * **sy** (float): Size of the simulation region in the y-direction.
        * **num_modes** (int): Number of modes to compute.  Defaults to 1.

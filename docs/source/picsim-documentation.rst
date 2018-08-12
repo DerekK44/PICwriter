@@ -17,16 +17,42 @@ The mapping of GDSII layers/datatypes to vertical dielectric profiles is done by
     etch_stack = [(epsSiO2, 1.89), (epsSi, 0.07), (epsSiO2, 2.04)]
     mstack = ps.MaterialStack(vsize=4.0, default_stack=etch_stack, name="Si waveguide")
     waveguide_stack = [(epsSiO2, 1.89), (epsSi, 0.22), (epsSiO2, 1.89)]
-    clad_stack = [(epsSiO2, 1.9), (epsSi, 0.05), (epsAir, 2.05)]
+    clad_stack = [(epsSiO2, 1.9), (epsSi, 0.05), (epsSiO2, 2.05)]
     mstack.addVStack(layer=1, datatype=0, stack=waveguide_stack)
     mstack.addVStack(layer=2, datatype=0, stack=clad_stack)
     
 First, we import the picsim library Next, we specified the dielectric constant for the two materials considered (silicon and silicon dioxide at a wavelength of 1550 nm).  Then, we create a VStack list (`etch_stack`), that is in the format [(dielectric1, thickness1), (dielectric2, thickness2), ...].  Withthis we can create the MaterialStack object, with `etch_stack` the default vertical stack in the domain.  Next, we create a `waveguide_stack` VStack list and associate it with the (1,0) GDSII layer using the `addVStack` call.
 
+Quickly computing mode profiles
+---------------------------------
+
+With a properly defined material stack, PICsim makes it easy to quickly view the mode profile corresponding to your layout's WaveguideTemplate with the `compute_mode()` function::
+
+    import picwriter.components as pc
+
+    wgt = pc.WaveguideTemplate(bend_radius=15, wg_width=0.5, clad_width=3.0,
+                               wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0)
+    
+    ps.compute_mode(wgt, mstack, res=128, wavelength=1.55, sx=3.0, sy=3.0, 
+                    num_modes=1, plot_mode_number=1, polarization="TE")
+    				
+Which produces plots of the corresponding electric fields:
+
+.. image:: imgs/mode_Efields.png
+   :width: 1000px
+   :align: center
+
+and magnetic fields:
+
+.. image:: imgs/mode_Hfields.png
+   :width: 1000px
+   :align: center
+
+
 Computing the transmission/reflection spectra
 -----------------------------------------------
 
-With this, we can build a PICwriter component in the normal way and directly launch a MEEP simulation.  Below we build a DirectionalCoupler object and give it 2 um of waveguide at all the inputs/outputs (this will be useful when we simulate with MEEP later)::
+Likewise, we can build a PICwriter component in the normal way and directly launch a MEEP simulation.  Below we build a DirectionalCoupler object and give it 2 um of waveguide at all the inputs/outputs (this will be useful when we simulate with MEEP later)::
 
     import picwriter.toolkit as tk
     from picwriter.components import *
