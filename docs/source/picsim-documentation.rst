@@ -17,7 +17,7 @@ The mapping of GDSII layers/datatypes to vertical dielectric profiles is done by
     etch_stack = [(epsSiO2, 1.89), (epsSi, 0.07), (epsSiO2, 2.04)]
     mstack = ps.MaterialStack(vsize=4.0, default_stack=etch_stack, name="Si waveguide")
     waveguide_stack = [(epsSiO2, 1.89), (epsSi, 0.22), (epsSiO2, 1.89)]
-    clad_stack = [(epsSiO2, 1.9), (epsSi, 0.05), (epsSiO2, 2.05)]
+    clad_stack = [(epsSiO2, 1.89), (epsSi, 0.05), (epsSiO2, 2.06)]
     mstack.addVStack(layer=1, datatype=0, stack=waveguide_stack)
     mstack.addVStack(layer=2, datatype=0, stack=clad_stack)
     
