@@ -9,3 +9,18 @@
 
 # Build files
 /build/
+/docs/build/
+
+# Old component files
+/picwriter/components/old_files/
+
+# Intermediate image files for documentation
+/docs/source/imgs/*.svg
+
+# GDSPY <-> MEEP/MPB conversion
+/picwriter/*.h5
+/picwriter/*.out
+/picwriter/*.ctl
+/picwriter/*.vtk
+/picwriter/test.py
+/picwriter/test-out/

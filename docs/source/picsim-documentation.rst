@@ -17,7 +17,9 @@ The mapping of GDSII layers/datatypes to vertical dielectric profiles is done by
     etch_stack = [(epsSiO2, 1.89), (epsSi, 0.07), (epsSiO2, 2.04)]
     mstack = ps.MaterialStack(vsize=4.0, default_stack=etch_stack, name="Si waveguide")
     waveguide_stack = [(epsSiO2, 1.89), (epsSi, 0.22), (epsSiO2, 1.89)]
+    clad_stack = [(epsSiO2, 1.9), (epsSi, 0.05), (epsAir, 2.05)]
     mstack.addVStack(layer=1, datatype=0, stack=waveguide_stack)
+    mstack.addVStack(layer=2, datatype=0, stack=clad_stack)
     
 First, we import the picsim library Next, we specified the dielectric constant for the two materials considered (silicon and silicon dioxide at a wavelength of 1550 nm).  Then, we create a VStack list (`etch_stack`), that is in the format [(dielectric1, thickness1), (dielectric2, thickness2), ...].  Withthis we can create the MaterialStack object, with `etch_stack` the default vertical stack in the domain.  Next, we create a `waveguide_stack` VStack list and associate it with the (1,0) GDSII layer using the `addVStack` call.
 
@@ -28,13 +30,15 @@ With this, we can build a PICwriter component in the normal way and directly lau
 
     import picwriter.toolkit as tk
     from picwriter.components import *
+    import numpy as np
     import gdspy
     
     top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(bend_radius=15, wg_width=0.45, clad_width=2.0,
+    wgt = WaveguideTemplate(bend_radius=15, wg_width=0.5, clad_width=3.0,
                             wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0)
     
     simulated_component = gdspy.Cell('sc')                        
+    
     dc = DirectionalCoupler(wgt, 3.5, 0.2, angle=np.pi/16.0, 
     						parity=1, direction='EAST', port=(0,0))
     tk.add(simulated_component, dc)
@@ -63,13 +67,12 @@ The gdspy Cell object `simulated_component` now contains four short waveguides a
              
 The first port specified in the list above will be the inport where MEEP will place an EigenmodeSource. The last step is calling `compute_transmission_spectra` with the simulated component, MaterialStack, ports, and some additional information about the simulation::
 
-    ps.compute_transmission_spectra(simulated_component, mstack, ports, port_vcenter=0, 
-                                    port_height=1.5*0.22, port_width=1.5*wgt.wg_width, dpml=1.0, 
-                                    res=20, wl_center=1.55, wl_span=0.6, fields=True,
-                                    norm=True, wgt=wgt, convert_component_to_hdf5=True, 
-                                    parallel=True, n_p=4)
+    ps.compute_transmission_spectra(simulated_component, mstack, wgt, ports, port_vcenter=0,
+                                port_height=1.5*0.22, port_width=1.5*wgt.wg_width, dpml=0.5,
+                                res=20, wl_center=1.55, wl_span=0.6, fields=True,
+                                norm=True, parallel=True, n_p=4)
                                     
-In the above *port_vcenter* specifies the center of the port in the vertical direction, *port_height* and *port_width* are the cross-sectional size of the power flux planes, *res* is the resolution (in pixels/um), *wl_center* and *wl_span* specify the center wavelength and wavelength span of the input pulse (in um), *fields* = True tells MEEP to output images of the electric field profile every few timesteps, *norm* = True tells MEEP to first perform a normalization calculation (straight waveguide) using the *wgt* WaveguideTemplate parameters.  If the simulation is being performed a second time, *convert_component_to_hdf5*=False will skip the hdf5 output step (to save time).  *parallel* specifies if the simulation should be run using multiple processor cores (requires MEEP/MPB to be built using parallel libaries), and *n_p* then specifies the number of cores to run on.
+In the above *port_vcenter* specifies the center of the port in the vertical direction, *port_height* and *port_width* are the cross-sectional size of the power flux planes, *res* is the resolution (in pixels/um), *wl_center* and *wl_span* specify the center wavelength and wavelength span of the input pulse (in um), *fields* = True tells MEEP to output images of the electric field profile every few timesteps, *norm* = True tells MEEP to first perform a normalization calculation (straight waveguide) using the *wgt* WaveguideTemplate parameters.  *parallel* specifies if the simulation should be run using multiple processor cores (requires MEEP/MPB to be built using parallel libaries), and *n_p* then specifies the number of cores to run on.
 
 *NOTE*: This function requires MEEP and MPB to be compiled (from source) together, so that MEEP can call MPB to input an EigenmodeSource at the first port location.
 
@@ -78,13 +81,13 @@ The resulting structure that is simulated and several field images are shown bel
 .. image:: imgs/topview-mcts.png
    :width: 1000px
    :align: center
-.. image:: imgs/mcts-ez-topview.t119.png
+.. image:: imgs/mcts-ez-topview.t124.png
    :width: 1000px
    :align: center
-.. image:: imgs/mcts-ez-topview.t146.png
+.. image:: imgs/mcts-ez-topview.t147.png
    :width: 1000px
    :align: center
-.. image:: imgs/mcts-ez-topview.t175.png
+.. image:: imgs/mcts-ez-topview.t178.png
    :width: 1000px
    :align: center
 

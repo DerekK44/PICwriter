@@ -17,7 +17,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import numpy as np
 import meep as mp
+import h5py
 import argparse
+import operator
 
 def str2bool(v):
     """ Allow proper argparse handling of boolean inputs """
@@ -28,12 +30,68 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+def get_prism_objects(eps_file):
+    with h5py.File(eps_file,'r') as hf:
+        """ Write-format:
+           * LL = layer
+           * DD = datatype
+           * NN = polygon index
+           * VV = vertex index
+           * XX = x-position
+           * ZZ = z-position
+
+           * height = height of the prism
+           * eps = epsilon of the prism
+           * y-center = center (y-direction) of the prism [note: (x,y) center defaults to (0,0)]
+        """
+        data = np.array([np.array(hf.get("LL")),
+                         np.array(hf.get("DD")),
+                         np.array(hf.get("NN")),
+                         np.array(hf.get("VV")),
+                         np.array(hf.get("XX")),
+                         np.array(hf.get("ZZ")),
+                         np.array(hf.get("height")),
+                         np.array(hf.get("eps")),
+                         np.array(hf.get("ycenter"))])
+
+    """ Now, restructure so that each element of the prisms list contains all the info needed to instantiate:
+        i.e. [{'center':(0,0,0), 'height':0.4, 'eps':2.3, 'vlist':[(0,0), (1,2), ...]}]
+    """
+    prisms = []
+
+    #get all unique (LL,DD,NN,ycenter,height,eps) combinations (each corresponds to a unique prism)
+    unique_vals = set([tuple(data[(0,1,2,6,7,8),i]) for i in range(len(data[0]))])
+    for val in unique_vals:
+        # Search 'data' for all vertex values with the matching vals
+        vertex_list = []
+        for i in range(len(data[0])):
+            if data[0,i]==val[0] and data[1,i]==val[1] and data[2,i]==val[2] and data[6,i]==val[3] and data[7,i]==val[4] and data[8,i]==val[5]:
+                vertex_list.append([data[3,i], data[4,i], data[5,i]])
+        # Sort vertices
+        vertex_list.sort(key=operator.itemgetter(0))
+
+        # Get rid of the numbering for each vertex
+        vl = [mp.Vector3(float(vertex_list[i][1]), float(val[5])-float(val[3])/2.0, float(vertex_list[i][2])) for i in range(len(vertex_list))]
+
+        prism = {'height':float(val[3]),
+                 'eps':float(val[4]),
+                 'vlist':vl}
+        prisms.append(prism)
+
+        # Sort prisms in order of ascending dielectric constant
+        prisms_sorted = sorted(prisms, key=operator.itemgetter('eps'))
+
+    if len(unique_vals)==0:
+        raise ValueError("Epsilon file (eps_file="+str(eps_file)+") is empty or the wrong format.")
+
+    return prisms_sorted
+
 def main(args):
     """
     Args:
        * **fields** (boolean): If true, outputs the fields at the relevant waveguide cross-sections (top-down and side-view)
        * **output_directory** (string): Name of the output directory (for storing the fields)
-       * **eps_input_file** (string): Name of the epsilon hdf5 file that defines the geometry
+       * **eps_input_file** (string): Name of the hdf5 file that defines the geometry through prisms
        * **input_pol** (string): Either "TE", or "TM", corresponding to the desired input mode.  Defaults to "TE"
        * **res** (int): Resolution of the MEEP simulation
        * **nfreq** (int): The number of wavelength points to record in the transmission/reflection spectra
@@ -91,6 +149,21 @@ def main(args):
     if len(port_coords)%2 != 0:
         raise ValueError("Warning! Improper port_coords was passed to `meep_compute_transmission_spectra`.  Must be even number of port_coords in [x1, y1, x2, y2, ..] format.")
 
+    # Setup the simulation geometries
+
+    prism_objects = get_prism_objects(eps_input_file)
+    geometry=[]
+    for p in prism_objects:
+#        print('vertices='+str(p['vlist']))
+#        print('axis = '+str(mp.Vector3(0,1,0)))
+#        print('height = '+str(p['height']))
+#        print('material = '+str(p['eps']))
+#        print('\n')
+        geometry.append(mp.Prism(p['vlist'],
+                                 axis=mp.Vector3(0,1,0),
+                                 height=p['height'],
+                                 material=mp.Medium(epsilon=p['eps'])))
+
     # Setup the simulation sources
     fmax = 1.0/(wl_center - 0.5*wl_span)
     fmin = 1.0/(wl_center + 0.5*wl_span)
@@ -111,11 +184,10 @@ def main(args):
                                    eig_resolution = 2*res if res > 16 else 32,
                                    )]
 
-    # Setup the simulation with symmetries
-
+    # Setup the simulation
     sim = mp.Simulation(cell_size=mp.Vector3(sx, sy, sz),
                         boundary_layers=[mp.PML(dpml)],
-                        epsilon_input_file=str(eps_input_file),
+                        geometry=geometry,
                         sources=sources,
                         dimensions=3,
                         resolution=res,
@@ -141,6 +213,8 @@ def main(args):
     sv = mp.Volume(size=mp.Vector3(sx, sy, 0), center=mp.Vector3(0,0,0))
     tv = mp.Volume(size=mp.Vector3(sx, 0, sz), center=mp.Vector3(0,port_vcenter,0))
 
+    print("RUNNING SIMULATION")
+
     if fields:
         sim.run(mp.at_beginning(mp.output_epsilon),
                 mp.at_beginning(mp.with_prefix(str("sideview-"), mp.in_volume(sv, mp.output_epsilon))),
@@ -161,7 +235,7 @@ if __name__ == "__main__":
     Args:
        * **fields** (boolean): If true, outputs the fields at the relevant waveguide cross-sections (top-down and side-view)
        * **output_directory** (string): Name of the output directory (for storing the fields)
-       * **eps_input_file** (string): Name of the epsilon hdf5 file that defines the geometry
+       * **eps_input_file** (string): Name of the hdf5 file that defines the geometry through prisms
        * **res** (int): Resolution of the MEEP simulation
        * **nfreq** (int): The number of wavelength points to record in the transmission/reflection spectra
        * **input_direction** (1 or -1): Direction of propagation for the input eigenmode.  If +1, goes in +x, else if -1, goes in -x.  Defaults to +1.
@@ -183,7 +257,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-fields', type=str2bool, nargs='?', const=True, default=False, help='If true, outputs the fields at the relevant waveguide cross-sections (top-down and side-view) (default=False)')
     parser.add_argument('-output_directory', type=str, default=None, help='Name of the output directory (for storing the fields) (default=None)')
-    parser.add_argument('-eps_input_file', type=str, default=None, help='Name of the epsilon hdf5 file that defines the geometry (default=None)')
+    parser.add_argument('-eps_input_file', type=str, default=None, help='Name of the hdf5 file that defines the geometry through prisms (default=None)')
     parser.add_argument('-input_pol', type=str, default='TE', help='Either "TE", or "TM", corresponding to the desired input mode polarization (default="TE")')
     parser.add_argument('-res', type=int, default=10, help='Resolution of the simulation [pixels/um] (default=10)')
     parser.add_argument('-nfreq', type=int, default=100, help='Number of frequencies sampled (for flux) between fcen-df/2 and fcen+df/2 (default=100)')

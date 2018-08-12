@@ -7,7 +7,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class WaveguideTemplate:
-    """ Standard template for waveguides (as well as other structures) that contains some standard information about the fabrication process and waveguides.
+    """ Standard template for waveguides that contains standard information about the geometry and fabrication.
 
         Keyword Args:
            * **wg_type** (string): Type of waveguide used.  Options are "strip" and "slot".  Defaults to "strip".
@@ -16,7 +16,7 @@ class WaveguideTemplate:
            * **slot** (float): Size of the waveguide slot region.  This is only used if `wg_type`=`'slot'`.  Defaults to 0.1.
            * **clad_width** (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff).  Defaults to 10.
            * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used.  Defaults to '+'
-           * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.   Defaults to "ETCH".
+           * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.   Defaults to 'ETCH'.
            * **wg_layer** (int): Layer type used for waveguides.  Defaults to 1.
            * **wg_datatype** (int): Data type used for waveguides.  Defaults to 0.
            * **clad_layer** (int): Layer type used for cladding.  Defaults to 2.

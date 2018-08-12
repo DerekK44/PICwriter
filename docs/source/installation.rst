@@ -11,7 +11,7 @@ A working version of python is required for using the PICwriter library.  You ca
 Installation (Linux / OS X)
 ---------------------------
 
-(**Option 1 (preferred)**) Install PICwriter by first downloading the source code `here <https://github.com/DerekK88/PICwriter>`_. and then in the picwriter directory run::
+(**Option 1 -- preferred**) Install PICwriter by first downloading the source code `here <https://github.com/DerekK88/PICwriter>`_. and then in the picwriter directory run::
 
     python setup.py install
     
@@ -35,6 +35,14 @@ The best way of obtaining the library is by installing the prebuilt binaries.
     pip install picwriter-1.X.X.X.whl
     
 Building from source is also possible. For installing gdspy, an appropriate build environment is required for compilation of the C extension modules.
+
+Simulations with PICwriter
+--------------------------
+
+In order to use the built-in PICwriter simulation functions, it is necessary to download and build `MEEP <https://meep.readthedocs.io/>`_ and `MPB <https://mpb.readthedocs.io/>`_ (the free and open-source software packages for electromagnetic simulation that PICwriter calls).  Currently, this functionality is only tested on Ubuntu 16.04, but should work fine for any UNIX environment.  For the FDTD functionality, it is necessary for MEEP and MPB to be built from source (so that they can be linked together for importing eigenmode sources).  Below is a downloadable script that I use to install and build MEEP/MPB from source:
+:download:`build_meep_python_parallel.sh <build_meep_python_parallel.sh>`.
+
+Please see the section :doc:`/picsim-documentation` for information and tutorials for simulating PICwriter components.
 
 Getting Started
 ---------------

@@ -84,7 +84,7 @@ As usual, we begin with the import statements, a 'top' cell, and a standard wave
     from picwriter.components import *
     
     top = gdspy.Cell('top')
-    wgt = WaveguideTemplate(wg_width=0.45, clad_width=10.0, bend_radius=100, resist='+', fab='ETCH', wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0)
+    wgt = WaveguideTemplate(wg_width=0.45, clad_width=10.0, bend_radius=60, resist='+', fab='ETCH', wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0)
     
     gc1 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=40, period=1.0, dutycycle=0.7, port=(100,0), direction='WEST')
     tk.add(top, gc1)
@@ -133,7 +133,7 @@ We then add a waveguide for the bottom 'arm' of the Mach-Zehnder that directly c
                  (xmmi_top, ybot)], wgt)
     tk.add(top, wg3)
     
-The last grating coupler then is placed at the location of the second MMI 'port', plus an additional 100 um in the '+x' direction.
+The last grating coupler then is placed at the location of the second MMI 'port', plus an additional 100 um in the '+x' direction::
 
     gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=40, period=1.0, dutycycle=0.7,
     port=(mmi2.portlist['input']['port'][0]+100, mmi2.portlist['input']['port'][1]), direction='EAST')
@@ -159,7 +159,7 @@ Altogether, the entire code for the example is shown below::
     from picwriter.components import *
 
     top = gdspy.Cell('top')
-    wgt = WaveguideTemplate(wg_width=0.45, clad_width=10.0, bend_radius=100, resist='+', fab='ETCH', wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0)
+    wgt = WaveguideTemplate(wg_width=0.45, clad_width=10.0, bend_radius=60, resist='+', fab='ETCH', wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0)
 
     gc1 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=40, period=1.0, dutycycle=0.7, port=(100,0), direction='WEST')
     tk.add(top, gc1)

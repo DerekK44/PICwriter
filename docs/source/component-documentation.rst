@@ -6,14 +6,14 @@ Below is the set of supported components that come standard in the picwriter lib
 .. toctree::
    :maxdepth: 2
    
-   waveguides.rst
-   couplers.rst
-   gratingcouplers.rst
-   spirals.rst
-   dc.rst
-   mmis.rst
-   resonators.rst
-   dbr.rst
-   mzi.rst
-   markers.rst
-   metalroutes.rst
+   components/waveguides.rst
+   components/couplers.rst
+   components/gratingcouplers.rst
+   components/spirals.rst
+   components/dc.rst
+   components/mmis.rst
+   components/resonators.rst
+   components/dbr.rst
+   components/mzi.rst
+   components/markers.rst
+   components/metalroutes.rst

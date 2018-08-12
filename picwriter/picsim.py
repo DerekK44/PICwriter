@@ -102,8 +102,9 @@ def point_inside_polygon(x,y,poly):
         p1x,p1y = p2x,p2y
     return inside
 
-def convert_to_hdf5(filename, component, mstack, x_size, z_size, res):
-    """ Outputs the scalar dielectric field corresponding to the desired component and MaterialStack.  Format is compatible for importing with MEEP/MPB via `epsilon_input_file`.
+def export_component_to_hdf5(filename, component, mstack, boolean_operations):
+    """ Outputs the polygons corresponding to the desired component and MaterialStack.
+    Format is compatible for generating prism geometries in MEEP/MPB.
 
     **Note**: that the top-down view of the device is the 'X-Z' plane.  The 'Y' direction specifies the vertical height.
 
@@ -111,56 +112,261 @@ def convert_to_hdf5(filename, component, mstack, x_size, z_size, res):
        * **filename** (string): Filename to save (must end with '.h5')
        * **component** (gdspy.Cell): Cell object (component of the PICwriter library)
        * **mstack** (MaterialStack): MaterialStack object that maps the gds layers to a physical stack
-       * **x_size** (float): Size of the output field (in the x-direction).  Centered at the middle of the device.
-       * **z_size** (float): Size of the output field (in the z-direction).  Centered at the middle of the device.
-       * **res** (float):
+       * **boolean_operations** (list): A list of specified boolean operations to be performed on the layers (order matters, see below).
+
+    The boolean_operations argument must be specified in the following format::
+
+       boolean_opeartions = [((layer1/datatype1), (layer2/datatype2), operation), ...]
+
+    where 'operation' can be 'xor', 'or', 'and', or 'not' and the resulting polygons are placed on (layer1, datatype1). For example, the boolean_operation below::
+
+       boolean_operations = [((-1,-1), (2,0), 'and'), ((2,0), (1,0), 'xor')]
+
+    will:
+
+       (1) do an 'xor' of the default layerset (-1,-1) with the cladding (2,0) and then make this the new default
+       (2) do an 'xor' of the cladding (2,0) and waveguide (1,0) and make this the new cladding
+
+    Write format:
+       * LL = layer
+       * DD = datatype
+       * NN = polygon index
+       * VV = vertex index
+       * XX = x-position
+       * ZZ = z-position
+       * height = height of the prism
+       * eps = epsilon of the prism
+       * y-center = center (y-direction) of the prism [note: (x,y) center defaults to (0,0)]
 
     """
-    import time
-    start = time.time()
 
     flatcell = component.flatten()
     polygon_dict = flatcell.get_polygons(by_spec=True)
+
     bb = flatcell.get_bounding_box()
-    xmin, xmax, zmin, zmax = bb[0][0], bb[1][0], bb[0][1], bb[1][1]
-    center = ((xmax+xmin)/2.0, (zmax+zmin)/2.0)
-    numx, numy, numz = int(x_size*res+1), int(mstack.vsize*res+1), int(z_size*res+1),
-    x_list = np.linspace(center[0]-x_size/2.0, center[0]+x_size/2.0, int(x_size*res+1))
-    z_list = np.linspace(center[1]-z_size/2.0, center[1]+z_size/2.0, int(z_size*res+1))
+    sx, sy, sz = bb[1][0]-bb[0][0], mstack.vsize, bb[1][1]-bb[0][1]
+    center_x, center_y, center_z = (bb[1][0]+bb[0][0])/2.0, 0.0, (bb[1][1]+bb[0][1])/2.0
 
-    # Initialize matrix for HDF5 output
-    f = h5py.File(filename,'w')
-    eps_matrix = f.create_dataset("epsilon", (numx, numy, numz))
+    ll_list, dd_list, nn_list, vv_list, xx_list, zz_list = [], [], [], [], [], []
+    height_list, eps_list, ycenter_list = [], [], []
 
-    default_stacklist_pts = mstack.interpolate_points((-1,-1), num_points=numy)
+    """ Add the default layer set """
+    polygon_dict[(-1, -1)] = [np.array([[bb[0][0], bb[0][1]],
+                                       [bb[1][0], bb[0][1]],
+                                       [bb[1][0], bb[1][1]],
+                                       [bb[0][0], bb[1][1]]])]
 
-    x_indices, z_indices = range(numx), range(numz)
-    for x in x_indices:
-        for z in z_indices:
-            eps_matrix[x,:,z] = default_stacklist_pts
+#    print("boolean operations: ")
+#    print(boolean_operations)
+#
+#    print('key (default): (-1,-1)')
+#    print(polygon_dict[(-1,-1)])
 
-    cur_progress, prev_progress = 0, 0
-    for key in list(polygon_dict.keys()):
-        # Check if the polygon layer/datatype is in the MaterialStack
+    for key in polygon_dict.keys():
+        """ Merge the polygons
+            This prevents weird edge effects in MEEP with subpixel averaging between adjacent objects
+        """
+        polygons = polygon_dict[key]
+        polygons_union = gdspy.fast_boolean(polygons, polygons, 'or', max_points=99999, layer=key[0], datatype=key[1])
+        polygon_dict[key] = polygons_union.polygons
+
+    for bo in boolean_operations:
+        polygons_bool = gdspy.fast_boolean(polygon_dict[bo[0]], polygon_dict[bo[1]], bo[2], layer=bo[0][0], datatype=bo[0][1])
+        if polygons_bool==None:
+            del polygon_dict[bo[0]]
+        else:
+            polygon_dict[bo[0]] = polygons_bool.polygons
+
+#    for key in polygon_dict.keys():
+#        print('key: '+str(key))
+#        print(polygon_dict[key])
+
+    for key in polygon_dict.keys():
+        ll, dd, = key[0], key[1]
         if key in list(mstack.stacklist.keys()):
-            # This *found* layer should be specified in the epsilon-input file
-            stacklist_pts =mstack.interpolate_points(key, num_points=numy)
-            # Look through all the xy points for values inside the polygons, then add vertical stacklist to the file.
-            # Note the run-time is O(x*y*stacks*polygons*points_per_polygon)
-            for x in x_indices:
-                cur_progress = 100*(x/numx)
-                if cur_progress%10 < prev_progress%10:
-                    print("Saving PICwriter component dielectric to hdf5... "+str(100*(x/numx))+"% done.")
-                prev_progress=cur_progress
-                for z in z_indices:
-                    xval, zval = x_list[x], z_list[z]
-                    for polygon in polygon_dict[key]:
-                        if point_inside_polygon(xval,zval,polygon):
-                            eps_matrix[x,:,z] = stacklist_pts
+            stacklist = np.array(mstack.stacklist[key])
 
-    f.close()
-    print("Time to write file = "+str(time.time()-start)+" seconds")
-    return None
+            # Put together a list of the centers of each layer
+            zlength = sum(stacklist[:,1])
+            z0 = -zlength/2.0
+            centers = [z0+stacklist[0][1]/2.0]
+            for i in range(len(stacklist)-1):
+                prev_value = centers[-1]
+                centers.append(prev_value+stacklist[i][1]/2.0 + stacklist[i+1][1]/2.0)
+
+            for i in range(len(stacklist)):
+                for nn in range(len(polygon_dict[key])):
+#                    print("Polygon: ")
+#                    print("layer=("+str(ll)+"/"+str(dd)+"), height="+str(stacklist[i][1])+" eps="+str(stacklist[i][0])+" ycent="+str(centers[i]))
+                    for vv in range(len(polygon_dict[key][nn])):
+                        xx, zz = polygon_dict[key][nn][vv]
+                        ll_list.append(ll)
+                        dd_list.append(dd)
+                        nn_list.append(nn)
+                        vv_list.append(vv)
+                        xx_list.append(xx-center_x)
+                        zz_list.append(zz-center_z)
+                        height_list.append(stacklist[i][1])
+                        eps_list.append(stacklist[i][0])
+                        ycenter_list.append(centers[i])
+
+    with h5py.File(filename,'w') as hf:
+        hf.create_dataset("LL", data=np.array(ll_list))
+        hf.create_dataset("DD", data=np.array(dd_list))
+        hf.create_dataset("NN", data=np.array(nn_list))
+        hf.create_dataset("VV", data=np.array(vv_list))
+        hf.create_dataset("XX", data=np.array(xx_list))
+        hf.create_dataset("ZZ", data=np.array(zz_list))
+        hf.create_dataset("height", data=np.array(height_list))
+        hf.create_dataset("eps", data=np.array(eps_list))
+        hf.create_dataset("ycenter", data=np.array(ycenter_list))
+
+def export_wgt_to_hdf5(filename, wgt, mstack, sx):
+    """ Outputs the polygons corresponding to the desired waveguide template and MaterialStack.
+    Format is compatible for generating prism geometries in MEEP/MPB.
+
+    **Note**: that the top-down view of the device is the 'X-Z' plane.  The 'Y' direction specifies the vertical height.
+
+    Args:
+       * **filename** (string): Filename to save (must end with '.h5')
+       * **wgt** (WaveguideTemplate): WaveguideTemplate object from the PICwriter library
+       * **mstack** (MaterialStack): MaterialStack object that maps the gds layers to a physical stack
+       * **sx** (float): Size of the simulation region in the x-direction
+
+    Write-format for all blocks:
+       * CX = center-x
+       * CY = center-y
+       * width = width (x-direction) of block
+       * height = height (y-direction) of block
+       * eps = dielectric constant
+
+    """
+    CX, CY, width_list, height_list, eps_list = [], [], [], [], []
+    if wgt.wg_type=='strip':
+        """
+        check wg (layer/datatype) and clad (layer/datatype)
+        check if these are in the mstack.  If so, create the blocks that would correspond to each
+        save all 'block' info to hdf5 file (center, x-size, y-size, epsilon)
+        still need to add support for full material functions (i.e. built-in silicon, SiN, etc...)
+        """
+        for key in mstack.stacklist.keys():
+            if key==(wgt.wg_layer, wgt.wg_datatype):
+                width = wgt.wg_width
+                center_x = 0.0
+                total_y = sum([layer[1] for layer in mstack.stacklist[key]])
+                cur_y = -total_y/2.0
+                for layer in mstack.stacklist[key]:
+                    center_y = cur_y + layer[1]/2.0
+                    cur_y = cur_y + layer[1]
+                    CX.append(center_x)
+                    CY.append(center_y)
+                    width_list.append(width)
+                    height_list.append(layer[1])
+                    eps_list.append(layer[0])
+            if key==(wgt.clad_layer, wgt.clad_datatype):
+                width = wgt.clad_width
+                center_x = (wgt.wg_width + wgt.clad_width)/2.0
+                total_y = sum([layer[1] for layer in mstack.stacklist[key]])
+                cur_y = -total_y/2.0
+                for layer in mstack.stacklist[key]:
+                    center_y = cur_y + layer[1]/2.0
+                    cur_y = cur_y + layer[1]
+                    # Add cladding on +x side
+                    CX.append(center_x)
+                    CY.append(center_y)
+                    width_list.append(width)
+                    height_list.append(layer[1])
+                    eps_list.append(layer[0])
+                    # Add cladding on -x side
+                    CX.append(-center_x)
+                    CY.append(center_y)
+                    width_list.append(width)
+                    height_list.append(layer[1])
+                    eps_list.append(layer[0])
+
+    elif wgt.wg_type=='slot':
+        """ Same thing as above but for slot waveguides
+        """
+        slot = wgt.slot
+        for key in mstack.stacklist.keys():
+            if key==(wgt.wg_layer, wgt.wg_datatype):
+                """ Add waveguide blocks """
+                rail_width = (wgt.wg_width - slot)/2.0
+                center_x = (slot + rail_width)/2.0
+                total_y = sum([layer[1] for layer in mstack.stacklist[key]])
+                cur_y = -total_y/2.0
+                for layer in mstack.stacklist[key]:
+                    center_y = cur_y + layer[1]/2.0
+                    cur_y = cur_y + layer[1]
+                    # Add left waveguide component
+                    CX.append(center_x)
+                    CY.append(center_y)
+                    width_list.append(rail_width)
+                    height_list.append(layer[1])
+                    eps_list.append(layer[0])
+                    # Add right waveguide component
+                    CX.append(-center_x)
+                    CY.append(center_y)
+                    width_list.append(rail_width)
+                    height_list.append(layer[1])
+                    eps_list.append(layer[0])
+            if key==(wgt.clad_layer, wgt.clad_datatype):
+                """ Add cladding blocks """
+                width = wgt.clad_width
+                center_x = (wgt.wg_width + wgt.clad_width)/2.0
+                total_y = sum([layer[1] for layer in mstack.stacklist[key]])
+                cur_y = -total_y/2.0
+                for layer in mstack.stacklist[key]:
+                    center_y = cur_y + layer[1]/2.0
+                    cur_y = cur_y + layer[1]
+                    # Add cladding on +x side
+                    CX.append(center_x)
+                    CY.append(center_y)
+                    width_list.append(width)
+                    height_list.append(layer[1])
+                    eps_list.append(layer[0])
+                    # Add cladding on -x side
+                    CX.append(-center_x)
+                    CY.append(center_y)
+                    width_list.append(width)
+                    height_list.append(layer[1])
+                    eps_list.append(layer[0])
+                    # Add slot region
+                    CX.append(0.0)
+                    CY.append(center_y)
+                    width_list.append(slot)
+                    height_list.append(layer[1])
+                    eps_list.append(layer[0])
+
+    if (wgt.wg_width + 2*wgt.clad_width) < sx:
+        """ If True, need to add additional region next to cladding (default material) """
+        default_key = (-1,-1)
+        center_x = sx/2.0
+        width = sx - (wgt.wg_width + 2*wgt.clad_width)
+        total_y = sum([layer[1] for layer in mstack.stacklist[default_key]])
+        cur_y = -total_y/2.0
+        for layer in mstack.stacklist[default_key]:
+            center_y = cur_y + layer[1]/2.0
+            cur_y = cur_y + layer[1]
+            # Add default material blocks on +x side
+            CX.append(center_x)
+            CY.append(center_y)
+            width_list.append(width)
+            height_list.append(layer[1])
+            eps_list.append(layer[0])
+            # Add default material blocks on -x side
+            CX.append(-center_x)
+            CY.append(center_y)
+            width_list.append(width)
+            height_list.append(layer[1])
+            eps_list.append(layer[0])
+
+    with h5py.File(filename,'w') as hf:
+        hf.create_dataset("CX", data=np.array(CX))
+        hf.create_dataset("CY", data=np.array(CY))
+        hf.create_dataset("width_list", data=np.array(width_list))
+        hf.create_dataset("height_list", data=np.array(height_list))
+        hf.create_dataset("eps_list", data=np.array(eps_list))
 
 def export_timestep_fields_to_png(directory):
     from subprocess import call
@@ -180,10 +386,109 @@ def export_timestep_fields_to_png(directory):
     exec_str = "h5topng -t 0:"+str(simulation_time)+" -R -Zc dkbluered -a yarg -A "+str(directory)+"/sideview-"+str(filename)+"-eps-000000.00.h5 "+str(directory)+"/"+str(filename)+"-ez-sideview.h5"
     call(exec_str, shell=True)
 
+def compute_mode(wgt, mstack, res, wavelength,
+                 sx, sy, num_modes = 1, plot_mode_number = 1,
+                 polarization="TE", output_directory='mpb-sim',
+                 plot_mode=True, suppress_window=False):
 
-def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, port_height, port_width, res, wl_center, wl_span,
-                                 norm=False, wgt=None, input_pol="TE", nfreq=100, dpml=0.5, fields=False, plot_window=False, source_offset=0.1, symmetry=None,
-                                 convert_component_to_hdf5=True, skip_sim=False, output_directory='meep-sim', parallel=False, n_p=2):
+    """ Launches a MPB simulation to quickly compute and visualize a waveguide's electromagnetic eigenmodes
+
+    Args:
+       * **wgt** (WaveguideTemplate): WaveguideTemplate object used to specify the waveguide geometry (mask-level)
+       * **mstack** (MaterialStack): MaterialStack object that maps the gds layers to a physical stack
+       * **res** (int): Resolution of the MPB simulation (number of pixels per micron).
+       * **wavelength** (float): Wavelength in microns.
+       * **wl_span** (float): Wavelength span (determines the pulse width).
+       * **sx** (float): Size of the simulation region in the x-direction.
+       * **sy** (float): Size of the simulation region in the y-direction.
+       * **num_modes** (int): Number of modes to compute.  Defaults to 1.
+       * **plot_mode_number** (int): Which mode to plot (only plots one mode at a time).  Must be a number equal to or less than num_modes.  Defaults to 1.
+       * **polarization** (string): Mode polarization.  Must be either "TE", "TM", or "None" (corresponding to MPB parities of ODD-X, EVEN-X, or NO-PARITY).
+       * **output_directory** (string): Output directory for files generated.  Defaults to 'mpb-sim'.
+       * **plot_mode** (Boolean): Save the mode image and data to a separate file.  Defaults to True.
+       * **suppress_window** (Boolean): Suppress the matplotlib window.  Defaults to false.
+
+    Returns:
+       List of values for the modes: [[:math:`n_{eff,1}, n_{g,1}`], [:math:`n_{eff,2}, n_{g,2}`], ...]
+
+    """
+    from subprocess import call
+    import os
+    import time
+
+    if plot_mode > num_modes:
+        raise ValueError("Warning!  plot_mode must be less than or equal to num_modes.")
+
+    eps_input_file = str('epsilon.h5')
+    export_wgt_to_hdf5(eps_input_file, wgt, mstack, sx)
+
+    exec_str = ("python mcm.py"
+                " -res %d"
+                " -wavelength %0.3f"
+                " -sx %0.3f"
+                " -sy %0.3f"
+                " -num_modes %d"
+                " -plot_mode_number %d"
+                " -polarization %s"
+                " -epsilon_file '%s/%s'"
+                " -output_directory '%s/%s'"
+                " -plot_mode %r"
+                " -suppress_window %r"
+                " > '%s/%s-res%d.out'") % (res, wavelength, sx, sy, num_modes, plot_mode_number,
+                polarization, str(os.getcwd()), str(eps_input_file),
+                str(os.getcwd()), str(output_directory),
+                plot_mode, suppress_window, str(os.getcwd()), str(output_directory), res)
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    print("dir_path = "+str(dir_path))
+
+    print("Running MPB simulation... (check .out file for current status)")
+    start = time.time()
+    call(exec_str, shell=True, cwd=dir_path)
+    print("Time to run MPB simulation = "+str(time.time()-start)+" seconds")
+
+#    grep_str = "grep flux1: '%s/%s-res%d.out' > '%s/%s-res%d.dat'"%(str(os.getcwd()), str(output_directory), res,
+#                                                                    str(os.getcwd()), str(output_directory), res)
+#    call(grep_str, shell="True")
+#
+#    """ Grab data and plot transmission/reflection spectra
+#    """
+#    norm_data = np.genfromtxt("%s/%s-norm-res%d.dat"%(str(os.getcwd()), str(output_directory), res), delimiter=",")
+#    freq, refl0, trans0 = norm_data[:,1], -norm_data[:,2], norm_data[:,3]# refl0 = -norm_data[:,2]
+#    comp_data = np.genfromtxt("%s/%s-res%d.dat"%(str(os.getcwd()), str(output_directory), res), delimiter=",")
+#
+#    flux_data = []
+#    for i in range(len(ports)): #Get the power flux-data from the component simulation for each flux-plane
+#        flux_data.append((-1)*input_directions[i]*comp_data[:,i+2])
+#
+#    wavelength = [1.0/f for f in freq]
+#    from matplotlib import pyplot as plt
+#
+#    # Plot a spectrum corresponding to each port (sign is calculated from the port "direction")
+#    colorlist = ['r-', 'b-', 'g-', 'c-', 'm-', 'y-']
+#    plt.plot(wavelength, (flux_data[0]-refl0)/trans0, colorlist[0], label='port 0')
+#    for i in range(len(flux_data)-1):
+#        plt.plot(wavelength, flux_data[i+1]/trans0, colorlist[(i+1)%len(colorlist)], label='port '+str(i+1))
+#
+#    plt.xlabel("Wavelength [um]")
+#    plt.ylabel("Transmission")
+#    plt.xlim([min(wavelength),max(wavelength)])
+#    plt.legend(loc='best')
+#    plt.savefig("%s/%s-res%d.png"%(str(os.getcwd()), str(output_directory), res))
+#    if plot_window:
+#        plt.show()
+#    plt.close()
+#
+#    if fields:
+#        print("Outputting fields images to "+str(output_directory))
+#        export_timestep_fields_to_png(str(output_directory))
+
+    return None
+
+
+def compute_transmission_spectra(pic_component, mstack, wgt, ports, port_vcenter, port_height, port_width, res, wl_center, wl_span, boolean_operations=None,
+                                 norm=False, input_pol="TE", nfreq=100, dpml=0.5, fields=False, plot_window=False, source_offset=0.1, symmetry=None,
+                                 skip_sim=False, output_directory='meep-sim', parallel=False, n_p=2):
 
     """ Launches a MEEP simulation to compute the transmission/reflection spectra from each of the component's ports when light enters at the input `port`.
 
@@ -193,6 +498,7 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
     Args:
        * **pic_component** (gdspy.Cell): Cell object (component of the PICwriter library)
        * **mstack** (MaterialStack): MaterialStack object that maps the gds layers to a physical stack
+       * **wgt** (WaveguideTemplate): Waveguide template
        * **ports** (list of `Port` dicts): These are the ports to track the Poynting flux through.  **IMPORTANT** The first element of this list is where the Eigenmode source will be input.
        * **port_vcenter** (float): Vertical center of the waveguide
        * **port_height** (float): Height of the port cross-section (flux plane)
@@ -202,24 +508,36 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
        * **wl_span** (float): Wavelength span (determines the pulse width)
 
     Keyword Args:
+       * **boolean_operations** (list): A list of specified boolean operations to be performed on the layers (ORDER MATTERS).  In the following format:
+           [((layer1/datatype1), (layer2/datatype2), operation), ...] where 'operation' can be 'xor', 'or', 'and', or 'not' and the resulting polygons are placed on (layer1, datatype1).  See below for example.
        * **norm** (boolean):  If True, first computes a normalization run (transmission through a straight waveguide defined by `wgt` above.  Defaults to `False`.  If `True`, a WaveguideTemplate must be specified.
-       * **wgt** (WaveguideTemplate): Waveguide template, used for normalization run.  Defaults to None.
        * **input_pol** (String): Input polarization of the waveguide mode.  Must be either "TE" or "TM".  Defaults to "TE" (z-antisymmetric).
        * **nfreq** (int): Number of frequencies (wavelengths) to compute the spectrum over.  Defaults to 100.
        * **dpml** (float): Length (in microns) of the perfectly-matched layer (PML) at simulation boundaries.  Defaults to 0.5 um.
        * **fields** (boolean): If true, outputs the epsilon and cross-sectional fields.  Defaults to false.
        * **plot_window** (boolean): If true, outputs the spectrum plot in a matplotlib window (in addition to saving).  Defaults to False.
        * **source_offset** (float): Offset (in x-direction) between reflection monitor and source.  Defaults to 0.1 um.
-       * **convert_component_to_hdf5** (boolean): Defaults to True.  If True, converts the `pic_component` to an hdf5 file (warning, this may take some time!).  If `False` (since it was already computed in a previous run), will not output to hdf5.  **NOTE** this will output the structure with resolution 50% higher than the meep `res` specified above (to reduce discretization errors).
        * **skip_sim** (boolean): Defaults to False.  If True, skips the simulation (and hdf5 export).  Useful if you forgot to perform a normalization and don't want to redo the whole MEEP simulation.
        * **output_directory** (string): Output directory for files generated.  Defaults to 'meep-sim'.
        * **parallel** (boolean): If `True`, will run simulation on `np` cores (`np` must be specified below, and MEEP/MPB must be built from source with parallel-libraries).  Defaults to False.
        * **n_p** (int): Number of processors to run meep simulation on.  Defaults to `2`.
 
+
+    Example of **boolean_operations** (using the default):
+           The following default boolean_operation will:
+               (1) do an 'xor' of the default layerset (-1,-1) with a cladding (2,0) and then make this the new default layerset
+               (2) do an 'xor' of the cladding (2,0) and waveguide (1,0) and make this the new cladding
+
+            boolean_operations = [((-1,-1), (2,0), 'and'), ((2,0), (1,0), 'xor')]
+
     """
     from subprocess import call
     import os
     import time
+
+    if boolean_operations == None:
+        boolean_operations = [((-1,-1), (wgt.clad_layer, wgt.clad_datatype), 'xor'),
+                              ((wgt.clad_layer, wgt.clad_datatype), (wgt.wg_layer, wgt.wg_datatype), 'xor')]
 
     """ For each port determine input_direction (useful for computing the sign of the power flux) """
     input_directions = []
@@ -266,7 +584,8 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
         norm_ports = [wg2.portlist["input"], wg2.portlist["output"]]
 
         eps_norm_input_file = str('epsilon-norm.h5')
-        convert_to_hdf5(eps_norm_input_file, norm_component, mstack, sx, sz, 1.5*res)
+        export_component_to_hdf5(eps_norm_input_file, norm_component, mstack, boolean_operations)
+#        convert_to_hdf5(eps_norm_input_file, norm_component, mstack, sx, sz, 1.5*res)
 
         # Launch MEEP simulation using correct inputs
         port_string = ""
@@ -341,15 +660,15 @@ def compute_transmission_spectra(pic_component, mstack, ports, port_vcenter, por
                                                                                   str(os.getcwd()), str(output_directory), res)
         call(grep_str, shell="True")
 
-    # Convert the structure to an hdf5 file
+    # Get size, center of simulation window
     flatcell = pic_component.flatten()
     bb = flatcell.get_bounding_box()
     sx, sy, sz = bb[1][0]-bb[0][0], mstack.vsize, bb[1][1]-bb[0][1]
     center = ((bb[1][0]+bb[0][0])/2.0, 0, (bb[1][1]+bb[0][1])/2.0)
 
+    # Convert the structure to an hdf5 file
     eps_input_file = str('epsilon-component.h5')
-    if convert_component_to_hdf5 and skip_sim==False:
-        convert_to_hdf5(eps_input_file, pic_component, mstack, sx, sz, 1.5*res)
+    export_component_to_hdf5(eps_input_file, pic_component, mstack, boolean_operations)
 
     # Launch MEEP simulation using correct inputs
     port_string = ""
