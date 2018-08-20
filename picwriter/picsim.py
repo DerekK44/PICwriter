@@ -387,9 +387,9 @@ def export_timestep_fields_to_png(directory):
     call(exec_str, shell=True)
 
 def compute_mode(wgt, mstack, res, wavelength,
-                 sx, sy, num_modes = 1, plot_mode_number = 1,
+                 sx, sy, plot_mode_number = 1,
                  polarization="TE", output_directory='mpb-sim',
-                 plot_mode=True, suppress_window=False):
+                 save_mode_data=True, suppress_window=False):
 
     """ Launches a MPB simulation to quickly compute and visualize a waveguide's electromagnetic eigenmodes
 
@@ -400,11 +400,10 @@ def compute_mode(wgt, mstack, res, wavelength,
        * **wavelength** (float): Wavelength in microns.
        * **sx** (float): Size of the simulation region in the x-direction.
        * **sy** (float): Size of the simulation region in the y-direction.
-       * **num_modes** (int): Number of modes to compute.  Defaults to 1.
        * **plot_mode_number** (int): Which mode to plot (only plots one mode at a time).  Must be a number equal to or less than num_modes.  Defaults to 1.
        * **polarization** (string): Mode polarization.  Must be either "TE", "TM", or "None" (corresponding to MPB parities of ODD-X, EVEN-X, or NO-PARITY).
        * **output_directory** (string): Output directory for files generated.  Defaults to 'mpb-sim'.
-       * **plot_mode** (Boolean): Save the mode image and data to a separate file.  Defaults to True.
+       * **save_mode_data** (Boolean): Save the mode image and data to a separate file.  Defaults to True.
        * **suppress_window** (Boolean): Suppress the matplotlib window.  Defaults to false.
 
     Returns:
@@ -415,9 +414,6 @@ def compute_mode(wgt, mstack, res, wavelength,
     import os
     import time
 
-    if plot_mode > num_modes:
-        raise ValueError("Warning!  plot_mode must be less than or equal to num_modes.")
-
     eps_input_file = str('epsilon.h5')
     export_wgt_to_hdf5(eps_input_file, wgt, mstack, sx)
 
@@ -426,17 +422,16 @@ def compute_mode(wgt, mstack, res, wavelength,
                 " -wavelength %0.3f"
                 " -sx %0.3f"
                 " -sy %0.3f"
-                " -num_modes %d"
                 " -plot_mode_number %d"
                 " -polarization %s"
                 " -epsilon_file '%s/%s'"
                 " -output_directory '%s/%s'"
-                " -plot_mode %r"
+                " -save_mode_data %r"
                 " -suppress_window %r"
-                " > '%s/%s-res%d.out'") % (res, wavelength, sx, sy, num_modes, plot_mode_number,
+                " > '%s/%s-res%d.out'") % (res, wavelength, sx, sy, plot_mode_number,
                 polarization, str(os.getcwd()), str(eps_input_file),
                 str(os.getcwd()), str(output_directory),
-                plot_mode, suppress_window, str(os.getcwd()), str(output_directory), res)
+                save_mode_data, suppress_window, str(os.getcwd()), str(output_directory), res)
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     print("dir_path = "+str(dir_path))
@@ -445,43 +440,6 @@ def compute_mode(wgt, mstack, res, wavelength,
     start = time.time()
     call(exec_str, shell=True, cwd=dir_path)
     print("Time to run MPB simulation = "+str(time.time()-start)+" seconds")
-
-#    grep_str = "grep flux1: '%s/%s-res%d.out' > '%s/%s-res%d.dat'"%(str(os.getcwd()), str(output_directory), res,
-#                                                                    str(os.getcwd()), str(output_directory), res)
-#    call(grep_str, shell="True")
-#
-#    """ Grab data and plot transmission/reflection spectra
-#    """
-#    norm_data = np.genfromtxt("%s/%s-norm-res%d.dat"%(str(os.getcwd()), str(output_directory), res), delimiter=",")
-#    freq, refl0, trans0 = norm_data[:,1], -norm_data[:,2], norm_data[:,3]# refl0 = -norm_data[:,2]
-#    comp_data = np.genfromtxt("%s/%s-res%d.dat"%(str(os.getcwd()), str(output_directory), res), delimiter=",")
-#
-#    flux_data = []
-#    for i in range(len(ports)): #Get the power flux-data from the component simulation for each flux-plane
-#        flux_data.append((-1)*input_directions[i]*comp_data[:,i+2])
-#
-#    wavelength = [1.0/f for f in freq]
-#    from matplotlib import pyplot as plt
-#
-#    # Plot a spectrum corresponding to each port (sign is calculated from the port "direction")
-#    colorlist = ['r-', 'b-', 'g-', 'c-', 'm-', 'y-']
-#    plt.plot(wavelength, (flux_data[0]-refl0)/trans0, colorlist[0], label='port 0')
-#    for i in range(len(flux_data)-1):
-#        plt.plot(wavelength, flux_data[i+1]/trans0, colorlist[(i+1)%len(colorlist)], label='port '+str(i+1))
-#
-#    plt.xlabel("Wavelength [um]")
-#    plt.ylabel("Transmission")
-#    plt.xlim([min(wavelength),max(wavelength)])
-#    plt.legend(loc='best')
-#    plt.savefig("%s/%s-res%d.png"%(str(os.getcwd()), str(output_directory), res))
-#    if plot_window:
-#        plt.show()
-#    plt.close()
-#
-#    if fields:
-#        print("Outputting fields images to "+str(output_directory))
-#        export_timestep_fields_to_png(str(output_directory))
-
     return None
 
 
