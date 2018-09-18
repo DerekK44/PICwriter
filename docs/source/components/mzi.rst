@@ -7,12 +7,12 @@ Regular Mach-Zehnder
 .. automodule:: picwriter.components
    :members: MachZehnder
    
-Mach-Zehnder Switch
---------------------
+Mach-Zehnder Switches
+----------------------
 Same as the type above, but instead places a 1x2 MMI for the input, and a 2x2 MMI at the output.  Tuning of the respective arms allows for optical switching between the two output paths.
 
 .. automodule:: picwriter.components
-   :members: MachZehnderSwitch
+   :members: MachZehnderSwitch1x2, MachZehnderSwitchDC1x2, MachZehnderSwitchDC2x2
    
 .. image:: imgs/mzi.png
 
