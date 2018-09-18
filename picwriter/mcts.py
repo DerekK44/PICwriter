@@ -157,7 +157,7 @@ def main(args):
 #        print('vertices='+str(p['vlist']))
 #        print('axis = '+str(mp.Vector3(0,1,0)))
 #        print('height = '+str(p['height']))
-#        print('material = '+str(p['eps']))
+        print('material = '+str(p['eps']))
 #        print('\n')
         geometry.append(mp.Prism(p['vlist'],
                                  axis=mp.Vector3(0,1,0),
