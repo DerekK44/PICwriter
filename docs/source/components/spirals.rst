@@ -2,6 +2,6 @@ Spirals
 +++++++
    
 .. automodule:: picwriter.components
-   :members: Spiral
+   :members: Spiral, Spiral2
    
 .. image:: imgs/spiral.png
