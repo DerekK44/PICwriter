@@ -131,7 +131,7 @@ class Waveguide(gdspy.Cell):
 
                 #dl is the amount of distance that is taken *off* the waveguide from the curved section
                 dl = abs(br*np.tan((next_angle-start_angle)/2.0))
-                if (dl+prev_dl) > tk.dist(self.trace[i], self.trace[i+1]):
+                if (dl+prev_dl) > tk.dist(self.trace[i], self.trace[i+1])+1E-6:
                     raise ValueError("Warning! The waypoints "+str(self.trace[i])+" and "+str(self.trace[i+1])+" are too close to accommodate "
                                      " the necessary bend-radius of "+str(br)+", the points were closer than "+str(dl+prev_dl))
 

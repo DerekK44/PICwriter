@@ -64,9 +64,19 @@ class TestPICwriter(TestCase):
 		wgt = WaveguideTemplate(bend_radius=50, resist='-')
 		sp1 = Spiral(wgt, 1000.0, 1000.0, 10000.0)
 		tk.add(top, sp1)
-		# print("Spiral area = "+str(top.area()))
-		self.assertTrue(len(top.elements)==1)
-		self.assertTrue(abs(top.area()-241199.988149) <= 1e-6)
+
+		sp2 = Spiral2(wgt,
+                 width=2000.0,
+                 length=20000.0,
+                 spacing=50.0,
+                 parity=1,
+                 port=(0,-10000),
+                 direction='WEST')
+		tk.add(top, sp2)
+
+#		print("Spiral area = "+str(top.area()))
+    		self.assertTrue(len(top.elements)==2)
+		self.assertTrue(abs(top.area()-721199.971219) <= 1e-6)
 
 	def test_mmi1x2_creation(self):
 		top = gdspy.Cell("t-mmi1x2")

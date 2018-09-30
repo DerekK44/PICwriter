@@ -320,7 +320,6 @@ class MachZehnderSwitch1x2(gdspy.Cell):
         wg_top = Waveguide(trace1, self.wgt)
 
         (x1, y1) = mmi1.portlist["output_bot"]["port"]
-        print("(x1, y1)="+str((x1,y1)))
         trace2 = [(x1, y1),
                   (x1+self.wgt.bend_radius, y1),
                   (x1+self.wgt.bend_radius, y1-2*self.wgt.bend_radius - self.arm2/2.0 - self.heater_length/2.0),
@@ -533,7 +532,6 @@ class MachZehnderSwitchDC1x2(gdspy.Cell):
         wg_top = Waveguide(trace1, self.wgt)
 
         (x1, y1) = mmi1.portlist["output_bot"]["port"]
-        print("(x1, y1)="+str((x1,y1)))
         trace2 = [(x1, y1),
                   (x1+self.wgt.bend_radius, y1),
                   (x1+self.wgt.bend_radius, y1-2*self.wgt.bend_radius - self.arm2/2.0 - self.heater_length/2.0),
@@ -739,7 +737,6 @@ class MachZehnderSwitchDC2x2(gdspy.Cell):
         wg_top = Waveguide(trace1, self.wgt)
 
         (x1, y1) = dc_in.portlist["output_bot"]["port"]
-        print("(x1, y1)="+str((x1,y1)))
         trace2 = [(x1, y1),
                   (x1+self.wgt.bend_radius, y1),
                   (x1+self.wgt.bend_radius, y1-2*self.wgt.bend_radius - self.arm2/2.0 - self.heater_length/2.0),
