@@ -243,7 +243,7 @@ class Spiral2(gdspy.Cell):
         """ Generate the waveguide """
         wg = Waveguide(waypoints, self.wgt)
 
-        dist = h+self.bend_radius
+        dist = self.width
         if self.direction=="WEST":
             wgr = gdspy.CellReference(wg, rotation=180)
             self.portlist_output = (self.port[0]-dist, self.port[1])
@@ -289,6 +289,7 @@ if __name__ == "__main__":
     tk.add(top, sp1)
 
     print("length is "+str(sp1.get_spiral_length()))
+    print("portlist = "+str(sp1.portlist))
 
     gdspy.LayoutViewer()
     # gdspy.write_gds('spiral.gds', unit=1.0e-6, precision=1.0e-9)
