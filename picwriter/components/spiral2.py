@@ -116,7 +116,7 @@ class Spiral2(gdspy.Cell):
             length_min = self.get_length(hmin, n)
 
         if n==0:
-            raise ValueError("Warning! No value of 'n' (number of spirals) could be determined, since the minimum spiral length is already smaller than the goal.  Please increase the spiral width.")
+            raise ValueError("Warning! No value of 'n' (number of spirals) could be determined, since the minimum spiral length is already smaller than the goal.  Please decrease the spiral width.")
 
         return n-1
 
