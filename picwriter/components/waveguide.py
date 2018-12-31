@@ -84,11 +84,11 @@ class Waveguide(gdspy.Cell):
 
     def type_check_trace(self):
         trace = []
-        """ Round each trace value to the nearest 1e-6 -- prevents
-        some typechecking errors
+        """ Round each trace (x,y) point to the nearest 1e-6.
+        Prevents some typechecking errors
         """
         for t in self.trace:
-            trace.append((round(t[0], 6), round(t[1], 5)))
+            trace.append((round(t[0], 6), round(t[1], 6)))
         self.trace = trace
 
         """ Type-check trace ¯\_(ツ)_/¯
