@@ -253,3 +253,18 @@ def translate_point(pt, length, direction):
     elif isinstance(direction, float):
         # direction is a float (in radians)
         return (pt[0]+length*np.cos(direction), pt[1]+length*np.sin(direction))
+    
+def normalize_angle(angle):
+    """  Returns the angle (in radians) between -pi and +pi that corresponds to the input angle
+
+        Args:
+           * **angle** (float):  Angle to normalize
+
+        Returns:
+           float  Angle
+
+    """
+    angle = angle % (2*np.pi)
+    if angle > np.pi:
+        angle -= 2*np.pi
+    return angle
