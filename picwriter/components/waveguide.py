@@ -10,10 +10,12 @@ class WaveguideTemplate:
     """ Standard template for waveguides that contains standard information about the geometry and fabrication.
 
         Keyword Args:
-           * **wg_type** (string): Type of waveguide used.  Options are "strip" and "slot".  Defaults to "strip".
+           * **wg_type** (string): Type of waveguide used.  Options are "strip", "slot", and "swg".  Defaults to "strip".
            * **bend_radius** (float): Radius of curvature for waveguide bends (circular).  Defaults to 50.
            * **wg_width** (float): Width of the waveguide as shown on the mask.  Defaults to 2.
            * **slot** (float): Size of the waveguide slot region.  This is only used if `wg_type`=`'slot'`.  Defaults to 0.1.
+           * **period** (float): Period of the SWG. This is only used if `wg_type`=`'swg'`. Defaults to 0.1.
+           * **duty_cycle** (float): Duty cycle of the SWG. This is only used if `wg_type`=`'swg'`. Defaults to 0.5.
            * **clad_width** (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff).  Defaults to 10.
            * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used.  Defaults to '+'
            * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.   Defaults to 'ETCH'.
@@ -24,10 +26,10 @@ class WaveguideTemplate:
 
     """
     def __init__(self, wg_type='strip', bend_radius=50.0, wg_width=2.0, clad_width=10.0,
-                 resist='+', fab='ETCH', slot=0.1,
+                 resist='+', fab='ETCH', slot=0.1, period=0.1, duty_cycle=0.5,
                  wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0):
         self.wg_width = wg_width
-        if wg_type in ['strip', 'slot']:
+        if wg_type in ['strip', 'slot', 'swg']:
             self.wg_type = wg_type
         else:
             raise ValueError("Warning, invalid input for kwarg wg_type.")
@@ -35,6 +37,10 @@ class WaveguideTemplate:
             self.slot = slot
             self.rail = (self.wg_width - self.slot)/2.0
             self.rail_dist = self.wg_width -self.rail
+        elif self.wg_type =='swg':
+            self.period = period
+            self.duty_cycle = duty_cycle
+            
         self.bend_radius = bend_radius
         self.clad_width = clad_width
         if resist != '+' and resist != '-':
@@ -49,6 +55,16 @@ class WaveguideTemplate:
         self.wg_datatype = wg_datatype
         self.clad_layer = clad_layer
         self.clad_datatype = clad_datatype
+        
+        if self.wg_type =='swg':
+            self.straight_period_cell = gdspy.Cell("swg_seg_"+str(self.wg_width)+"_"+str(self.period)+"_"+str(self.duty_cycle)+"_"+str(self.wg_layer)+"_"+str(self.clad_layer))
+            straight_path = gdspy.Path(self.wg_width, initial_point=(0,0))
+            straight_path.segment(self.period*self.duty_cycle, direction='+x', layer=self.wg_layer, datatype=self.wg_datatype)
+            self.straight_period_cell.add(straight_path)
+            self.bend_period_cell = gdspy.Cell("swg_bend_"+str(self.wg_width)+"_"+str(self.period)+"_"+str(self.duty_cycle)+"_"+str(self.wg_layer)+"_"+str(self.clad_layer))
+            bend_path = gdspy.Path(self.wg_width, initial_point=(self.bend_radius,0))
+            bend_path.arc(self.bend_radius, 0, self.period*self.duty_cycle/self.bend_radius, layer=self.wg_layer, datatype=self.wg_datatype)
+            self.bend_period_cell.add(bend_path)
 
 class Waveguide(gdspy.Cell):
     """ Standard Waveguide Cell class (subclass of gdspy.Cell).
@@ -106,55 +122,195 @@ class Waveguide(gdspy.Cell):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         br = self.wgt.bend_radius
-
+        
+        # add waveguide
+        if self.wgt.wg_type=='swg':
+            # for SWG waveguides, there's no easy way to create the grating along the path of the waveguide
+            # therefore, a different method has to be used, which is to break the waveguide up into straight segments and bends that are built individually
+            segments = [[None,None] for i in range(len(self.trace)-1)] # list of endpoints for all straight segments
+            bends = [[None,None,None] for i in range(len(self.trace)-2)] # list of arc-centers, start angular positions, and end angular positions for all bends
+            prev_dl = 0.0
+            for i in range(len(self.trace)):
+                if i == 0:
+                    segments[i][0] = self.trace[i] # if first point in trace, just add as start point of first segment
+                elif i == len(self.trace)-1:
+                    segments[i-1][1] = self.trace[i] # if last point in trace, just add as end point of last segment
+                else:
+                    start_angle = tk.get_exact_angle(self.trace[i-1], self.trace[i])
+                    next_angle = tk.get_exact_angle(self.trace[i], self.trace[i+1])
+                    angle_change = tk.normalize_angle(next_angle-start_angle)
+                    
+                    #dl is the amount of distance that is taken *off* the waveguide from the curved section
+                    dl = abs(br*np.tan(angle_change/2.0))
+                    if (dl+prev_dl) > tk.dist(self.trace[i-1], self.trace[i])+1E-6:
+                        raise ValueError("Warning! The waypoints "+str(self.trace[i-1])+" and "+str(self.trace[i])+" are too close to accommodate "
+                                         " the necessary bend-radius of "+str(br)+", the points were closer than "+str(dl+prev_dl))
+                    
+                    # assign start and end points for segments around this trace point
+                    segments[i-1][1] = tk.translate_point(self.trace[i], dl, start_angle+np.pi)
+                    segments[i][0] = tk.translate_point(self.trace[i], dl, next_angle)
+                    
+                    # calculate arc-center for the bend
+                    chord_angle = tk.get_exact_angle(segments[i-1][1], segments[i][0])
+                    bisect_len = abs(br/np.cos(angle_change/2.0))
+                    if angle_change > 0:
+                        bends[i-1][0] = tk.translate_point(self.trace[i], bisect_len, chord_angle+np.pi/2)
+                    else:
+                        bends[i-1][0] = tk.translate_point(self.trace[i], bisect_len, chord_angle-np.pi/2)
+                    
+                    # calculate start and end angular positions for the bend
+                    if angle_change > 0:
+                        bends[i-1][1] = tk.normalize_angle(start_angle - np.pi/2)
+                        bends[i-1][2] = tk.normalize_angle(next_angle - np.pi/2)
+                    else:
+                        bends[i-1][1] = tk.normalize_angle(start_angle + np.pi/2)
+                        bends[i-1][2] = tk.normalize_angle(next_angle + np.pi/2)
+                    
+                    prev_dl = dl
+                
+            # need to account for partial periods in the following segment and bend building
+            # so need to do them interleaving
+            remaining_period = 0.0
+            for i in range(len(segments)):
+                # add straight segment
+                segment = segments[i]
+                direction = tk.get_exact_angle(segment[0], segment[1])
+                direction_deg = direction/np.pi*180
+                curr_point = segment[0]
+                # finish any partial period leftover from previous segment/bend
+                if remaining_period > self.wgt.period*(1-self.wgt.duty_cycle):
+                    first_path = gdspy.Path(self.wgt.wg_width, initial_point=curr_point)
+                    first_path.segment(remaining_period-self.wgt.period*(1-self.wgt.duty_cycle), direction=direction, **self.wg_spec)
+                    self.add(first_path)
+                # add in all whole periods in remaining length
+                curr_point = tk.translate_point(curr_point, remaining_period, direction)
+                remaining_length = tk.dist(segment[0], segment[1]) - remaining_period
+                num_periods = int(remaining_length//self.wgt.period)
+                for j in range(num_periods):
+                    self.add(gdspy.CellReference(self.wgt.straight_period_cell, origin=curr_point, rotation=direction_deg))
+                    curr_point = tk.translate_point(curr_point, self.wgt.period, direction)
+                # finish any partial period at end of this segment
+                if tk.dist(curr_point, segment[1]) < self.wgt.period*self.wgt.duty_cycle:
+                    last_path = gdspy.Path(self.wgt.wg_width, initial_point=curr_point)
+                    last_path.segment(tk.dist(curr_point, segment[1]), direction=direction, **self.wg_spec)
+                    self.add(last_path)
+                else:
+                    self.add(gdspy.CellReference(self.wgt.straight_period_cell, origin=curr_point, rotation=direction_deg))
+                remaining_period = self.wgt.period - tk.dist(curr_point, segment[1])
+                
+                # add bend
+                if i != len(bends):
+                    bend = bends[i]
+                    angle_change = tk.normalize_angle(bend[2]-bend[1])
+                    angular_period = self.wgt.period/br
+                    curr_angle = bend[1]
+                    # finish any partial period leftover from previous segment/bend
+                    remaining_angle = remaining_period/br
+                    if angle_change > 0:
+                        if remaining_angle > angular_period*(1-self.wgt.duty_cycle):
+                            first_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
+                            first_path.arc(br, curr_angle, curr_angle+remaining_angle-angular_period*(1-self.wgt.duty_cycle), **self.wg_spec)
+                            self.add(first_path)
+                    else:
+                        if remaining_angle > angular_period*(1-self.wgt.duty_cycle):
+                            first_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
+                            first_path.arc(br, curr_angle, curr_angle-(remaining_angle-angular_period*(1-self.wgt.duty_cycle)), **self.wg_spec)
+                            self.add(first_path)
+                    # add in all whole periods in remaining angle
+                    curr_angle += remaining_angle
+                    num_periods = int(br*(abs(angle_change)-remaining_angle)//self.wgt.period)
+                    if angle_change > 0:
+                        for j in range(num_periods):
+                            self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180))
+                            curr_angle += angular_period
+                        # finish any partial period at end of this bend
+                        if abs(tk.normalize_angle(bend[2]-curr_angle)) < angular_period*self.wgt.duty_cycle:
+                            last_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
+                            last_path.arc(br, curr_angle, bend[2], **self.wg_spec)
+                            self.add(last_path)
+                        else:
+                            self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180))
+                    else:
+                        for j in range(num_periods):
+                            self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180, x_reflection=True))
+                            curr_angle -= angular_period
+                        # finish any partial period at end of this bend
+                        if abs(tk.normalize_angle(bend[2]-curr_angle)) < angular_period*self.wgt.duty_cycle:
+                            last_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, bend[2]))
+                            last_path.arc(br, bend[2], bend[2]+abs(tk.normalize_angle(bend[2]-curr_angle)), **self.wg_spec)
+                            self.add(last_path)
+                        else:
+                            self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180, x_reflection=True))
+                    remaining_period = self.wgt.period - br*abs(tk.normalize_angle(bend[2]-curr_angle))
+                 
+        else:
+            if len(self.trace)==2:
+                if self.wgt.wg_type=='strip':
+                    path = gdspy.Path(self.wgt.wg_width, self.trace[0])
+                    path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.wg_spec)
+                elif self.wgt.wg_type=='slot':
+                    path = gdspy.Path(self.wgt.rail, self.trace[0], number_of_paths=2, distance=self.wgt.rail_dist)
+                    path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.wg_spec)
+            else:
+                if self.wgt.wg_type=='strip':
+                    path = gdspy.Path(self.wgt.wg_width, self.trace[0])
+                elif self.wgt.wg_type=='slot':
+                    path = gdspy.Path(self.wgt.rail, self.trace[0], number_of_paths=2, distance=self.wgt.rail_dist)
+    
+                prev_dl = 0.0
+                for i in range(len(self.trace)-2):
+                    start_angle = tk.get_exact_angle(self.trace[i], self.trace[i+1])
+                    next_angle = tk.get_exact_angle(self.trace[i+1], self.trace[i+2])
+    
+                    #dl is the amount of distance that is taken *off* the waveguide from the curved section
+                    dl = abs(br*np.tan((next_angle-start_angle)/2.0))
+                    if (dl+prev_dl) > tk.dist(self.trace[i], self.trace[i+1])+1E-6:
+                        raise ValueError("Warning! The waypoints "+str(self.trace[i])+" and "+str(self.trace[i+1])+" are too close to accommodate "
+                                         " the necessary bend-radius of "+str(br)+", the points were closer than "+str(dl+prev_dl))
+    
+                    path.segment(tk.dist(self.trace[i], self.trace[i+1])-dl-prev_dl,
+                                 direction=start_angle, **self.wg_spec)
+    
+                    # The following makes sure the turn-by angle is *always* between -pi and +pi
+                    turnby = tk.normalize_angle(next_angle - start_angle)
+    
+                    path.turn(br, turnby, number_of_points=0.1, **self.wg_spec)
+                    prev_dl = dl
+    
+                path.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
+                             direction=next_angle, **self.wg_spec)
+    
+            self.add(path)
+        
+        # add cladding
         if len(self.trace)==2:
-            if self.wgt.wg_type=='strip':
-                path = gdspy.Path(self.wgt.wg_width, self.trace[0])
-                path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.wg_spec)
-            elif self.wgt.wg_type=='slot':
-                path = gdspy.Path(self.wgt.rail, self.trace[0], number_of_paths=2, distance=self.wgt.rail_dist)
-                path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.wg_spec)
             path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
             path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.clad_spec)
-
         else:
-            if self.wgt.wg_type=='strip':
-                path = gdspy.Path(self.wgt.wg_width, self.trace[0])
-            elif self.wgt.wg_type=='slot':
-                path = gdspy.Path(self.wgt.rail, self.trace[0], number_of_paths=2, distance=self.wgt.rail_dist)
             path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
-
             prev_dl = 0.0
             for i in range(len(self.trace)-2):
                 start_angle = tk.get_exact_angle(self.trace[i], self.trace[i+1])
                 next_angle = tk.get_exact_angle(self.trace[i+1], self.trace[i+2])
-
+                
                 #dl is the amount of distance that is taken *off* the waveguide from the curved section
                 dl = abs(br*np.tan((next_angle-start_angle)/2.0))
                 if (dl+prev_dl) > tk.dist(self.trace[i], self.trace[i+1])+1E-6:
                     raise ValueError("Warning! The waypoints "+str(self.trace[i])+" and "+str(self.trace[i+1])+" are too close to accommodate "
                                      " the necessary bend-radius of "+str(br)+", the points were closer than "+str(dl+prev_dl))
-
-                path.segment(tk.dist(self.trace[i], self.trace[i+1])-dl-prev_dl,
-                             direction=start_angle, **self.wg_spec)
+                
                 path2.segment(tk.dist(self.trace[i], self.trace[i+1])-dl-prev_dl,
-                             direction=start_angle, **self.clad_spec)
-
-                # The following makes sure the turn-by angle is *always* between -pi and +pi
-                turnby = (next_angle - start_angle)%(2*np.pi)
-                turnby = turnby-2*np.pi if turnby > np.pi else turnby
-
-                path.turn(br, turnby, number_of_points=0.1, **self.wg_spec)
+                              direction=start_angle, **self.clad_spec)
+                
+                turnby = tk.normalize_angle(next_angle - start_angle)
+                
                 path2.turn(br, turnby, number_of_points=0.1, **self.clad_spec)
                 prev_dl = dl
-
-            path.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
-                         direction=next_angle, **self.wg_spec)
+            
             path2.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
-                         direction=next_angle, **self.clad_spec)
-
-        self.add(path)
+                          direction=next_angle, **self.clad_spec)
         self.add(path2)
+            
 
     def build_ports(self):
         # Portlist format:
@@ -165,10 +321,11 @@ class Waveguide(gdspy.Cell):
                                    'direction':tk.get_exact_angle(self.trace[-2], self.trace[-1])}
 
 if __name__ == "__main__":
+    gdspy.current_library = gdspy.GdsLibrary()
     top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(wg_type='slot', wg_width=1.0, bend_radius=50, resist='+', fab="ETCH")
+    wgt = WaveguideTemplate(wg_type='strip', wg_width=1.0, bend_radius=50, resist='+', fab="ETCH")
 
-    wg1=Waveguide([(0,0), (150,0), (150,100), (250,100),(350,0), (200,-150)], wgt)
+    wg1=Waveguide([(200,0), (100,0), (100,100)], wgt)
     tk.add(top, wg1)
     print(wg1.portlist)
 
