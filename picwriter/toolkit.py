@@ -242,18 +242,18 @@ def translate_point(pt, length, direction):
            point, tuple (x, y)
 
     """
-    if direction=="NORTH":
-        return (pt[0], pt[1]+length)
-    elif direction=="SOUTH":
-        return (pt[0], pt[1]-length)
-    elif direction=="WEST":
-        return (pt[0]-length, pt[1])
-    elif direction=="EAST":
-        return (pt[0]+length, pt[1])
-    elif isinstance(direction, float):
+    if isinstance(direction,float):
         # direction is a float (in radians)
         return (pt[0]+length*np.cos(direction), pt[1]+length*np.sin(direction))
-    
+    elif str(direction)=="NORTH":
+        return (pt[0], pt[1]+length)
+    elif str(direction)=="SOUTH":
+        return (pt[0], pt[1]-length)
+    elif str(direction)=="WEST":
+        return (pt[0]-length, pt[1])
+    elif str(direction)=="EAST":
+        return (pt[0]+length, pt[1])
+
 def normalize_angle(angle):
     """  Returns the angle (in radians) between -pi and +pi that corresponds to the input angle
 
