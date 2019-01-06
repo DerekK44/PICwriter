@@ -14,9 +14,8 @@ class MMI2x2(gdspy.Cell):
            * **width** (float): Width of the MMI region (perpendicular to direction of propagation)
 
         Keyword Args:
-           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6. Note: it is possible to generate a MMI with straight tapered outputs (not curved) by setting angle=0 (or taper_length=0) and then connecting a straight Taper object to the desired MMI ports.
+           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6. Note: it is possible to generate a MMI with straight tapered outputs (not curved) by setting angle=0 and then connecting a straight Taper object to the desired MMI ports.
            * **taper_width** (float): Maximum width of the taper region (default = wg_width from wg_template)
-           * **taper_length** (float): Length of the taper leading up to the MMI
            * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to width/3.0)
            * **port** (tuple): Cartesian coordinate of the **top** input port
            * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
@@ -34,7 +33,7 @@ class MMI2x2(gdspy.Cell):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, length, width, angle=np.pi/6.0, taper_width=None, taper_length=None, wg_sep=None, port=(0,0), direction='EAST'):
+    def __init__(self, wgt, length, width, angle=np.pi/6.0, taper_width=None, wg_sep=None, port=(0,0), direction='EAST'):
         gdspy.Cell.__init__(self, "MMI2x2--"+str(uuid.uuid4()))
 
         self.portlist = {}
@@ -46,7 +45,6 @@ class MMI2x2(gdspy.Cell):
             raise ValueError("Warning! Improper angle specified ("+str(angle)+").  Must be between 0 and pi/2.0.")
         self.angle = angle
         self.taper_width = wgt.wg_width if taper_width==None else taper_width
-        self.taper_length = 20 if taper_length==None else taper_length
         self.wg_sep = width/3.0 if wg_sep==None else wg_sep
 
         self.port = port
@@ -148,7 +146,7 @@ class MMI2x2(gdspy.Cell):
             x0r, y0r = np.cos(angle)*x0 - np.sin(angle)*y0, np.sin(angle)*x0 + np.cos(angle)*y0
             x1, y1 = totlength, 0.0
             x1r, y1r = np.cos(angle)*x1 - np.sin(angle)*y1, np.sin(angle)*x1 + np.cos(angle)*y1
-            x2, y2 = totlength, -self.wg_sep
+            x2, y2 = totlength, -self.wg_sep-2*angle_y_dist
             x2r, y2r = np.cos(angle)*x2 - np.sin(angle)*y2, np.sin(angle)*x2 + np.cos(angle)*y2
             self.input_port_bot = (self.port[0]+x0r, self.port[1]+y0r)
             self.output_port_top = (self.port[0]+x1r, self.port[1]+y1r)
@@ -198,4 +196,4 @@ if __name__ == "__main__":
     print(mmi.portlist)
 
     gdspy.LayoutViewer()
-    # gdspy.write_gds('mmi2x2.gds', unit=1.0e-6, precision=1.0e-9)
+#    # gdspy.write_gds('mmi2x2.gds', unit=1.0e-6, precision=1.0e-9)
