@@ -14,6 +14,9 @@
 # Old component files
 /picwriter/components/old_files/
 
+# Deprecated components
+/picwriter/components/spiral_old.py
+
 # Intermediate image files for documentation
 /docs/source/imgs/*.svg
 
