@@ -110,15 +110,18 @@ class Spiral2(gdspy.Cell):
         n = 0
         hmin = self.get_hmin(n)
         length_min = self.get_length(hmin, n)
-        while (length_min < length_goal) and n+1 < self.nmax:
+        while (length_min < length_goal) and n < self.nmax:
             n += 1
             hmin = self.get_hmin(n)
             length_min = self.get_length(hmin, n)
 
         if n==0:
-            raise ValueError("Warning! No value of 'n' (number of spirals) could be determined, since the minimum spiral length is already smaller than the goal.  Please decrease the spiral width.")
-
-        return n-1
+            if length_min > length_goal:
+                raise ValueError("Warning! No value of 'n' (number of spirals) could be determined, since the minimum spiral length ("+str(length_min)+") is already larger than the goal ("+str(length_goal)+").  Please decrease the spiral width.")
+            else:
+                return n
+        else:
+            return n-1
 
     def get_spiral_height(self, n):
         # n is the number of spirals
@@ -274,13 +277,14 @@ class Spiral2(gdspy.Cell):
 
 if __name__ == "__main__":
     from picwriter.components.waveguide import WaveguideTemplate
+    gdspy.current_library = gdspy.GdsLibrary()
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50,
                             wg_width=1.0,
                             clad_width=10.0)
 
     sp1 = Spiral2(wgt,
-                 width=2000.0,
+                 width=300.0,
                  length=20000.0,
                  spacing=50.0,
                  parity=1,
