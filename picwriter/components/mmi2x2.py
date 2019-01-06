@@ -14,7 +14,7 @@ class MMI2x2(gdspy.Cell):
            * **width** (float): Width of the MMI region (perpendicular to direction of propagation)
 
         Keyword Args:
-           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
+           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6. Note: it is possible to generate a MMI with straight tapered outputs (not curved) by setting angle=0 (or taper_length=0) and then connecting a straight Taper object to the desired MMI ports.
            * **taper_width** (float): Maximum width of the taper region (default = wg_width from wg_template)
            * **taper_length** (float): Length of the taper leading up to the MMI
            * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to width/3.0)
