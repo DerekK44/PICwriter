@@ -20,7 +20,7 @@ class TestPICwriter(TestCase):
 		wg2=Waveguide([(0,0), (0,100), (-250, 100), (-250, -100)], wgt)
 		tk.add(top, wg1)
 		tk.add(top, wg2)
-		# print("Waveguide area = "+str(top.area()))
+#		print("Waveguide area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==2)
 		self.assertTrue(abs(top.area()-33939.818854) <= 1e-6)
 
@@ -29,7 +29,7 @@ class TestPICwriter(TestCase):
 		mt = MetalTemplate(bend_radius=0, resist='+', fab="ETCH")
 		mt1=MetalRoute([(0,0), (0,250), (100,250), (100,500), (400,500)], mt)
 		tk.add(top, mt1)
-		# print("MetalRoute area = "+str(top.area()))
+#		print("MetalRoute area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==1)
 		self.assertTrue(abs(top.area()-88800.0) <= 1e-6)
 
@@ -42,7 +42,7 @@ class TestPICwriter(TestCase):
 		tp2 = Taper(wgt, 100.0, 0.0, **wg1.portlist["output"])
 		tk.add(top, tp1)
 		tk.add(top, tp2)
-		# print("Taper area = "+str(top.area()))
+#		print("Taper area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==3)
 		self.assertTrue(abs(top.area()-27005.909427) <= 1e-6)
 
@@ -55,7 +55,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, gc1)
 		gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=50, period=1.0, dutycycle=0.7, **wg1.portlist["output"])
 		tk.add(top, gc2)
-		# print("Grating coupler area = "+str(top.area()))
+#		print("Grating coupler area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==3)
 		self.assertTrue(abs(top.area()-30061.6918115) <= 1e-6)
 
@@ -76,7 +76,7 @@ class TestPICwriter(TestCase):
 
 #		print("Spiral area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-721199.971219) <= 1e-6)
+		self.assertTrue(abs(top.area()-721199.969995) <= 1e-6)
 
 	def test_mmi1x2_creation(self):
 		top = gdspy.Cell("t-mmi1x2")
@@ -111,7 +111,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg1)
 		r1 = Ring(wgt, 60.0, 1.0, parity=1, **wg1.portlist["output"])
 		tk.add(top, r1)
-		# print("Ring area = "+str(top.area()))
+		print("Ring area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
 		self.assertTrue(abs(top.area()-13133.8016946) <= 1e-6)
@@ -124,7 +124,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg1)
 		d1 = Disk(wgt, 60.0, 1.0, parity=1, **wg1.portlist["output"])
 		tk.add(top, d1)
-		# print("Disk area = "+str(top.area()))
+#		print("Disk area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
 		self.assertTrue(abs(top.area()-31953.5046652) <= 1e-6)
@@ -187,10 +187,10 @@ class TestPICwriter(TestCase):
 		tk.add(top, dc5)
 		tk.add(top, dc6)
 
-		# print("DC area = "+str(top.area()))
+#		print("DC area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==7)
-		self.assertTrue(abs(top.area()-65615.8506033) <= 1e-6)
+		self.assertTrue(abs(top.area()-65615.850449) <= 1e-6)
 
 	def test_contradc_creation(self):
 		top = gdspy.Cell("t-contradc")
@@ -201,7 +201,7 @@ class TestPICwriter(TestCase):
 
 		cdc = ContraDirectionalCoupler(wgt, length=30.0, gap=0.5, period=0.220, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=0.75, input_bot=True, **wg1.portlist["output"])
 		tk.add(top, cdc)
-		# print("Contra DC area = "+str(top.area()))
+#		print("Contra DC area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
 		self.assertTrue(abs(top.area()-4222.12846627) <= 1e-6)
