@@ -96,9 +96,7 @@ class Spiral2(gdspy.Cell):
         return 2*br + 2*s + 2*n*s
 
     def get_spiral_length(self):
-        """
-        Returns the true length of the spiral, including length from the turns
-        """
+		#Returns the true length of the spiral, including length from the turns
         return self.actual_length
 
     def get_number_of_spirals(self):
@@ -139,8 +137,7 @@ class Spiral2(gdspy.Cell):
         # Waveguide() class.
         # This is just one way of doing it... ¯\_(ツ)_/¯
 
-        """ Determine the number of spiral wraps
-        """
+        # Determine the number of spiral wraps
         n = self.get_number_of_spirals()
 
         """ Determine the corresponding spiral height

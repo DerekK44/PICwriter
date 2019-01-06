@@ -7,7 +7,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class WaveguideTemplate:
-    """ Standard template for waveguides that contains standard information about the geometry and fabrication.
+    """ Standard template for waveguides that contains standard information about the geometry and fabrication.  Supported waveguide types are **strip** (also known as "channel" waveguides), **slot**, and **SWG** ("sub-wavelength grating", or 1D photonic crystal waveguides).
 
         Keyword Args:
            * **wg_type** (string): Type of waveguide used.  Options are "strip", "slot", and "swg".  Defaults to "strip".
@@ -40,7 +40,7 @@ class WaveguideTemplate:
         elif self.wg_type =='swg':
             self.period = period
             self.duty_cycle = duty_cycle
-            
+
         self.bend_radius = bend_radius
         self.clad_width = clad_width
         if resist != '+' and resist != '-':
@@ -55,7 +55,7 @@ class WaveguideTemplate:
         self.wg_datatype = wg_datatype
         self.clad_layer = clad_layer
         self.clad_datatype = clad_datatype
-        
+
         if self.wg_type =='swg':
             self.straight_period_cell = gdspy.Cell("swg_seg_"+str(self.wg_width)+"_"+str(self.period)+"_"+str(self.duty_cycle)+"_"+str(self.wg_layer)+"_"+str(self.clad_layer))
             straight_path = gdspy.Path(self.wg_width, initial_point=(0,0))
@@ -122,11 +122,10 @@ class Waveguide(gdspy.Cell):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         br = self.wgt.bend_radius
-        
+
         # add waveguide
         if self.wgt.wg_type=='swg':
-            # for SWG waveguides, there's no easy way to create the grating along the path of the waveguide
-            # therefore, a different method has to be used, which is to break the waveguide up into straight segments and bends that are built individually
+            # SWG waveguides consist of both straight segments and bends that are built individually
             segments = [[None,None] for i in range(len(self.trace)-1)] # list of endpoints for all straight segments
             bends = [[None,None,None] for i in range(len(self.trace)-2)] # list of arc-centers, start angular positions, and end angular positions for all bends
             prev_dl = 0.0
@@ -139,17 +138,17 @@ class Waveguide(gdspy.Cell):
                     start_angle = tk.get_exact_angle(self.trace[i-1], self.trace[i])
                     next_angle = tk.get_exact_angle(self.trace[i], self.trace[i+1])
                     angle_change = tk.normalize_angle(next_angle-start_angle)
-                    
+
                     #dl is the amount of distance that is taken *off* the waveguide from the curved section
                     dl = abs(br*np.tan(angle_change/2.0))
                     if (dl+prev_dl) > tk.dist(self.trace[i-1], self.trace[i])+1E-6:
                         raise ValueError("Warning! The waypoints "+str(self.trace[i-1])+" and "+str(self.trace[i])+" are too close to accommodate "
                                          " the necessary bend-radius of "+str(br)+", the points were closer than "+str(dl+prev_dl))
-                    
+
                     # assign start and end points for segments around this trace point
                     segments[i-1][1] = tk.translate_point(self.trace[i], dl, start_angle+np.pi)
                     segments[i][0] = tk.translate_point(self.trace[i], dl, next_angle)
-                    
+
                     # calculate arc-center for the bend
                     chord_angle = tk.get_exact_angle(segments[i-1][1], segments[i][0])
                     bisect_len = abs(br/np.cos(angle_change/2.0))
@@ -157,7 +156,7 @@ class Waveguide(gdspy.Cell):
                         bends[i-1][0] = tk.translate_point(self.trace[i], bisect_len, chord_angle+np.pi/2)
                     else:
                         bends[i-1][0] = tk.translate_point(self.trace[i], bisect_len, chord_angle-np.pi/2)
-                    
+
                     # calculate start and end angular positions for the bend
                     if angle_change > 0:
                         bends[i-1][1] = tk.normalize_angle(start_angle - np.pi/2)
@@ -165,9 +164,9 @@ class Waveguide(gdspy.Cell):
                     else:
                         bends[i-1][1] = tk.normalize_angle(start_angle + np.pi/2)
                         bends[i-1][2] = tk.normalize_angle(next_angle + np.pi/2)
-                    
+
                     prev_dl = dl
-                
+
             # need to account for partial periods in the following segment and bend building
             # so need to do them interleaving
             remaining_period = 0.0
@@ -197,7 +196,7 @@ class Waveguide(gdspy.Cell):
                 else:
                     self.add(gdspy.CellReference(self.wgt.straight_period_cell, origin=curr_point, rotation=direction_deg))
                 remaining_period = self.wgt.period - tk.dist(curr_point, segment[1])
-                
+
                 # add bend
                 if i != len(bends):
                     bend = bends[i]
@@ -242,8 +241,9 @@ class Waveguide(gdspy.Cell):
                         else:
                             self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180, x_reflection=True))
                     remaining_period = self.wgt.period - br*abs(tk.normalize_angle(bend[2]-curr_angle))
-                 
+
         else:
+            # Strip and slot waveguide generation below
             if len(self.trace)==2:
                 if self.wgt.wg_type=='strip':
                     path = gdspy.Path(self.wgt.wg_width, self.trace[0])
@@ -256,32 +256,32 @@ class Waveguide(gdspy.Cell):
                     path = gdspy.Path(self.wgt.wg_width, self.trace[0])
                 elif self.wgt.wg_type=='slot':
                     path = gdspy.Path(self.wgt.rail, self.trace[0], number_of_paths=2, distance=self.wgt.rail_dist)
-    
+
                 prev_dl = 0.0
                 for i in range(len(self.trace)-2):
                     start_angle = tk.get_exact_angle(self.trace[i], self.trace[i+1])
                     next_angle = tk.get_exact_angle(self.trace[i+1], self.trace[i+2])
-    
+
                     #dl is the amount of distance that is taken *off* the waveguide from the curved section
                     dl = abs(br*np.tan((next_angle-start_angle)/2.0))
                     if (dl+prev_dl) > tk.dist(self.trace[i], self.trace[i+1])+1E-6:
                         raise ValueError("Warning! The waypoints "+str(self.trace[i])+" and "+str(self.trace[i+1])+" are too close to accommodate "
                                          " the necessary bend-radius of "+str(br)+", the points were closer than "+str(dl+prev_dl))
-    
+
                     path.segment(tk.dist(self.trace[i], self.trace[i+1])-dl-prev_dl,
                                  direction=start_angle, **self.wg_spec)
-    
+
                     # The following makes sure the turn-by angle is *always* between -pi and +pi
                     turnby = tk.normalize_angle(next_angle - start_angle)
-    
+
                     path.turn(br, turnby, number_of_points=0.1, **self.wg_spec)
                     prev_dl = dl
-    
+
                 path.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
                              direction=next_angle, **self.wg_spec)
-    
+
             self.add(path)
-        
+
         # add cladding
         if len(self.trace)==2:
             path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
@@ -292,25 +292,25 @@ class Waveguide(gdspy.Cell):
             for i in range(len(self.trace)-2):
                 start_angle = tk.get_exact_angle(self.trace[i], self.trace[i+1])
                 next_angle = tk.get_exact_angle(self.trace[i+1], self.trace[i+2])
-                
+
                 #dl is the amount of distance that is taken *off* the waveguide from the curved section
                 dl = abs(br*np.tan((next_angle-start_angle)/2.0))
                 if (dl+prev_dl) > tk.dist(self.trace[i], self.trace[i+1])+1E-6:
                     raise ValueError("Warning! The waypoints "+str(self.trace[i])+" and "+str(self.trace[i+1])+" are too close to accommodate "
                                      " the necessary bend-radius of "+str(br)+", the points were closer than "+str(dl+prev_dl))
-                
+
                 path2.segment(tk.dist(self.trace[i], self.trace[i+1])-dl-prev_dl,
                               direction=start_angle, **self.clad_spec)
-                
+
                 turnby = tk.normalize_angle(next_angle - start_angle)
-                
+
                 path2.turn(br, turnby, number_of_points=0.1, **self.clad_spec)
                 prev_dl = dl
-            
+
             path2.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
                           direction=next_angle, **self.clad_spec)
         self.add(path2)
-            
+
 
     def build_ports(self):
         # Portlist format:
