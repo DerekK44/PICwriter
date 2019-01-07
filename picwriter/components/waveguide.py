@@ -209,7 +209,7 @@ class Waveguide(gdspy.Cell):
                             first_path.segment(total_dist, direction=direction, **self.wg_spec)
                             self.add(first_path)
                     remaining_period = remaining_period-total_dist
-                        
+
 
                 # add bend
                 if i != len(bends):
@@ -360,10 +360,17 @@ class Waveguide(gdspy.Cell):
 if __name__ == "__main__":
     gdspy.current_library = gdspy.GdsLibrary()
     top = gdspy.Cell("top")
-    wgt= WaveguideTemplate(wg_type='swg', wg_width=1.0, bend_radius=25, duty_cycle=0.50, period=1.0, resist='+', fab="ETCH")
-    wg=Waveguide([(0, 20.0), (90.0, 20.0), (95.0, 21.0), (200, 21.0)], wgt)
-    tk.add(top, wg)
-    print(wg.portlist)
+    wgt1= WaveguideTemplate(wg_type='strip', wg_width=1.0, bend_radius=25, resist='+', fab="ETCH")
+    wgt2= WaveguideTemplate(wg_type='slot', wg_width=1.0, bend_radius=25, slot=0.3, resist='+', fab="ETCH")
+    wgt3= WaveguideTemplate(wg_type='swg', wg_width=1.0, bend_radius=25, duty_cycle=0.50, period=1.0, resist='+', fab="ETCH")
+
+    space = 10.0
+    wg1=Waveguide([(0, 0), (140.0-space, 0), (160.0-space, 50.0), (300.0, 50.0)], wgt1)
+    tk.add(top, wg1)
+    wg2=Waveguide([(0, -space), (140.0, -space), (160.0, 50.0-space), (300.0, 50.0-space)], wgt2)
+    tk.add(top, wg2)
+    wg3=Waveguide([(0, -2*space), (140.0+space, -2*space), (160.0+space, 50.0-2*space), (300.0, 50.0-2*space)], wgt3)
+    tk.add(top, wg3)
 
     gdspy.LayoutViewer()
-    # gdspy.write_gds('waveguide.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.write_gds('waveguide.gds', unit=1.0e-6, precision=1.0e-9)
