@@ -175,27 +175,41 @@ class Waveguide(gdspy.Cell):
                 segment = segments[i]
                 direction = tk.get_exact_angle(segment[0], segment[1])
                 direction_deg = direction/np.pi*180
+                total_dist = tk.dist(segment[0], segment[1])
                 curr_point = segment[0]
-                # finish any partial period leftover from previous segment/bend
-                if remaining_period > self.wgt.period*(1-self.wgt.duty_cycle):
-                    first_path = gdspy.Path(self.wgt.wg_width, initial_point=curr_point)
-                    first_path.segment(remaining_period-self.wgt.period*(1-self.wgt.duty_cycle), direction=direction, **self.wg_spec)
-                    self.add(first_path)
-                # add in all whole periods in remaining length
-                curr_point = tk.translate_point(curr_point, remaining_period, direction)
-                remaining_length = tk.dist(segment[0], segment[1]) - remaining_period
-                num_periods = int(remaining_length//self.wgt.period)
-                for j in range(num_periods):
-                    self.add(gdspy.CellReference(self.wgt.straight_period_cell, origin=curr_point, rotation=direction_deg))
-                    curr_point = tk.translate_point(curr_point, self.wgt.period, direction)
-                # finish any partial period at end of this segment
-                if tk.dist(curr_point, segment[1]) < self.wgt.period*self.wgt.duty_cycle:
-                    last_path = gdspy.Path(self.wgt.wg_width, initial_point=curr_point)
-                    last_path.segment(tk.dist(curr_point, segment[1]), direction=direction, **self.wg_spec)
-                    self.add(last_path)
-                else:
-                    self.add(gdspy.CellReference(self.wgt.straight_period_cell, origin=curr_point, rotation=direction_deg))
-                remaining_period = self.wgt.period - tk.dist(curr_point, segment[1])
+                if total_dist > remaining_period: # if the total distance will complete the remaining period from before
+                    # finish any partial period leftover from previous segment/bend
+                    if remaining_period > self.wgt.period*(1-self.wgt.duty_cycle):
+                        first_path = gdspy.Path(self.wgt.wg_width, initial_point=curr_point)
+                        first_path.segment(remaining_period-self.wgt.period*(1-self.wgt.duty_cycle), direction=direction, **self.wg_spec)
+                        self.add(first_path)
+                    # add in all whole periods in remaining length
+                    curr_point = tk.translate_point(curr_point, remaining_period, direction)
+                    remaining_length = total_dist - remaining_period
+                    num_periods = int(remaining_length//self.wgt.period)
+                    for j in range(num_periods):
+                        self.add(gdspy.CellReference(self.wgt.straight_period_cell, origin=curr_point, rotation=direction_deg))
+                        curr_point = tk.translate_point(curr_point, self.wgt.period, direction)
+                    # finish any partial period at end of this segment
+                    if tk.dist(curr_point, segment[1]) < self.wgt.period*self.wgt.duty_cycle:
+                        last_path = gdspy.Path(self.wgt.wg_width, initial_point=curr_point)
+                        last_path.segment(tk.dist(curr_point, segment[1]), direction=direction, **self.wg_spec)
+                        self.add(last_path)
+                    else:
+                        self.add(gdspy.CellReference(self.wgt.straight_period_cell, origin=curr_point, rotation=direction_deg))
+                    remaining_period = self.wgt.period - tk.dist(curr_point, segment[1])
+                else: # if total distance did not complete the remaining period from before
+                    if remaining_period > self.wgt.period*(1-self.wgt.duty_cycle):
+                        if total_dist > remaining_period-self.wgt.period*(1-self.wgt.duty_cycle):
+                            first_path = gdspy.Path(self.wgt.wg_width, initial_point=curr_point)
+                            first_path.segment(remaining_period-self.wgt.period*(1-self.wgt.duty_cycle), direction=direction, **self.wg_spec)
+                            self.add(first_path)
+                        elif total_dist > 0:
+                            first_path = gdspy.Path(self.wgt.wg_width, initial_point=curr_point)
+                            first_path.segment(total_dist, direction=direction, **self.wg_spec)
+                            self.add(first_path)
+                    remaining_period = remaining_period-total_dist
+                        
 
                 # add bend
                 if i != len(bends):
@@ -203,44 +217,67 @@ class Waveguide(gdspy.Cell):
                     angle_change = tk.normalize_angle(bend[2]-bend[1])
                     angular_period = self.wgt.period/br
                     curr_angle = bend[1]
-                    # finish any partial period leftover from previous segment/bend
                     remaining_angle = remaining_period/br
-                    if angle_change > 0:
-                        if remaining_angle > angular_period*(1-self.wgt.duty_cycle):
-                            first_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
-                            first_path.arc(br, curr_angle, curr_angle+remaining_angle-angular_period*(1-self.wgt.duty_cycle), **self.wg_spec)
-                            self.add(first_path)
-                    else:
-                        if remaining_angle > angular_period*(1-self.wgt.duty_cycle):
-                            first_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
-                            first_path.arc(br, curr_angle, curr_angle-(remaining_angle-angular_period*(1-self.wgt.duty_cycle)), **self.wg_spec)
-                            self.add(first_path)
-                    # add in all whole periods in remaining angle
-                    curr_angle += remaining_angle
-                    num_periods = int(br*(abs(angle_change)-remaining_angle)//self.wgt.period)
-                    if angle_change > 0:
-                        for j in range(num_periods):
-                            self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180))
-                            curr_angle += angular_period
-                        # finish any partial period at end of this bend
-                        if abs(tk.normalize_angle(bend[2]-curr_angle)) < angular_period*self.wgt.duty_cycle:
-                            last_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
-                            last_path.arc(br, curr_angle, bend[2], **self.wg_spec)
-                            self.add(last_path)
+                    if abs(angle_change) > remaining_angle: # if the angle change will complete the remaining period from before
+                        # finish any partial period leftover from previous segment/bend
+                        if angle_change > 0:
+                            if remaining_angle > angular_period*(1-self.wgt.duty_cycle):
+                                first_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
+                                first_path.arc(br, curr_angle, curr_angle+remaining_angle-angular_period*(1-self.wgt.duty_cycle), **self.wg_spec)
+                                self.add(first_path)
+                            curr_angle += remaining_angle
                         else:
-                            self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180))
-                    else:
-                        for j in range(num_periods):
-                            self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180, x_reflection=True))
-                            curr_angle -= angular_period
-                        # finish any partial period at end of this bend
-                        if abs(tk.normalize_angle(bend[2]-curr_angle)) < angular_period*self.wgt.duty_cycle:
-                            last_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, bend[2]))
-                            last_path.arc(br, bend[2], bend[2]+abs(tk.normalize_angle(bend[2]-curr_angle)), **self.wg_spec)
-                            self.add(last_path)
+                            if remaining_angle > angular_period*(1-self.wgt.duty_cycle):
+                                first_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
+                                first_path.arc(br, curr_angle, curr_angle-(remaining_angle-angular_period*(1-self.wgt.duty_cycle)), **self.wg_spec)
+                                self.add(first_path)
+                            curr_angle -= remaining_angle
+                        # add in all whole periods in remaining angle
+                        num_periods = int(br*(abs(angle_change)-remaining_angle)//self.wgt.period)
+                        if angle_change > 0:
+                            for j in range(num_periods):
+                                self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180))
+                                curr_angle += angular_period
+                            # finish any partial period at end of this bend
+                            if abs(tk.normalize_angle(bend[2]-curr_angle)) < angular_period*self.wgt.duty_cycle:
+                                last_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
+                                last_path.arc(br, curr_angle, bend[2], **self.wg_spec)
+                                self.add(last_path)
+                            else:
+                                self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180))
                         else:
-                            self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180, x_reflection=True))
-                    remaining_period = self.wgt.period - br*abs(tk.normalize_angle(bend[2]-curr_angle))
+                            for j in range(num_periods):
+                                self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180, x_reflection=True))
+                                curr_angle -= angular_period
+                            # finish any partial period at end of this bend
+                            if abs(tk.normalize_angle(bend[2]-curr_angle)) < angular_period*self.wgt.duty_cycle:
+                                last_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, bend[2]))
+                                last_path.arc(br, bend[2], bend[2]+abs(tk.normalize_angle(bend[2]-curr_angle)), **self.wg_spec)
+                                self.add(last_path)
+                            else:
+                                self.add(gdspy.CellReference(self.wgt.bend_period_cell, origin=bend[0], rotation=curr_angle/np.pi*180, x_reflection=True))
+                        remaining_period = self.wgt.period - br*abs(tk.normalize_angle(bend[2]-curr_angle))
+                    else: # if the angle change did not complete the remaining period from before
+                        if remaining_angle > angular_period*(1-self.wgt.duty_cycle):
+                            if abs(angle_change) > remaining_angle-angular_period*(1-self.wgt.duty_cycle):
+                                if angle_change > 0:
+                                    first_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
+                                    first_path.arc(br, curr_angle, curr_angle+remaining_angle-angular_period*(1-self.wgt.duty_cycle), **self.wg_spec)
+                                    self.add(first_path)
+                                else:
+                                    first_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
+                                    first_path.arc(br, curr_angle, curr_angle-(remaining_angle-angular_period*(1-self.wgt.duty_cycle)), **self.wg_spec)
+                                    self.add(first_path)
+                            else:
+                                if angle_change > 0:
+                                    first_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle))
+                                    first_path.arc(br, curr_angle, curr_angle+angle_change, **self.wg_spec)
+                                    self.add(first_path)
+                                else:
+                                    first_path = gdspy.Path(self.wgt.wg_width, initial_point=tk.translate_point(bend[0], br, curr_angle+angle_change))
+                                    first_path.arc(br, curr_angle+angle_change, curr_angle, **self.wg_spec)
+                                    self.add(first_path)
+                        remaining_period = remaining_period - br*abs(angle_change)
 
         else:
             # Strip and slot waveguide generation below
@@ -323,11 +360,10 @@ class Waveguide(gdspy.Cell):
 if __name__ == "__main__":
     gdspy.current_library = gdspy.GdsLibrary()
     top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(wg_type='strip', wg_width=1.0, bend_radius=50, resist='+', fab="ETCH")
-
-    wg1=Waveguide([(200,0), (100,0), (100,100)], wgt)
-    tk.add(top, wg1)
-    print(wg1.portlist)
+    wgt= WaveguideTemplate(wg_type='swg', wg_width=1.0, bend_radius=25, duty_cycle=0.50, period=1.0, resist='+', fab="ETCH")
+    wg=Waveguide([(0, 20.0), (90.0, 20.0), (95.0, 21.0), (200, 21.0)], wgt)
+    tk.add(top, wg)
+    print(wg.portlist)
 
     gdspy.LayoutViewer()
     # gdspy.write_gds('waveguide.gds', unit=1.0e-6, precision=1.0e-9)
