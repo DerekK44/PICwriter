@@ -161,8 +161,8 @@ class GratingCouplerFocusing(gdspy.Cell):
         # then add it to the Cell
 
         num_teeth = int(self.length//self.period)
-        assert self.focus_distance > 0
-        assert self.focus_distance > self.width/2.0
+        if self.focus_distance < self.width/2.0 - self.period:
+            raise ValueError("Warning! The focus_distance is smaller than the allowed value of width/2.0 - period.")
         neff = self.wavelength / float(self.period) + self.sin_theta
         qmin = int(self.focus_distance / float(self.period) + 0.5)
         max_points = 199
