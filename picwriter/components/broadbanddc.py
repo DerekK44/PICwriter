@@ -10,7 +10,7 @@ from picwriter.components.waveguide import Waveguide
 class BroadbandDirectionalCoupler(gdspy.Cell):
     """ Broadband Directional Coupler Cell class (subclass of gdspy.Cell).  Design based on adiabatic 3dB coupler designs from https://doi.org/10.1364/CLEO_SI.2017.SF1I.5 and https://doi.org/10.1364/CLEO_SI.2018.STh4B.4.
 
-    In this design, Region I is the first half of the input S-bend waveguide, Region II is the second half of the S-bend waveguide, Region III is the coupling region, and Region IV is the entire output S-bend waveguide.
+    In this design, Region I is the first half of the input S-bend waveguide where the input waveguides widths taper by +dw and -dw, Region II is the second half of the S-bend waveguide with constant, unbalanced widths, Region III is the coupling region where the waveguides taper back to the original width, and Region IV is the  output S-bend waveguide.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

@@ -11,6 +11,15 @@ Standard Directional Coupler
    
 .. image:: imgs/dc.png
 
+=============================
+Broadband Directional Coupler
+=============================
+   
+.. automodule:: picwriter.components
+   :members: BroadbandDirectionalCoupler
+   
+.. image:: imgs/bdc.png
+
 ==========================================================
 Sub-wavelength Grating Assisted Contra-Directional Coupler
 ==========================================================
