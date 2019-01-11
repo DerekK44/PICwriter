@@ -7,7 +7,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class WaveguideTemplate:
-    """ Standard template for waveguides that contains standard information about the geometry and fabrication.  Supported waveguide types are **strip** (also known as "channel" waveguides), **slot**, and **SWG** ("sub-wavelength grating", or 1D photonic crystal waveguides).
+    """ Template for waveguides that contains standard information about the geometry and fabrication.  Supported waveguide types are **strip** (also known as "channel" waveguides), **slot**, and **SWG** ("sub-wavelength grating", or 1D photonic crystal waveguides).
 
         Keyword Args:
            * **wg_type** (string): Type of waveguide used.  Options are "strip", "slot", and "swg".  Defaults to "strip".
@@ -67,7 +67,7 @@ class WaveguideTemplate:
             self.bend_period_cell.add(bend_path)
 
 class Waveguide(gdspy.Cell):
-    """ Standard Waveguide Cell class (subclass of gdspy.Cell).
+    """ Waveguide Cell class (subclass of gdspy.Cell).
 
         Args:
            * **trace** (list):  List of coordinates used to generate the waveguide (such as '[(x1,y1), (x2,y2), ...]').

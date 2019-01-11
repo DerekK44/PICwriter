@@ -6,7 +6,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class GratingCouplerStraight(gdspy.Cell):
-    """ Standard Staight Grating Coupler Cell class (subclass of gdspy.Cell).
+    """ Straight Grating Coupler Cell class (subclass of gdspy.Cell).
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

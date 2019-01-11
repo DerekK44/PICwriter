@@ -7,7 +7,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class MetalTemplate:
-    """ Standard template for electrical wires that contains some standard information about the fabrication process and metal wire.
+    """ Template for electrical wires that contains some standard information about the fabrication process and metal wire.
 
         Keyword Args:
            * **bend_radius** (float): Radius of curvature for bends in the metal route.  Defaults to zero.

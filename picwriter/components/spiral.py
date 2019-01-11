@@ -8,7 +8,7 @@ import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
 class Spiral(gdspy.Cell):
-    """ Standard Spiral Waveguide Cell class (subclass of gdspy.Cell).  The desired length of the spiral is first set, along with the spacing between input and output (the 'width' paramter).  Then, the corresponding height of the spiral is automatically set.
+    """ Spiral Waveguide Cell class (subclass of gdspy.Cell).  The desired length of the spiral is first set, along with the spacing between input and output (the 'width' paramter).  Then, the corresponding height of the spiral is automatically set.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

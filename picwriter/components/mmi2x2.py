@@ -6,7 +6,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class MMI2x2(gdspy.Cell):
-    """ Standard 2x2 MMI Cell class (subclass of gdspy.Cell).  Two input ports, two output ports.
+    """ 2x2 MMI Cell class (subclass of gdspy.Cell).  Two input ports, two output ports.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

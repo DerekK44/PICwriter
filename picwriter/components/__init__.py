@@ -17,3 +17,4 @@ from .directionalcoupler import DirectionalCoupler
 from .contradc import ContraDirectionalCoupler
 from .swgcontradc import SWGContraDirectionalCoupler
 from .stripslotcoupler import StripSlotYCoupler
+from .broadbanddc import BroadbandDirectionalCoupler

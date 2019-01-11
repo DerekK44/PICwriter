@@ -7,7 +7,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class StripSlotYCoupler(gdspy.Cell):
-    """ Standard Strip-to-Slot Y-Coupler Cell class (subclass of gdspy.Cell).
+    """ Strip-to-Slot Y-Coupler Cell class (subclass of gdspy.Cell).
 
         Args:
            * **wgt_strip** (WaveguideTemplate):  WaveguideTemplate object for *strip* waveguide.

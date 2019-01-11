@@ -7,7 +7,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class Disk(gdspy.Cell):
-    """ Standard Disk Resonator Cell class (subclass of gdspy.Cell).
+    """ Disk Resonator Cell class (subclass of gdspy.Cell).
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

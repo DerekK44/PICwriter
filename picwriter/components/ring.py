@@ -7,7 +7,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class Ring(gdspy.Cell):
-    """ Standard Ring Resonator Cell class (subclass of gdspy.Cell).
+    """ Ring Resonator Cell class (subclass of gdspy.Cell).
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

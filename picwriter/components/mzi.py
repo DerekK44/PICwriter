@@ -11,7 +11,7 @@ from picwriter.components.electrical import MetalRoute
 from picwriter.components.directionalcoupler import DirectionalCoupler
 
 class MachZehnder(gdspy.Cell):
-    """ Standard Mach-Zehnder Cell class with thermo-optic option (subclass of gdspy.Cell).  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
+    """ Mach-Zehnder Cell class with thermo-optic option (subclass of gdspy.Cell).  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

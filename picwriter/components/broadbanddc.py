@@ -7,13 +7,16 @@ import uuid
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
-class BBDirectionalCoupler(gdspy.Cell):
-    """ Standard Broadband Directional Coupler Cell class (subclass of gdspy.Cell).
+class BroadbandDirectionalCoupler(gdspy.Cell):
+    """ Broadband Directional Coupler Cell class (subclass of gdspy.Cell).  Design based on adiabatic 3dB coupler designs from https://doi.org/10.1364/CLEO_SI.2017.SF1I.5 and https://doi.org/10.1364/CLEO_SI.2018.STh4B.4.
+
+    In this design, Region I is the first half of the input S-bend waveguide, Region II is the second half of the S-bend waveguide, Region III is the coupling region, and Region IV is the entire output S-bend waveguide.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
            * **length** (float): Length of the coupling region.
            * **gap** (float): Distance between the two waveguides.
+           * **dw** (float): Change in waveguide width.  Top arm tapers to the waveguide width - dw, bottom taper to width - dw.
 
         Keyword Args:
            * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
@@ -34,8 +37,8 @@ class BBDirectionalCoupler(gdspy.Cell):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, length, gap, angle=np.pi/6.0, parity=1, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "DC--"+str(uuid.uuid4()))
+    def __init__(self, wgt, length, gap, dw, angle=np.pi/6.0, parity=1, port=(0,0), direction='EAST'):
+        gdspy.Cell.__init__(self, "BDC--"+str(uuid.uuid4()))
 
         self.portlist = {}
 
@@ -50,6 +53,7 @@ class BBDirectionalCoupler(gdspy.Cell):
         self.parity = parity
         self.length = length
         self.gap = gap
+        self.dw = dw
         self.wgt = wgt
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
@@ -60,68 +64,82 @@ class BBDirectionalCoupler(gdspy.Cell):
     def build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
+        p = self.parity
+        angle_x_dist = 2*self.wgt.bend_radius*np.sin(self.angle)
 
-        x0, y0 = 0,0 #shift to port location after rotation later
+        angle_y_dist = 2*self.wgt.bend_radius*(1-np.cos(self.angle))
+        distx = 2*angle_x_dist + self.length
+        disty = p*(2*abs(angle_y_dist) + self.gap + self.wgt.wg_width)
 
-        # X-distance of horizontal waveguide
-        dlx = abs(self.wgt.bend_radius*np.tan((self.angle)/2.0))
-        padding = 0.01 #Add extra 10nm to allow room for curves
-        angle_x_dist = 2.0*(dlx+padding)*np.cos(self.angle)
-        angle_y_dist = 2.0*(dlx+padding)*np.sin(self.angle)*self.parity
-        tracelist_top = [(x0, y0),
-                         (x0+dlx+padding, y0),
-                         (x0+dlx+padding+angle_x_dist, y0-angle_y_dist),
-                         (x0+3*dlx+padding+angle_x_dist+self.length, y0-angle_y_dist),
-                         (x0+3*dlx+padding+2*angle_x_dist+self.length, y0),
-                         (x0+4*dlx+2*padding+2*angle_x_dist+self.length, y0)]
-        wg_top = Waveguide(tracelist_top, self.wgt)
+        x0, y0 = self.port[0],self.port[1] #shift to port location after rotation later
 
-        y_bot_start = y0 - (2*abs(angle_y_dist) + self.gap + self.wgt.wg_width)*self.parity
-        tracelist_bot = [(x0, y_bot_start),
-                         (x0+dlx+padding, y_bot_start),
-                         (x0+dlx+padding+angle_x_dist, y_bot_start+angle_y_dist),
-                         (x0+3*dlx+padding+angle_x_dist+self.length, y_bot_start+angle_y_dist),
-                         (x0+3*dlx+padding+2*angle_x_dist+self.length, y_bot_start),
-                         (x0+4*dlx+2*padding+2*angle_x_dist+self.length, y_bot_start)]
-        wg_bot = Waveguide(tracelist_bot, self.wgt)
+        """ Build the broadband DC from gdspy Path derivatives """
+        """ First the top waveguide """
+        wg_top = gdspy.Path(self.wgt.wg_width, (x0, y0))
+        wg_top.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+self.dw, **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, p*self.angle, number_of_points=0.1, **self.wg_spec)
+        wg_top.segment(self.length, final_width=self.wgt.wg_width, **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, p*self.angle, number_of_points=0.1, **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width, **self.wg_spec)
 
-        distx = 4*dlx+2*angle_x_dist+self.length
-        disty = (2*abs(angle_y_dist) + self.gap + self.wgt.wg_width)*self.parity
+        wg_top_clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (x0, y0))
+        wg_top_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_top_clad.segment(self.length, **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, **self.clad_spec)
+
+        """ Next, the bottom waveguide """
+        x1, y1 = self.port[0], self.port[1] - disty
+        wg_bot = gdspy.Path(self.wgt.wg_width, (x1, y1))
+        wg_bot.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width-self.dw, **self.wg_spec)
+        wg_bot.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, **self.wg_spec)
+        wg_bot.segment(self.length, final_width=self.wgt.wg_width, **self.wg_spec)
+        wg_bot.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, **self.wg_spec)
+        wg_bot.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width, **self.wg_spec)
+
+        wg_bot_clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (x1, y1))
+        wg_bot_clad.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=0.1, **self.clad_spec)
+        wg_bot_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_bot_clad.segment(self.length, **self.clad_spec)
+        wg_bot_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_bot_clad.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=0.1, **self.clad_spec)
+
         if self.direction=="WEST":
-            wgr_top = gdspy.CellReference(wg_top, rotation=180)
-            wgr_bot = gdspy.CellReference(wg_bot, rotation=180)
+            angle = np.pi
             self.portlist_output_straight = (self.port[0]-distx, self.port[1])
             self.portlist_output_cross = (self.port[0]-distx, self.port[1] + disty)
             self.portlist_input_cross = (self.port[0], self.port[1] + disty)
         elif self.direction=="SOUTH":
-            wgr_top = gdspy.CellReference(wg_top, rotation=-90/0)
-            wgr_bot = gdspy.CellReference(wg_bot, rotation=-90.0)
+            angle = -np.pi/2.0
             self.portlist_output_straight = (self.port[0], self.port[1]-distx)
             self.portlist_output_cross = (self.port[0]-disty, self.port[1]-distx)
             self.portlist_input_cross = (self.port[0]-disty, self.port[1])
         elif self.direction=="EAST":
-            wgr_top = gdspy.CellReference(wg_top)
-            wgr_bot = gdspy.CellReference(wg_bot)
+            angle = 0
             self.portlist_output_straight = (self.port[0]+distx, self.port[1])
             self.portlist_output_cross = (self.port[0]+distx, self.port[1]-disty)
             self.portlist_input_cross = (self.port[0], self.port[1]-disty)
         elif self.direction=="NORTH":
-            wgr_top = gdspy.CellReference(wg_top, rotation=90.0)
-            wgr_bot = gdspy.CellReference(wg_bot, rotation=90.0)
+            angle = np.pi/2.0
             self.portlist_output_straight = (self.port[0], self.port[1]+distx)
             self.portlist_output_cross = (self.port[0]+disty, self.port[1]+distx)
             self.portlist_input_cross = (self.port[0]+disty, self.port[1])
         elif isinstance(self.direction, float):
-            wgr_top = gdspy.CellReference(wg_top, rotation=(self.direction*180/np.pi))
-            wgr_bot = gdspy.CellReference(wg_bot, rotation=(self.direction*180/np.pi))
+            angle = self.direction
             self.portlist_output_straight = (self.port[0]+distx*np.cos(self.direction), self.port[1]+distx*np.sin(self.direction))
             self.portlist_input_cross = (self.port[0]-(-disty)*np.sin(self.direction), self.port[1]+(-disty)*np.cos(self.direction))
             self.portlist_output_cross = (self.port[0]-(-disty)*np.sin(self.direction)+distx*np.cos(self.direction), self.port[1]+(-disty)*np.cos(self.direction)+distx*np.sin(self.direction))
 
-        wgr_top.translate(self.port[0], self.port[1])
-        wgr_bot.translate(self.port[0], self.port[1])
-        self.add(wgr_top)
-        self.add(wgr_bot)
+        wg_top.rotate(angle, self.port)
+        wg_bot.rotate(angle, self.port)
+        wg_top_clad.rotate(angle, self.port)
+        wg_bot_clad.rotate(angle, self.port)
+
+        self.add(wg_top)
+        self.add(wg_bot)
+        self.add(wg_top_clad)
+        self.add(wg_bot_clad)
 
     def build_ports(self):
         # Portlist format:
@@ -141,26 +159,15 @@ if __name__ == "__main__":
     from . import *
     from picwriter.components.waveguide import WaveguideTemplate
     top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(bend_radius=100, resist='+')
+    wgt = WaveguideTemplate(wg_width=2.0, bend_radius=100, resist='+')
 
     wg1=Waveguide([(0,0), (100,0)], wgt)
     tk.add(top, wg1)
 
-    dc = DirectionalCoupler(wgt, 20.0, 0.5, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
-    tk.add(top, dc)
-
-    # dc1 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **wg1.portlist["output"])
-    # dc2 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=-1, **dc1.portlist["output_top"])
-    # dc3 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc1.portlist["output_bot"])
-    # dc4 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc2.portlist["output_bot"])
-    # dc5 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=-1, **dc2.portlist["output_top"])
-    # dc6 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc3.portlist["output_bot"])
-    # tk.add(top, dc1)
-    # tk.add(top, dc2)
-    # tk.add(top, dc3)
-    # tk.add(top, dc4)
-    # tk.add(top, dc5)
-    # tk.add(top, dc6)
+    bdc = BroadbandDirectionalCoupler(wgt, 20.0, 0.5, 1.0, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
+    tk.add(top, bdc)
+    for p in bdc.portlist.keys():
+        print(str(p)+": "+str(bdc.portlist[p]['port']))
 
     gdspy.LayoutViewer()
-    # gdspy.write_gds('dc2.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.write_gds('bdc.gds', unit=1.0e-6, precision=1.0e-9)

@@ -7,7 +7,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class DBR(gdspy.Cell):
-    """ Standard Distributed Bragg Reflector Cell class (subclass of gdspy.Cell).  Tapers the input waveguide to a periodic waveguide structure with varying width (1-D photonic crystal).
+    """ Distributed Bragg Reflector Cell class (subclass of gdspy.Cell).  Tapers the input waveguide to a periodic waveguide structure with varying width (1-D photonic crystal).
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

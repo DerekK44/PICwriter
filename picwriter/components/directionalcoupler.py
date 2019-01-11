@@ -8,7 +8,7 @@ import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
 class DirectionalCoupler(gdspy.Cell):
-    """ Standard Directional Coupler Cell class (subclass of gdspy.Cell).
+    """ Directional Coupler Cell class (subclass of gdspy.Cell).
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

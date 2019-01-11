@@ -7,7 +7,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class AlignmentCross(gdspy.Cell):
-    """ Standard Cross Cell class (subclass of gdspy.Cell), used for alignment
+    """ Cross Cell class (subclass of gdspy.Cell), used for alignment
 
         Args:
            * **cross_length** (float):  Length of each arm of the cross.

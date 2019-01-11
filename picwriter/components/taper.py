@@ -7,7 +7,7 @@ import uuid
 import picwriter.toolkit as tk
 
 class Taper(gdspy.Cell):
-    """ Standard Taper Cell class (subclass of gdspy.Cell).
+    """ Taper Cell class (subclass of gdspy.Cell).
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
