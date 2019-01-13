@@ -83,7 +83,7 @@ class StripSlotYCoupler(gdspy.Cell):
 
         # Add slot waveguide taper
         path_slot = gdspy.Path(self.wgt_slot.rail, self.trace[1], number_of_paths=2, distance=self.wgt_slot.rail_dist)
-        path_slot.segment(self.length, final_width=self.end_slot_width, final_distance=(self.wgt_strip.wg_width+2*self.d+self.wgt_slot.rail), direction=angle_opp, **self.wg_spec)
+        path_slot.segment(self.length, final_width=self.end_slot_width, final_distance=(self.wgt_strip.wg_width+2*self.d+self.end_slot_width), direction=angle_opp, **self.wg_spec)
 
         # Cladding for waveguide taper
         path_clad = gdspy.Path(2*self.wgt_strip.clad_width+self.wgt_strip.wg_width, self.trace[0])
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     wg1=Waveguide([(0,0), (100,100)], wgt_strip)
     tk.add(top, wg1)
 
-    ycoup = StripSlotYCoupler(wgt_strip, wgt_slot, 10.0, 0.2, end_slot_width=0, **wg1.portlist["output"])
+    ycoup = StripSlotYCoupler(wgt_strip, wgt_slot, 10.0, 0.2, end_slot_width=0.1, **wg1.portlist["output"])
     tk.add(top, ycoup)
 
     (x1,y1)=ycoup.portlist["output"]["port"]
