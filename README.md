@@ -7,6 +7,7 @@ Picwriter (Photonic-Integrated-Circuit Writer) is a [Python](https://www.python.
 * waveguides (strip, slot, and sub-wavelength grating)
 * grating couplers (straight and focusing)
 * tapers
+* strip to slot waveguide mode converters
 * directional couplers
 * spiral structures (auto-generated from specified waveguide length)
 * 1x2 multi-mode interferometers
