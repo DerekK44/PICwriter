@@ -204,7 +204,7 @@ class TestPICwriter(TestCase):
 		self.assertTrue(len(top.elements)==2)
 		self.assertTrue(abs(top.area()-4222.12846627) <= 1e-6)
 
-	def test_stripslotycoupler_creation(self):
+	def test_stripslotcoupler_creation(self):
 		top = gdspy.Cell("t-stripslotycoupler")
 		wgt_strip = WaveguideTemplate(bend_radius=50, wg_type='strip', wg_width=0.7)
 		wgt_slot = WaveguideTemplate(bend_radius=50, wg_type='slot', wg_width=0.7, slot=0.2)
@@ -217,10 +217,14 @@ class TestPICwriter(TestCase):
 		(x1,y1)=ycoup.portlist["output"]["port"]
 		wg2=Waveguide([(x1, y1), (x1+100, y1)], wgt_slot)
 		tk.add(top, wg2)
-#		print("StripSlotYCoupler area = "+str(top.area()))
+		
+		ycoup2 = StripSlotMMICoupler(wgt_strip, wgt_slot, 2.5, 6.0, 20.0, **wg2.portlist["output"])
+		tk.add(top, ycoup2)
+		
+#		print("StripSlotCoupler area = "+str(top.area()))
 		print(len(top.elements))
-		self.assertTrue(len(top.elements)==3)
-		self.assertTrue(abs(top.area()-4473.0) <= 1e-6)
+		self.assertTrue(len(top.elements)==4)
+		self.assertTrue(abs(top.area()-4921.6) <= 1e-6)
 
 	def test_broadbanddc_creation(self):
 		top = gdspy.Cell("t-bdc")

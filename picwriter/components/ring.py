@@ -38,7 +38,6 @@ class Ring(gdspy.Cell):
         self.portlist = {}
 
         self.port = port
-        # self.trace=[port, tk.translate_point(port, 2*radius, direction)]
         self.direction = direction
 
         self.radius = radius
