@@ -34,7 +34,7 @@ With a properly defined material stack, PICsim makes it easy to quickly view the
                                wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0)
     
     ps.compute_mode(wgt, mstack, res=128, wavelength=1.55, sx=3.0, sy=3.0, 
-                    num_modes=1, plot_mode_number=1, polarization="TE")
+                    plot_mode_number=1, polarization="TE")
     				
 Which produces plots of the corresponding electric fields:
 
