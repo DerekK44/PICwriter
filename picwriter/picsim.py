@@ -506,7 +506,7 @@ def compute_transmission_spectra(pic_component, mstack, wgt, ports, port_vcenter
                 input_directions.append(1)
             else:
                 raise ValueError("Warning! An invalid float port direction ("+str(port["direction"])+") was provided.  Must be 0 or pi.")
-        elif isinstance(port["direction"], unicode) or isinstance(port["direction"], str):
+        elif isinstance(port["direction"], (str, bytes)):
             if port["direction"]=='EAST':
                 input_directions.append(-1)
             elif port["direction"]=='WEST':
