@@ -226,16 +226,16 @@ class TestPICwriter(TestCase):
 		self.assertTrue(len(top.elements)==4)
 		self.assertTrue(abs(top.area()-4921.6) <= 1e-6)
 
-	def test_broadbanddc_creation(self):
-		top = gdspy.Cell("t-bdc")
+	def test_adiabaticcoupler_creation(self):
+		top = gdspy.Cell("t-ac")
 		wgt = WaveguideTemplate(wg_width=2.0, bend_radius=100, resist='+')
 		wg1=Waveguide([(0,0), (100,0)], wgt)
 		tk.add(top, wg1)
 
-		bdc = BroadbandDirectionalCoupler(wgt, 20.0, 0.5, 1.0, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
+		bdc = AdiabaticCoupler(wgt, 20.0, 0.5, 1.0, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
 		tk.add(top, bdc)
 
-#		print("BroadbandDirectoinalCoupler area = "+str(top.area()))
+#		print("AdiabaticCoupler area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
 		self.assertTrue(abs(top.area()-8386.54754147) <= 1e-6)

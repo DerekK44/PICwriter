@@ -7,8 +7,8 @@ import uuid
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
-class BroadbandDirectionalCoupler(gdspy.Cell):
-    """ Broadband Directional Coupler Cell class (subclass of gdspy.Cell).  Design based on adiabatic 3dB coupler designs from https://doi.org/10.1364/CLEO_SI.2017.SF1I.5 and https://doi.org/10.1364/CLEO_SI.2018.STh4B.4.
+class AdiabaticCoupler(gdspy.Cell):
+    """ Adiabatic Coupler Cell class (subclass of gdspy.Cell).  Design based on asymmetric adiabatic 3dB coupler designs, such as those from https://doi.org/10.1364/CLEO.2010.CThAA2, https://doi.org/10.1364/CLEO_SI.2017.SF1I.5, and https://doi.org/10.1364/CLEO_SI.2018.STh4B.4.
 
     In this design, Region I is the first half of the input S-bend waveguide where the input waveguides widths taper by +dw and -dw, Region II is the second half of the S-bend waveguide with constant, unbalanced widths, Region III is the coupling region where the waveguides taper back to the original width, and Region IV is the  output S-bend waveguide.
 
@@ -38,7 +38,7 @@ class BroadbandDirectionalCoupler(gdspy.Cell):
 
     """
     def __init__(self, wgt, length, gap, dw, angle=np.pi/6.0, parity=1, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "BDC--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, "AC--"+str(uuid.uuid4()))
 
         self.portlist = {}
 
@@ -73,7 +73,7 @@ class BroadbandDirectionalCoupler(gdspy.Cell):
 
         x0, y0 = self.port[0],self.port[1] #shift to port location after rotation later
 
-        """ Build the broadband DC from gdspy Path derivatives """
+        """ Build the adiabatic DC from gdspy Path derivatives """
         """ First the top waveguide """
         wg_top = gdspy.Path(self.wgt.wg_width, (x0, y0))
         wg_top.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+self.dw, **self.wg_spec)
@@ -164,10 +164,10 @@ if __name__ == "__main__":
     wg1=Waveguide([(0,0), (100,0)], wgt)
     tk.add(top, wg1)
 
-    bdc = BroadbandDirectionalCoupler(wgt, 20.0, 0.5, 1.0, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
+    bdc = AdiabaticCoupler(wgt, 20.0, 0.5, 1.0, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
     tk.add(top, bdc)
     for p in bdc.portlist.keys():
         print(str(p)+": "+str(bdc.portlist[p]['port']))
 
     gdspy.LayoutViewer()
-    gdspy.write_gds('bdc.gds', unit=1.0e-6, precision=1.0e-9)
+#    gdspy.write_gds('ac.gds', unit=1.0e-6, precision=1.0e-9)

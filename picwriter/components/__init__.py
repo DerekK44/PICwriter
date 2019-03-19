@@ -18,5 +18,5 @@ from .contradc import ContraDirectionalCoupler
 from .swgcontradc import SWGContraDirectionalCoupler
 from .stripslotycoupler import StripSlotYCoupler
 from .stripslotmmicoupler import StripSlotMMICoupler
-from .broadbanddc import BroadbandDirectionalCoupler
+from .adiabaticcoupler import AdiabaticCoupler
 from .zerolengthcavity import ZeroLengthCavity

@@ -3,7 +3,7 @@ Directional Couplers
 ****************************
 
 ============================
-Standard Directional Coupler
+Directional Coupler
 ============================
    
 .. automodule:: picwriter.components
@@ -12,13 +12,13 @@ Standard Directional Coupler
 .. image:: imgs/dc.png
 
 =============================
-Broadband Directional Coupler
+Adiabatic Coupler
 =============================
    
 .. automodule:: picwriter.components
-   :members: BroadbandDirectionalCoupler
+   :members: AdiabaticCoupler
    
-.. image:: imgs/bdc.png
+.. image:: imgs/ac.png
 
 ==========================================================
 Sub-wavelength Grating Assisted Contra-Directional Coupler
