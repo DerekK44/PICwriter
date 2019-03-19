@@ -311,6 +311,8 @@ class Waveguide(gdspy.Cell):
                     # The following makes sure the turn-by angle is *always* between -pi and +pi
                     turnby = tk.normalize_angle(next_angle - start_angle)
 
+                    # points defining the curve = length (in um) / number_of_points
+                    # for example: number_of_points=0.1 corresponds to 1 point every 0.1um
                     path.turn(br, turnby, number_of_points=0.1, **self.wg_spec)
                     prev_dl = dl
 
