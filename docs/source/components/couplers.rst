@@ -1,9 +1,8 @@
 ****************************
-Couplers
-****************************
+Mode converters****************************
 
 ============================
-Edge couplers
+Tapers (for edge couplers)
 ============================
 
 Below is a standard taper class that can be used to generate inverse-tapered waveguide couplers or wide to narrow tapered couplers.
