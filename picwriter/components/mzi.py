@@ -813,23 +813,29 @@ class MachZehnderSwitchDC2x2(gdspy.Cell):
             self.htr_bot_in_dir = self.direction + np.pi/2.0
             self.htr_bot_out_dir = self.direction + 3*np.pi/2.0
 
-        htr_top_in = (x0+self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
-        htr_top_out = (x0+3*self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
-        htr_bot_in = (x0+self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
-        htr_bot_out = (x0+3*self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
         R = np.array([[np.cos(angle*np.pi/180.0), -np.sin(angle*np.pi/180.0)],
                      [np.sin(angle*np.pi/180.0), np.cos(angle*np.pi/180.0)]])
-        hti = np.dot(R, htr_top_in)
-        hto = np.dot(R, htr_top_out)
-        hbi = np.dot(R, htr_bot_in)
-        hbo = np.dot(R, htr_bot_out)
-        self.htr_top_in = (hti[0]+self.port[0], hti[1]+self.port[1])
-        self.htr_top_out = (hto[0]+self.port[0], hto[1]+self.port[1])
-        self.htr_bot_in = (hbi[0]+self.port[0], hbi[1]+self.port[1])
-        self.htr_bot_out = (hbo[0]+self.port[0], hbo[1]+self.port[1])
+        
+        components = [dc_in, dc_out, wg_top, wg_bot]
+
+        if self.heater:
+            components.append(heater_top)
+            components.append(heater_bot)
+            htr_top_in = (x0+self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
+            htr_top_out = (x0+3*self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
+            htr_bot_in = (x0+self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
+            htr_bot_out = (x0+3*self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
+
+            hti = np.dot(R, htr_top_in)
+            hto = np.dot(R, htr_top_out)
+            hbi = np.dot(R, htr_bot_in)
+            hbo = np.dot(R, htr_bot_out)
+            self.htr_top_in = (hti[0]+self.port[0], hti[1]+self.port[1])
+            self.htr_top_out = (hto[0]+self.port[0], hto[1]+self.port[1])
+            self.htr_bot_in = (hbi[0]+self.port[0], hbi[1]+self.port[1])
+            self.htr_bot_out = (hbo[0]+self.port[0], hbo[1]+self.port[1])
 
         """ Add all the components """
-        components = [dc_in, dc_out, wg_top, wg_bot, heater_top, heater_bot]
         for c in components:
             self.add(gdspy.CellReference(c, origin=self.port, rotation=angle))
 
@@ -862,7 +868,7 @@ if __name__ == "__main__":
 #                                 arm1=0, arm2=0, heater=True, heater_length=400, mt=htr_mt, port=(0,0), direction='EAST')
 
     mzi = MachZehnderSwitchDC2x2(wgt, DC1length=200, DC1gap=0.5, DC2length=100, DC2gap=1.5,
-                                    arm1=0, arm2=0, heater=True, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
+                                    arm1=500, arm2=500, heater=False, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
     print("input_top = "+str(mzi.portlist["input_top"]["port"]))
     print("input_bot = "+str(mzi.portlist["input_bot"]["port"]))
 
@@ -888,26 +894,26 @@ if __name__ == "__main__":
 #                       (mzi.portlist["output"]["port"][0]+wgt.bend_radius+300, mzi.portlist["output"]["port"][1]-2*wgt.bend_radius)], wgt)
 #    tk.add(top, wg_out)
 
-    (x1,y1) = mzi.portlist["heater_top_in"]["port"]
-    mt1=MetalRoute([(x1,y1), (x1-150, y1), (x1-150, y1+200)], mt)
+#    (x1,y1) = mzi.portlist["heater_top_in"]["port"]
+#    mt1=MetalRoute([(x1,y1), (x1-150, y1), (x1-150, y1+200)], mt)
+#
+#    (x2,y2) = mzi.portlist["heater_top_out"]["port"]
+#    mt2=MetalRoute([(x2,y2), (x2+150, y2), (x2+150, y2+200)], mt)
+#
+#    (x3, y3) = mzi.portlist["heater_bot_in"]["port"]
+#    mt3=MetalRoute([(x3,y3), (x3-150.0, y3), (x3-150, y3-200)], mt)
+#
+#    (x4, y4) = mzi.portlist["heater_bot_out"]["port"]
+#    mt4=MetalRoute([(x4, y4), (x4+150, y4), (x4+150, y4-200)], mt)
+#
+#    tk.add(top, mt1)
+#    tk.add(top, mt2)
+#    tk.add(top, mt3)
+#    tk.add(top, mt4)
+#    tk.add(top, Bondpad(mt, **mt1.portlist["output"]))
+#    tk.add(top, Bondpad(mt, **mt2.portlist["output"]))
+#    tk.add(top, Bondpad(mt, **mt3.portlist["output"]))
+#    tk.add(top, Bondpad(mt, **mt4.portlist["output"]))
 
-    (x2,y2) = mzi.portlist["heater_top_out"]["port"]
-    mt2=MetalRoute([(x2,y2), (x2+150, y2), (x2+150, y2+200)], mt)
-
-    (x3, y3) = mzi.portlist["heater_bot_in"]["port"]
-    mt3=MetalRoute([(x3,y3), (x3-150.0, y3), (x3-150, y3-200)], mt)
-
-    (x4, y4) = mzi.portlist["heater_bot_out"]["port"]
-    mt4=MetalRoute([(x4, y4), (x4+150, y4), (x4+150, y4-200)], mt)
-
-    tk.add(top, mt1)
-    tk.add(top, mt2)
-    tk.add(top, mt3)
-    tk.add(top, mt4)
-    tk.add(top, Bondpad(mt, **mt1.portlist["output"]))
-    tk.add(top, Bondpad(mt, **mt2.portlist["output"]))
-    tk.add(top, Bondpad(mt, **mt3.portlist["output"]))
-    tk.add(top, Bondpad(mt, **mt4.portlist["output"]))
-
-    gdspy.LayoutViewer()
+    gdspy.LayoutViewer(cells=top, depth=4)
     # gdspy.write_gds('mzi.gds', unit=1.0e-6, precision=1.0e-9)
