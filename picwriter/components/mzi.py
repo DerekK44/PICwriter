@@ -169,24 +169,29 @@ class MachZehnder(gdspy.Cell):
             self.htr_top_out_dir = self.direction + 3*np.pi/2.0
             self.htr_bot_in_dir = self.direction + np.pi/2.0
             self.htr_bot_out_dir = self.direction + 3*np.pi/2.0
-
-        htr_top_in = (x0+self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
-        htr_top_out = (x0+3*self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
-        htr_bot_in = (x0+self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
-        htr_bot_out = (x0+3*self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
+            
+        components = [mmi1, mmi2, wg_top, wg_bot]
         R = np.array([[np.cos(angle*np.pi/180.0), -np.sin(angle*np.pi/180.0)],
                      [np.sin(angle*np.pi/180.0), np.cos(angle*np.pi/180.0)]])
-        hti = np.dot(R, htr_top_in)
-        hto = np.dot(R, htr_top_out)
-        hbi = np.dot(R, htr_bot_in)
-        hbo = np.dot(R, htr_bot_out)
-        self.htr_top_in = (hti[0]+self.port[0], hti[1]+self.port[1])
-        self.htr_top_out = (hto[0]+self.port[0], hto[1]+self.port[1])
-        self.htr_bot_in = (hbi[0]+self.port[0], hbi[1]+self.port[1])
-        self.htr_bot_out = (hbo[0]+self.port[0], hbo[1]+self.port[1])
+            
+        if self.heater:
+            htr_top_in = (x0+self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
+            htr_top_out = (x0+3*self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
+            htr_bot_in = (x0+self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
+            htr_bot_out = (x0+3*self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
+            hti = np.dot(R, htr_top_in)
+            hto = np.dot(R, htr_top_out)
+            hbi = np.dot(R, htr_bot_in)
+            hbo = np.dot(R, htr_bot_out)
+            self.htr_top_in = (hti[0]+self.port[0], hti[1]+self.port[1])
+            self.htr_top_out = (hto[0]+self.port[0], hto[1]+self.port[1])
+            self.htr_bot_in = (hbi[0]+self.port[0], hbi[1]+self.port[1])
+            self.htr_bot_out = (hbo[0]+self.port[0], hbo[1]+self.port[1])
+            
+            components.append(heater_top)
+            components.append(heater_bot)
 
         """ Add all the components """
-        components = [mmi1, mmi2, wg_top, wg_bot, heater_top, heater_bot]
         for c in components:
             self.add(gdspy.CellReference(c, origin=self.port, rotation=angle))
 
@@ -869,28 +874,28 @@ if __name__ == "__main__":
     wg_in = Waveguide([(0,0), (300,0)], wgt)
     tk.add(top, wg_in)
 
-#    mzi = MachZehnder(wgt, MMIlength=50, MMIwidth=10, MMItaper_width=2.0, MMIwg_sep=3, arm1=0, arm2=100, heater=True, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
-    mzi = MachZehnderSwitchDC1x2(wgt, MMI1x2length=50, MMI1x2width=10, MMI1x2taper_width=2.0, MMI1x2wg_sep=3, DClength=100, DCgap=0.5,
-                                 arm1=500, arm2=500, heater=False, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
+    mzi = MachZehnder(wgt, MMIlength=50, MMIwidth=10, MMItaper_width=2.0, MMIwg_sep=3, arm1=500, arm2=500, heater=False, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
+#    mzi = MachZehnderSwitchDC1x2(wgt, MMI1x2length=50, MMI1x2width=10, MMI1x2taper_width=2.0, MMI1x2wg_sep=3, DClength=100, DCgap=0.5,
+#                                 arm1=500, arm2=500, heater=False, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
 #
 #    mzi = MachZehnderSwitchDC2x2(wgt, DC1length=200, DC1gap=0.5, DC2length=100, DC2gap=1.5,
 #                                    arm1=500, arm2=500, heater=False, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
 
     tk.add(top, mzi)
 
-    x_to, y_to = mzi.portlist["output_top"]["port"]
+    x_to, y_to = mzi.portlist["output"]["port"]
     wg_out_top = Waveguide([(x_to, y_to),
                        (x_to + wgt.bend_radius*0.75, y_to),
                        (x_to + 1.5*wgt.bend_radius, y_to + wgt.bend_radius),
                        (x_to + wgt.bend_radius+300, y_to + wgt.bend_radius)], wgt)
     tk.add(top, wg_out_top)
 
-    x_bo, y_bo = mzi.portlist["output_bot"]["port"]
-    wg_out_bot = Waveguide([(x_bo, y_bo),
-                       (x_bo+wgt.bend_radius*0.75, y_bo),
-                       (x_bo+1.5*wgt.bend_radius, y_bo-wgt.bend_radius),
-                       (x_bo+wgt.bend_radius+300, y_bo-wgt.bend_radius)], wgt)
-    tk.add(top, wg_out_bot)
+#    x_bo, y_bo = mzi.portlist["output_bot"]["port"]
+#    wg_out_bot = Waveguide([(x_bo, y_bo),
+#                       (x_bo+wgt.bend_radius*0.75, y_bo),
+#                       (x_bo+1.5*wgt.bend_radius, y_bo-wgt.bend_radius),
+#                       (x_bo+wgt.bend_radius+300, y_bo-wgt.bend_radius)], wgt)
+#    tk.add(top, wg_out_bot)
 
 #    wg_out = Waveguide([mzi.portlist["output"]["port"],
 #                       (mzi.portlist["output"]["port"][0]+wgt.bend_radius, mzi.portlist["output"]["port"][1]),
