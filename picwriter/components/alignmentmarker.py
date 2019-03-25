@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 
 class AlignmentCross(gdspy.Cell):
@@ -21,7 +20,7 @@ class AlignmentCross(gdspy.Cell):
 
     """
     def __init__(self, cross_length, cross_width, small_cross_width=None, center=(0,0), layer=1, datatype=0):
-        gdspy.Cell.__init__(self, "Cross--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("AlignmentCross"))
 
         self.cross_length = cross_length
         self.cross_width = cross_width
@@ -61,7 +60,7 @@ class AlignmentTarget(gdspy.Cell):
 
     """
     def __init__(self, diameter, ring_width, num_rings=10, center=(0,0), layer=1, datatype=0):
-        gdspy.Cell.__init__(self, "Target--"+str(uuid.uuid4()))
+        tk.getCellName("AlignmentTarget")
 
         self.diameter = diameter
         self.ring_width = ring_width
@@ -83,8 +82,11 @@ class AlignmentTarget(gdspy.Cell):
 if __name__ == "__main__":
     from . import *
     top = gdspy.Cell("top")
-    mark1 = AlignmentTarget(200, 3, num_rings=10)
+    mark1 = AlignmentCross(500, 1, center=(0,0))
+    mark2 = AlignmentCross(500, 1, center=(100,1000))
+#    mark1 = AlignmentTarget(200, 3, num_rings=10)
     tk.add(top, mark1)
+    tk.add(top, mark2)
 
-    # gdspy.LayoutViewer()
-    gdspy.write_gds('target.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.LayoutViewer()
+#    gdspy.write_gds('target.gds', unit=1.0e-6, precision=1.0e-9)

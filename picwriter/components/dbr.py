@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 
 class DBR(gdspy.Cell):
@@ -36,7 +35,7 @@ class DBR(gdspy.Cell):
 
     """
     def __init__(self, wgt, length, period, dc, w_phc, taper_length=20.0, fins=False, fin_size = (0.2,0.05), dbr_wgt=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "DBR--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("DBR"))
 
         self.portlist = {}
 

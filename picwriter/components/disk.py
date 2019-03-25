@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 
 class Disk(gdspy.Cell):
@@ -32,7 +31,7 @@ class Disk(gdspy.Cell):
 
     """
     def __init__(self, wgt, radius, coupling_gap, wrap_angle=0, parity=1, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "Disk--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("Disk"))
 
         self.portlist = {}
 

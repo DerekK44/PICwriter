@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
@@ -44,7 +43,7 @@ class ContraDirectionalCoupler(gdspy.Cell):
 
     """
     def __init__(self, wgt, length, gap, period, dc, angle=np.pi/6.0, width_top=None, width_bot=None, dw_top=None, dw_bot=None, input_bot=False, fins=False, fin_size=(0.2, 0.05), contradc_wgt=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "ContraDC--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("ContraDirectionalCoupler"))
 
         self.portlist = {}
 

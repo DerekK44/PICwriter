@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
@@ -37,7 +36,7 @@ class ZeroLengthCavity(gdspy.Cell):
 
     """
     def __init__(self, wgt, nbr_holes, period, radius, radius_taper, gap, wgt_beam_length, nbr_taper=4, taper_type='FF', port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "ZLCavity--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("ZeroLengthCavity"))
 
         self.portlist = {}
 

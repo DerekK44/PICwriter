@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 
 class Taper(gdspy.Cell):
@@ -32,7 +31,7 @@ class Taper(gdspy.Cell):
 
     """
     def __init__(self, wgt, length, end_width, end_clad_width=None, extra_clad_length=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "Taper--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("Taper"))
 
         self.portlist = {}
 

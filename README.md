@@ -36,7 +36,6 @@ With a working version of python, all dependencies should be automatically insta
 * [Python](http://www.python.org/) (tested with versions 2.7, 3.4, 3.5, 3.6 for Linux/OS, tested with versions 2.7, 3.4, 3.5, 3.6, 2.7-x64, 3.4-x64, 3.5-x64, 3.6-x64 for Windows.)
 * [gdspy](https://github.com/heitzmann/gdspy) (tested with versions 2.7, 3.4, 3.5, and 3.6)
 * [Numpy](http://numpy.scipy.org/)
-* [UUID](https://pypi.python.org/pypi/uuid/)
 * [SciPy](https://www.scipy.org/)
 * [Python-future](http://python-future.org/) (only for Python 2)
 

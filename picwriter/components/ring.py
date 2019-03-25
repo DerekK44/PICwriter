@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 
 class Ring(gdspy.Cell):
@@ -33,7 +32,7 @@ class Ring(gdspy.Cell):
 
     """
     def __init__(self, wgt, radius, coupling_gap, wrap_angle=0, parity=1, draw_bus_wg=True, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "Ring--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("Ring"))
 
         self.portlist = {}
 

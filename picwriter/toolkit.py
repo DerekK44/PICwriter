@@ -11,6 +11,7 @@ import math
 import gdspy
 
 TOL=1e-6
+CURRENT_CELLS = {}
 
 def add(topcell, subcell, center=(0,0)):
     """ First creates a CellReference to subcell, then adds this to topcell at location center
@@ -24,9 +25,16 @@ def add(topcell, subcell, center=(0,0)):
 
         Returns:
            None
-
     """
     topcell.add(gdspy.CellReference(subcell, origin=center))
+    
+def getCellName(name):
+    global CURRENT_CELLS
+    if name not in CURRENT_CELLS.keys():
+        CURRENT_CELLS[name] = 1
+    else:
+        CURRENT_CELLS[name] += 1
+    return str(name)+"_"+str(CURRENT_CELLS[name])
 
 def build_mask(cell, wgt, final_layer=None, final_datatype=None):
     """ Builds the appropriate mask according to the resist specifications and fabrication type.  Does this by applying a boolean 'XOR' or 'AND' operation on the waveguide and clad masks.

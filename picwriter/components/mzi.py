@@ -2,7 +2,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 from picwriter.components.mmi1x2 import MMI1x2
 from picwriter.components.mmi2x2 import MMI2x2
@@ -63,7 +62,7 @@ class MachZehnder(gdspy.Cell):
                  port=(0,0),
                  direction='EAST'):
         
-        gdspy.Cell.__init__(self, "MZI--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("MachZehnder"))
 
         self.portlist = {}
 
@@ -282,7 +281,7 @@ class MachZehnderSwitch1x2(gdspy.Cell):
                  mt=None, 
                  port=(0,0), 
                  direction='EAST'):
-        gdspy.Cell.__init__(self, "MZISwitch1x2--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("MachZehnderSwitch1x2"))
 
         self.portlist = {}
 
@@ -510,7 +509,7 @@ class MachZehnderSwitchDC1x2(gdspy.Cell):
                  port=(0,0), 
                  direction='EAST'):
         
-        gdspy.Cell.__init__(self, "MZISwitchDC1x2--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("MachZehnderSwitchDC1x2"))
 
         self.portlist = {}
 
@@ -738,7 +737,7 @@ class MachZehnderSwitchDC2x2(gdspy.Cell):
                  port=(0,0), 
                  direction='EAST'):
         
-        gdspy.Cell.__init__(self, "MZISwitchDC2x2--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("MachZehnderSwitchDC2x2"))
 
         self.portlist = {}
 

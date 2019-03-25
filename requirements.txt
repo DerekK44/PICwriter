@@ -2,6 +2,5 @@ setuptools
 numpy
 scipy
 future; python_version < "3"
-uuid
 gdspy
 h5py

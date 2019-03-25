@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 
 class StripSlotMMICoupler(gdspy.Cell):
@@ -35,7 +34,7 @@ class StripSlotMMICoupler(gdspy.Cell):
 
     """
     def __init__(self, wgt_input, wgt_output, w_mmi, l_mmi, length, input_strip=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "StripSlotMMICoupler--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("StripSlotMMICoupler"))
 
         self.portlist = {}
 

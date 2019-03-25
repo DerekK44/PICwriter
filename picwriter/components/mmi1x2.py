@@ -2,7 +2,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 
 class MMI1x2(gdspy.Cell):
@@ -34,7 +33,7 @@ class MMI1x2(gdspy.Cell):
 
     """
     def __init__(self, wgt, length, width, angle=np.pi/6.0, taper_width=None, taper_length=None, wg_sep=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "MMI1x2--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("MMI1x2"))
 
         self.portlist = {}
 

@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 
 class MetalTemplate:
@@ -57,7 +56,7 @@ class MetalRoute(gdspy.Cell):
 
     """
     def __init__(self, trace, mt):
-        gdspy.Cell.__init__(self,"MetalRoute--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self,tk.getCellName("MetalRoute"))
 
         self.portlist = {}
 
@@ -211,7 +210,7 @@ class Bondpad(gdspy.Cell):
 
     """
     def __init__(self, mt, length=150, width=100, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, "Bondpad--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("Bondpad"))
 
         self.portlist = {}
 

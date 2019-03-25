@@ -2,7 +2,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 
 class GratingCouplerStraight(gdspy.Cell):
@@ -32,7 +31,7 @@ class GratingCouplerStraight(gdspy.Cell):
     """
     def __init__(self, wgt, port=(0,0), direction='EAST', width=20, length=50,
                  taper_length=20, period=1.0, dutycycle=0.5):
-        gdspy.Cell.__init__(self, "GratingCouplerStraight--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("GratingCouplerStraight"))
 
         self.portlist = {}
 
@@ -130,7 +129,7 @@ class GratingCouplerFocusing(gdspy.Cell):
                     width=20, length=50, period=1.0, dutycycle=0.5,
                     wavelength=1.55, sin_theta=np.sin(np.pi * 8 / 180),
                     evaluations=99):
-        gdspy.Cell.__init__(self, "GratingCouplerFocusing--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("GratingCouplerFocusing"))
 
         self.portlist = {}
 

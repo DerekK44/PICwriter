@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 import gdspy
-import uuid
 import picwriter.toolkit as tk
 
 class WaveguideTemplate:
@@ -84,7 +83,7 @@ class Waveguide(gdspy.Cell):
 
     """
     def __init__(self, trace, wgt):
-        gdspy.Cell.__init__(self,"Waveguide--"+str(uuid.uuid4()))
+        gdspy.Cell.__init__(self, tk.getCellName("Waveguide"))
 
         self.portlist = {}
 
