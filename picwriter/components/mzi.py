@@ -47,8 +47,22 @@ class MachZehnder(gdspy.Cell):
         Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
 
     """
-    def __init__(self, wgt, MMIlength, MMIwidth, angle=np.pi/6.0, MMItaper_width=None, MMItaper_length=None, MMIwg_sep=None,
-                 arm1=0, arm2=0, heater=False, heater_length=400, mt=None, port=(0,0), direction='EAST'):
+    def __init__(self, 
+                 wgt, 
+                 MMIlength, 
+                 MMIwidth, 
+                 angle=np.pi/6.0, 
+                 MMItaper_width=None, 
+                 MMItaper_length=None, 
+                 MMIwg_sep=None,
+                 arm1=0, 
+                 arm2=0, 
+                 heater=False, 
+                 heater_length=400, 
+                 mt=None, 
+                 port=(0,0),
+                 direction='EAST'):
+        
         gdspy.Cell.__init__(self, "MZI--"+str(uuid.uuid4()))
 
         self.portlist = {}
@@ -223,7 +237,6 @@ class MachZehnderSwitch1x2(gdspy.Cell):
            * **MMI1x2taper_length** (float): Length of the taper leading up to the 1x2 MMI.  Defaults to None (taper_length=20).
            * **MMI1x2wg_sep** (float): Separation between waveguides on the 2-port side of the 1x2 MMI (defaults to width/3.0)
            * **MMI2x2taper_width** (float): Maximum width of the 2x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
-           * **MMI2x2taper_length** (float): Length of the taper leading up to the 2x2 MMI.  Defaults to None (taper_length=20).
            * **MMI2x2wg_sep** (float): Separation between waveguides of the 2x2 MMI (defaults to width/3.0)
            * **arm1** (float): Additional length of the top arm (when going `'EAST'`).  Defaults to zero.
            * **arm2** (float): Additional length of the bottom arm (when going `'EAST'`).  Defaults to zero.
@@ -250,9 +263,25 @@ class MachZehnderSwitch1x2(gdspy.Cell):
         Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
 
     """
-    def __init__(self, wgt, MMI1x2length, MMI1x2width, MMI2x2length, MMI2x2width, angle=np.pi/6.0, MMI1x2taper_width=None,
-                 MMI1x2taper_length=None, MMI1x2wg_sep=None, MMI2x2taper_width=None, MMI2x2taper_length=None, MMI2x2wg_sep=None,
-                 arm1=0, arm2=0, heater=False, heater_length=400, mt=None, port=(0,0), direction='EAST'):
+    def __init__(self, 
+                 wgt, 
+                 MMI1x2length, 
+                 MMI1x2width, 
+                 MMI2x2length, 
+                 MMI2x2width, 
+                 angle=np.pi/6.0, 
+                 MMI1x2taper_width=None,
+                 MMI1x2taper_length=None, 
+                 MMI1x2wg_sep=None, 
+                 MMI2x2taper_width=None, 
+                 MMI2x2wg_sep=None,
+                 arm1=0, 
+                 arm2=0, 
+                 heater=False, 
+                 heater_length=400, 
+                 mt=None, 
+                 port=(0,0), 
+                 direction='EAST'):
         gdspy.Cell.__init__(self, "MZISwitch1x2--"+str(uuid.uuid4()))
 
         self.portlist = {}
@@ -274,7 +303,6 @@ class MachZehnderSwitch1x2(gdspy.Cell):
         self.MMI2x2length = MMI2x2length
         self.MMI2x2width = MMI2x2width
         self.MMI2x2taper_width = wgt.wg_width if MMI2x2taper_width==None else MMI2x2taper_width
-        self.MMI2x2taper_length = 20 if MMI2x2taper_length==None else MMI2x2taper_length
         self.MMI2x2wg_sep = MMI2x2width/3.0 if MMI2x2wg_sep==None else MMI2x2wg_sep
 
         self.angle_x_dist = 2*self.wgt.bend_radius*np.sin(self.angle)
@@ -309,7 +337,6 @@ class MachZehnderSwitch1x2(gdspy.Cell):
         mmi2 = MMI2x2(self.wgt, self.MMI2x2length, self.MMI2x2width,
                       angle=self.angle,
                       taper_width=self.MMI2x2taper_width,
-                      taper_length=self.MMI2x2taper_length,
                       wg_sep=self.MMI2x2wg_sep,
                       port=(self.mmi2x2length+self.mmi1x2length+4*self.wgt.bend_radius, -self.MMI2x2wg_sep/2.0-self.angle_y_dist), direction='WEST')
 
@@ -387,24 +414,28 @@ class MachZehnderSwitch1x2(gdspy.Cell):
             self.htr_top_out_dir = self.direction + 3*np.pi/2.0
             self.htr_bot_in_dir = self.direction + np.pi/2.0
             self.htr_bot_out_dir = self.direction + 3*np.pi/2.0
-
-        htr_top_in = (x0+self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
-        htr_top_out = (x0+3*self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
-        htr_bot_in = (x0+self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
-        htr_bot_out = (x0+3*self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
+            
+        components = [mmi1, mmi2, wg_top, wg_bot]
         R = np.array([[np.cos(angle*np.pi/180.0), -np.sin(angle*np.pi/180.0)],
                      [np.sin(angle*np.pi/180.0), np.cos(angle*np.pi/180.0)]])
-        hti = np.dot(R, htr_top_in)
-        hto = np.dot(R, htr_top_out)
-        hbi = np.dot(R, htr_bot_in)
-        hbo = np.dot(R, htr_bot_out)
-        self.htr_top_in = (hti[0]+self.port[0], hti[1]+self.port[1])
-        self.htr_top_out = (hto[0]+self.port[0], hto[1]+self.port[1])
-        self.htr_bot_in = (hbi[0]+self.port[0], hbi[1]+self.port[1])
-        self.htr_bot_out = (hbo[0]+self.port[0], hbo[1]+self.port[1])
+        
+        if self.heater:
+            htr_top_in = (x0+self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
+            htr_top_out = (x0+3*self.wgt.bend_radius, y0+self.arm1/2.0+self.wgt.bend_radius+self.mt.width/2.0)
+            htr_bot_in = (x0+self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
+            htr_bot_out = (x0+3*self.wgt.bend_radius, y1-self.arm2/2.0-self.wgt.bend_radius-self.mt.width/2.0)
+            hti = np.dot(R, htr_top_in)
+            hto = np.dot(R, htr_top_out)
+            hbi = np.dot(R, htr_bot_in)
+            hbo = np.dot(R, htr_bot_out)
+            self.htr_top_in = (hti[0]+self.port[0], hti[1]+self.port[1])
+            self.htr_top_out = (hto[0]+self.port[0], hto[1]+self.port[1])
+            self.htr_bot_in = (hbi[0]+self.port[0], hbi[1]+self.port[1])
+            self.htr_bot_out = (hbo[0]+self.port[0], hbo[1]+self.port[1])
+            components.append(heater_top)
+            components.append(heater_bot)
 
         """ Add all the components """
-        components = [mmi1, mmi2, wg_top, wg_bot, heater_top, heater_bot]
         for c in components:
             self.add(gdspy.CellReference(c, origin=self.port, rotation=angle))
 
@@ -461,9 +492,24 @@ class MachZehnderSwitchDC1x2(gdspy.Cell):
         Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
 
     """
-    def __init__(self, wgt, MMI1x2length, MMI1x2width, DClength, DCgap, angle=np.pi/6.0, MMI1x2taper_width=None,
-                 MMI1x2taper_length=None, MMI1x2wg_sep=None,
-                 arm1=0, arm2=0, heater=False, heater_length=400, mt=None, port=(0,0), direction='EAST'):
+    def __init__(self, 
+                 wgt, 
+                 MMI1x2length, 
+                 MMI1x2width, 
+                 DClength, 
+                 DCgap, 
+                 angle=np.pi/6.0, 
+                 MMI1x2taper_width=None,
+                 MMI1x2taper_length=None, 
+                 MMI1x2wg_sep=None,
+                 arm1=0, 
+                 arm2=0, 
+                 heater=False, 
+                 heater_length=400, 
+                 mt=None, 
+                 port=(0,0), 
+                 direction='EAST'):
+        
         gdspy.Cell.__init__(self, "MZISwitchDC1x2--"+str(uuid.uuid4()))
 
         self.portlist = {}
@@ -677,8 +723,21 @@ class MachZehnderSwitchDC2x2(gdspy.Cell):
         Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
 
     """
-    def __init__(self, wgt, DC1length, DC1gap, DC2length, DC2gap, angle=np.pi/6.0,
-                 arm1=0, arm2=0, heater=False, heater_length=400, mt=None, port=(0,0), direction='EAST'):
+    def __init__(self, 
+                 wgt, 
+                 DC1length, 
+                 DC1gap, 
+                 DC2length, 
+                 DC2gap, 
+                 angle=np.pi/6.0,
+                 arm1=0, 
+                 arm2=0, 
+                 heater=False, 
+                 heater_length=400, 
+                 mt=None, 
+                 port=(0,0), 
+                 direction='EAST'):
+        
         gdspy.Cell.__init__(self, "MZISwitchDC2x2--"+str(uuid.uuid4()))
 
         self.portlist = {}
@@ -874,7 +933,25 @@ if __name__ == "__main__":
     wg_in = Waveguide([(0,0), (300,0)], wgt)
     tk.add(top, wg_in)
 
-    mzi = MachZehnder(wgt, MMIlength=50, MMIwidth=10, MMItaper_width=2.0, MMIwg_sep=3, arm1=500, arm2=500, heater=False, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
+#    mzi = MachZehnder(wgt, MMIlength=50, MMIwidth=10, MMItaper_width=2.0, MMIwg_sep=3, arm1=500, arm2=500, heater=False, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
+    
+    mzi = MachZehnderSwitch1x2(wgt,
+                               MMI1x2length=50,
+                               MMI1x2width=10,
+                               MMI2x2length=100,
+                               MMI2x2width=12,
+                               angle=np.pi/6.0,
+                               MMI1x2taper_width=2.0,
+                               MMI1x2taper_length=30.0,
+                               MMI1x2wg_sep=5.0,
+                               MMI2x2taper_width=2.0,
+                               MMI2x2wg_sep=6.0,
+                               arm1=300,
+                               arm2=250,
+                               heater=False,
+                               heater_length=400,
+                               mt=None,
+                               **wg_in.portlist["output"])
 #    mzi = MachZehnderSwitchDC1x2(wgt, MMI1x2length=50, MMI1x2width=10, MMI1x2taper_width=2.0, MMI1x2wg_sep=3, DClength=100, DCgap=0.5,
 #                                 arm1=500, arm2=500, heater=False, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
 #
@@ -883,19 +960,19 @@ if __name__ == "__main__":
 
     tk.add(top, mzi)
 
-    x_to, y_to = mzi.portlist["output"]["port"]
+    x_to, y_to = mzi.portlist["output_top"]["port"]
     wg_out_top = Waveguide([(x_to, y_to),
                        (x_to + wgt.bend_radius*0.75, y_to),
                        (x_to + 1.5*wgt.bend_radius, y_to + wgt.bend_radius),
                        (x_to + wgt.bend_radius+300, y_to + wgt.bend_radius)], wgt)
     tk.add(top, wg_out_top)
 
-#    x_bo, y_bo = mzi.portlist["output_bot"]["port"]
-#    wg_out_bot = Waveguide([(x_bo, y_bo),
-#                       (x_bo+wgt.bend_radius*0.75, y_bo),
-#                       (x_bo+1.5*wgt.bend_radius, y_bo-wgt.bend_radius),
-#                       (x_bo+wgt.bend_radius+300, y_bo-wgt.bend_radius)], wgt)
-#    tk.add(top, wg_out_bot)
+    x_bo, y_bo = mzi.portlist["output_bot"]["port"]
+    wg_out_bot = Waveguide([(x_bo, y_bo),
+                       (x_bo+wgt.bend_radius*0.75, y_bo),
+                       (x_bo+1.5*wgt.bend_radius, y_bo-wgt.bend_radius),
+                       (x_bo+wgt.bend_radius+300, y_bo-wgt.bend_radius)], wgt)
+    tk.add(top, wg_out_bot)
 
 #    wg_out = Waveguide([mzi.portlist["output"]["port"],
 #                       (mzi.portlist["output"]["port"][0]+wgt.bend_radius, mzi.portlist["output"]["port"][1]),
