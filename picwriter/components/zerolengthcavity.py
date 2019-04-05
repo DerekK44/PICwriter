@@ -11,7 +11,7 @@ class ZeroLengthCavity(gdspy.Cell):
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **nbr_holes** (float): Number of holes in the mirror.
+           * **num_holes** (float): Number of holes in the mirror.
            * **period** (float): Period of the repeated unit.
            * **radius** (float): Radius of the holes of the mirror.
            * **radius_taper** (float): Radius of the smallest hole of the taper. Defaults to radius/2.
@@ -19,7 +19,7 @@ class ZeroLengthCavity(gdspy.Cell):
            * **wgt_beam_length** (float): Extra length of nanobeam that is simple  waveguide.
 
         Keyword Args:
-           * **nbr_taper** (float): Number of holes in the taper region between the mirror and the waveguide. Defaults to 4.
+           * **num_taper_holes** (float): Number of holes in the taper region between the mirror and the waveguide. Defaults to 4.
            * **taper_type** (string): Determines the radius of the taper holes. 'ratio' corresponds to a constant radius/period ratio. 'FF' corresponds to a linearly decreasing fill factor (hole area/unit cell area). Defaults to 'FF'.
            * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
            * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
@@ -35,15 +35,26 @@ class ZeroLengthCavity(gdspy.Cell):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, nbr_holes, period, radius, radius_taper, gap, wgt_beam_length, nbr_taper=4, taper_type='FF', port=(0,0), direction='EAST'):
+    def __init__(self, 
+                 wgt, 
+                 num_holes, 
+                 period, 
+                 radius, 
+                 radius_taper, 
+                 gap, 
+                 wgt_beam_length, 
+                 num_taper_holes=4, 
+                 taper_type='FF', 
+                 port=(0,0), 
+                 direction='EAST'):
         gdspy.Cell.__init__(self, tk.getCellName("ZeroLengthCavity"))
 
         self.portlist = {}
 
         self.port = port
         self.direction = direction
-        self.nbr_holes = nbr_holes
-        self.nbr_taper = nbr_taper
+        self.num_holes = num_holes
+        self.num_taper_holes = num_taper_holes
         self.radius = radius
         self.period = period
         self.radius_taper = radius_taper
@@ -56,12 +67,12 @@ class ZeroLengthCavity(gdspy.Cell):
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
         
         if taper_type=="FF":
-            self.taper_length = nbr_taper*period
-            self.total_length = nbr_holes*period + 2*self.taper_length + 2*self.wgt_beam_length
+            self.taper_length = num_taper_holes*period
+            self.total_length = num_holes*period + 2*self.taper_length + 2*self.wgt_beam_length
             self.trace=[port, tk.translate_point(port, self.total_length, direction)]
         elif taper_type=="ratio":
-            self.taper_length = period/radius*(radius*nbr_taper + (nbr_taper+1)*(radius_taper-radius)/2)
-            self.total_length = nbr_holes*period + 2*self.taper_length + 2*self.wgt_beam_length
+            self.taper_length = period/radius*(radius*num_taper_holes + (num_taper_holes+1)*(radius_taper-radius)/2)
+            self.total_length = num_holes*period + 2*self.taper_length + 2*self.wgt_beam_length
             self.trace=[port, tk.translate_point(port, self.total_length, direction)]
 
         self.type_check_trace()
@@ -105,7 +116,7 @@ class ZeroLengthCavity(gdspy.Cell):
         startx = beam_x + np.cos(angle)*(self.wgt_beam_length + self.taper_length + self.period/2)
         starty = beam_y + np.sin(angle)*(self.wgt_beam_length + self.taper_length + self.period/2)
         hole_list = []
-        for i in range(int(self.nbr_holes)):
+        for i in range(int(self.num_holes)):
             x = startx + i*np.cos(angle)*self.period
             y = starty + i*np.sin(angle)*self.period
             hole_list.append(gdspy.Round((x,y), self.radius))
@@ -118,8 +129,8 @@ class ZeroLengthCavity(gdspy.Cell):
             starty_out = beam_y + np.sin(angle)*(self.total_length - self.wgt_beam_length - self.period/2)
             taper_list_in = []
             taper_list_out = []
-            for i in range(int(self.nbr_taper)):
-                fill_factor = np.pi*np.square(self.radius_taper/self.period) + i*np.pi*(np.square(self.radius/self.period) - np.square(self.radius_taper/self.period))/(self.nbr_taper - 1)
+            for i in range(int(self.num_taper_holes)):
+                fill_factor = np.pi*np.square(self.radius_taper/self.period) + i*np.pi*(np.square(self.radius/self.period) - np.square(self.radius_taper/self.period))/(self.num_taper_holes - 1)
                 taper_radii = np.sqrt(fill_factor/np.pi)*self.period
                 x_in = startx_in + i*np.cos(angle)*self.period
                 y_in = starty_in + i*np.sin(angle)*self.period
@@ -134,9 +145,9 @@ class ZeroLengthCavity(gdspy.Cell):
             starty_out = beam_y + np.sin(angle)*(self.total_length - self.wgt_beam_length)
             taper_list_in = []
             taper_list_out = []
-            for i in range(int(self.nbr_taper)):
+            for i in range(int(self.num_taper_holes)):
                 ratio = self.period/self.radius
-                taper_radii = self.radius_taper + i*(self.radius-self.radius_taper)/(self.nbr_taper-1)
+                taper_radii = self.radius_taper + i*(self.radius-self.radius_taper)/(self.num_taper_holes-1)
                 taper_period = taper_radii*ratio
                 x_in = startx_in + i*np.cos(angle)*taper_period
                 y_in = starty_in + i*np.sin(angle)*taper_period
@@ -186,4 +197,4 @@ if __name__ == "__main__":
     tk.add(top, wg3)
 
     gdspy.LayoutViewer()
-#    gdspy.write_gds('dbr.gds', unit=1.0e-6, precision=1.0e-9)
+#    gdspy.write_gds('zlc.gds', unit=1.0e-6, precision=1.0e-9)
