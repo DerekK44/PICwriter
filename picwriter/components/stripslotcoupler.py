@@ -91,32 +91,32 @@ class StripSlotCoupler(gdspy.Cell):
         # Add strip waveguide taper for region 1
         x0, y0 = self.trace[0]
 
-        pts = [(x0, y0 - wgt_strip.wg_width/2.0),
-               (x0, y0 + wgt_strip.wg_width/2.0),
-               (x0 + self.length1, y0 - wgt_strip.wg_width/2.0 + self.end_strip_width),
-               (x0 + self.length1, y0 - wgt_strip.wg_width/2.0)]
+        pts = [(x0, y0 - self.wgt_strip.wg_width/2.0),
+               (x0, y0 + self.wgt_strip.wg_width/2.0),
+               (x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width),
+               (x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0)]
         strip1 = gdspy.Polygon(pts, layer=self.wgt_strip.wg_layer, datatype = self.wgt_strip.wg_datatype)
         strip1.rotate(angle, self.trace[0])
         
         # Add the thin side waveguide for region 1
-        pts = [(x0, y0 + wgt_strip.wg_width/2.0 + self.d),
-               (x0, y0 + wgt_strip.wg_width/2.0 + self.d + self.start_rail_width),
-               (x0 + self.length1, y0 - wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot + self.start_rail_width),
-               (x0 + self.length1, y0 - wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot)]
+        pts = [(x0, y0 + self.wgt_strip.wg_width/2.0 + self.d),
+               (x0, y0 + self.wgt_strip.wg_width/2.0 + self.d + self.start_rail_width),
+               (x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot + self.start_rail_width),
+               (x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot)]
         thin_strip = gdspy.Polygon(pts, layer=self.wgt_strip.wg_layer, datatype=self.wgt_strip.wg_datatype)   
         thin_strip.rotate(angle, self.trace[0])
         
         # Add the bottom rail for region 2
-        pts = [(x0 + self.length1, y0 - wgt_strip.wg_width/2.0 + self.end_strip_width),
-               (x0 + self.length1, y0 - wgt_strip.wg_width/2.0),
+        pts = [(x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width),
+               (x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0),
                (x0 + self.length1 + self.length2, y0 - self.wgt_slot.wg_width/2.0),
                (x0 + self.length1 + self.length2, y0 - self.wgt_slot.wg_width/2.0 + self.wgt_slot.rail)]
         rail1 = gdspy.Polygon(pts, layer=self.wgt_strip.wg_layer, datatype = self.wgt_strip.wg_datatype)
         rail1.rotate(angle, self.trace[0])
         
         # Add the top rail for region 2
-        pts = [(x0 + self.length1, y0 - wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot + self.start_rail_width),
-               (x0 + self.length1, y0 - wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot),
+        pts = [(x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot + self.start_rail_width),
+               (x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot),
                (x0 + self.length1 + self.length2, y0 + self.wgt_slot.wg_width/2.0 - self.wgt_slot.rail),
                (x0 + self.length1 + self.length2, y0 + self.wgt_slot.wg_width/2.0)]
         rail2 = gdspy.Polygon(pts, layer=self.wgt_strip.wg_layer, datatype = self.wgt_strip.wg_datatype)

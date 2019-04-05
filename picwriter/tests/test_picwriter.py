@@ -218,13 +218,23 @@ class TestPICwriter(TestCase):
 		wg2=Waveguide([(x1, y1), (x1+100, y1)], wgt_slot)
 		tk.add(top, wg2)
 		
-		ycoup2 = StripSlotMMICoupler(wgt_strip, wgt_slot, 2.5, 6.0, 20.0, **wg2.portlist["output"])
-		tk.add(top, ycoup2)
+		coup2 = StripSlotMMICoupler(wgt_strip, wgt_slot, 2.5, 6.0, 20.0, **wg2.portlist["output"])
+		tk.add(top, coup2)
+  
+		coup3 = StripSlotCoupler(wgt_strip, 
+                             wgt_slot, 
+                             length1 = 15.0, 
+                             length2 = 15.0, 
+                             start_rail_width = 0.1,
+                             end_strip_width = 0.4,
+                             d = 1.0,
+                             **coup2.portlist["output"])
+		tk.add(top, coup3)
 		
 #		print("StripSlotCoupler area = "+str(top.area()))
 		print(len(top.elements))
-		self.assertTrue(len(top.elements)==4)
-		self.assertTrue(abs(top.area()-4921.6) <= 1e-6)
+		self.assertTrue(len(top.elements)==5)
+		self.assertTrue(abs(top.area()-5559.85) <= 1e-6)
 
 	def test_adiabaticcoupler_creation(self):
 		top = gdspy.Cell("t-ac")
