@@ -19,14 +19,14 @@ Strip-to-slot couplers
 .. automodule:: picwriter.components
    :members: StripSlotCoupler
 
-.. image:: imgs/stripslotcoupler.png
+.. image:: imgs/stripslotconverter.png
 
 .. automodule:: picwriter.components
-   :members: StripSlotMMICoupler
+   :members: StripSlotMMIConverter
    
-.. image:: imgs/stripslotmmicoupler.png
+.. image:: imgs/stripslotmmiconverter.png
 
 .. automodule:: picwriter.components
    :members: StripSlotYCoupler
    
-.. image:: imgs/stripslotycoupler.png
+.. image:: imgs/stripslotyconverter.png

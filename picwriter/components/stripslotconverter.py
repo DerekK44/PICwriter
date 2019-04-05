@@ -5,8 +5,8 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class StripSlotCoupler(gdspy.Cell):
-    """ Strip-to-Slot Side Coupler Cell class (subclass of gdspy.Cell).  Adiabatically transforms a strip to a slot waveguide mode, with two sections.  Section 1 introduces a narrow waveguide alongside the input strip waveguide and gradually lowers the gap between the strip waveguide and narrow side waveguide.  Section 2 gradually converts the widths of the two waveguides until they are equal to the slot rail widths.  
+class StripSlotConverter(gdspy.Cell):
+    """ Strip-to-Slot Side Converter Cell class (subclass of gdspy.Cell).  Adiabatically transforms a strip to a slot waveguide mode, with two sections.  Section 1 introduces a narrow waveguide alongside the input strip waveguide and gradually lowers the gap between the strip waveguide and narrow side waveguide.  Section 2 gradually converts the widths of the two waveguides until they are equal to the slot rail widths.  
 
         Args:
            * **wgt_input** (WaveguideTemplate):  WaveguideTemplate object for the input waveguide (should be either of type `strip` or `slot`).
@@ -47,7 +47,7 @@ class StripSlotCoupler(gdspy.Cell):
                  port=(0,0), 
                  direction='EAST'):
         
-        gdspy.Cell.__init__(self, tk.getCellName("StripSlotCoupler"))
+        gdspy.Cell.__init__(self, tk.getCellName("StripSlotConverter"))
 
         self.portlist = {}
 
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     wg1=Waveguide([(0,0), (100,0)], wgt_strip)
     tk.add(top, wg1)
     
-    ssc = StripSlotCoupler(wgt_strip, 
+    ssc = StripSlotConverter(wgt_strip, 
                              wgt_slot, 
                              length1 = 15.0, 
                              length2 = 15.0, 
@@ -174,4 +174,4 @@ if __name__ == "__main__":
     tk.add(top, wg2)
 
     gdspy.LayoutViewer(cells=top)
-    gdspy.write_gds('stripslotcoupler.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.write_gds('StripSlotConverter.gds', unit=1.0e-6, precision=1.0e-9)

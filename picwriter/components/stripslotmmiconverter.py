@@ -5,8 +5,8 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class StripSlotMMICoupler(gdspy.Cell):
-    """ Strip-to-Slot MMI Coupler Cell class (subclass of gdspy.Cell).  For more information on this specific type of strip to slot mode converter, please see the original papers at https://doi.org/10.1364/OL.39.005665 and https://doi.org/10.1364/OE.24.007347.
+class StripSlotMMIConverter(gdspy.Cell):
+    """ Strip-to-Slot MMI Converter Cell class (subclass of gdspy.Cell).  For more information on this specific type of strip to slot mode converter, please see the original papers at https://doi.org/10.1364/OL.39.005665 and https://doi.org/10.1364/OE.24.007347.
 
         Args:
            * **wgt_input** (WaveguideTemplate):  WaveguideTemplate object for the input waveguide (should be either of type `strip` or `slot`).
@@ -34,7 +34,7 @@ class StripSlotMMICoupler(gdspy.Cell):
 
     """
     def __init__(self, wgt_input, wgt_output, w_mmi, l_mmi, length, input_strip=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, tk.getCellName("StripSlotMMICoupler"))
+        gdspy.Cell.__init__(self, tk.getCellName("StripSlotMMIConverter"))
 
         self.portlist = {}
 
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     wg1=Waveguide([(0,0), (100,0)], wgt_strip)
     tk.add(top, wg1)
 
-    ycoup = StripSlotMMICoupler(wgt_strip, wgt_slot, 2.5, 6.0, 20.0, **wg1.portlist["output"])
+    ycoup = StripSlotMMIConverter(wgt_strip, wgt_slot, 2.5, 6.0, 20.0, **wg1.portlist["output"])
     tk.add(top, ycoup)
 
     (x1,y1)=ycoup.portlist["output"]["port"]
@@ -127,4 +127,4 @@ if __name__ == "__main__":
     tk.add(top, wg2)
 
     gdspy.LayoutViewer(cells=top)
-    gdspy.write_gds('stripslotmmicoupler.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.write_gds('StripSlotMMIConverter.gds', unit=1.0e-6, precision=1.0e-9)
