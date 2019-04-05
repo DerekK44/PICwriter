@@ -17,6 +17,11 @@ Strip-to-slot couplers
 ============================
 
 .. automodule:: picwriter.components
+   :members: StripSlotCoupler
+
+.. image:: imgs/stripslotcoupler.png
+
+.. automodule:: picwriter.components
    :members: StripSlotMMICoupler
    
 .. image:: imgs/stripslotmmicoupler.png

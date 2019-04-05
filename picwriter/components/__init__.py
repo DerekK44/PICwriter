@@ -16,6 +16,7 @@ from .dbr import DBR
 from .directionalcoupler import DirectionalCoupler
 from .contradc import ContraDirectionalCoupler
 from .swgcontradc import SWGContraDirectionalCoupler
+from .stripslotcoupler import StripSlotCoupler
 from .stripslotycoupler import StripSlotYCoupler
 from .stripslotmmicoupler import StripSlotMMICoupler
 from .adiabaticcoupler import AdiabaticCoupler
