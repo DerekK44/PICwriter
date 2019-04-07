@@ -249,3 +249,18 @@ class TestPICwriter(TestCase):
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
 		self.assertTrue(abs(top.area()-8386.54754147) <= 1e-6)
+  
+  
+	def test_fullcoupler_creation(self):
+		top = gdspy.Cell("t-fc")
+		wgt = WaveguideTemplate(wg_width=2.0, bend_radius=100, resist='+')
+		wg1=Waveguide([(0,0), (100,0)], wgt)
+		tk.add(top, wg1)
+
+		fc = FullCoupler(wgt, 40.0, 0.5, 1.0, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
+		tk.add(top, fc)
+
+#		print("FullCoupler area = "+str(top.area()))
+		print(len(top.elements))
+		self.assertTrue(len(top.elements)==2)
+		self.assertTrue(abs(top.area()-9346.547542019445) <= 1e-6)

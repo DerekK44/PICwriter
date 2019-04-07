@@ -20,4 +20,5 @@ from .stripslotconverter import StripSlotConverter
 from .stripslotyconverter import StripSlotYConverter
 from .stripslotmmiconverter import StripSlotMMIConverter
 from .adiabaticcoupler import AdiabaticCoupler
+from .fullcoupler import FullCoupler
 from .zerolengthcavity import ZeroLengthCavity

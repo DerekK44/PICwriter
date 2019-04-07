@@ -11,13 +11,22 @@ Directional Coupler
 .. image:: imgs/dc.png
 
 ------------------------------
-Adiabatic Coupler
+Adiabatic 3dB Coupler
 ------------------------------
 
 .. automodule:: picwriter.components
    :members: AdiabaticCoupler
 
 .. image:: imgs/ac.png
+
+------------------------------
+Adiabatic Full Coupler
+------------------------------
+
+.. automodule:: picwriter.components
+   :members: FullCoupler
+
+.. image:: imgs/fc.png
 
 ------------------------------------------------------------
 Sub-wavelength Grating Assisted Contra-Directional Coupler

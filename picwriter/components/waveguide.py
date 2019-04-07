@@ -6,10 +6,10 @@ import gdspy
 import picwriter.toolkit as tk
 
 class WaveguideTemplate:
-    """ Template for waveguides that contains standard information about the geometry and fabrication.  Supported waveguide types are **strip** (also known as "channel" waveguides), **slot**, and **SWG** ("sub-wavelength grating", or 1D photonic crystal waveguides).
+    """ Template for waveguides that contains standard information about the geometry and fabrication.  Supported waveguide types are **strip** (also known as 'channel' waveguides), **slot**, and **SWG** ('sub-wavelength grating', or 1D photonic crystal waveguides).
 
         Keyword Args:
-           * **wg_type** (string): Type of waveguide used.  Options are "strip", "slot", and "swg".  Defaults to "strip".
+           * **wg_type** (string): Type of waveguide used.  Options are 'strip', 'slot', and 'swg'.  Defaults to 'strip'.
            * **bend_radius** (float): Radius of curvature for waveguide bends (circular).  Defaults to 50.
            * **wg_width** (float): Width of the waveguide as shown on the mask.  Defaults to 2.
            * **slot** (float): Size of the waveguide slot region.  This is only used if `wg_type`=`'slot'`.  Defaults to 0.1.
