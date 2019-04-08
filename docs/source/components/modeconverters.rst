@@ -5,7 +5,7 @@ Mode converters
 Linear tapers
 ----------------------------
 
-Below is a standard taper class that can be used to generate inverse-tapered waveguide couplers or wide to narrow tapered couplers.
+Below is a standard taper class that can be used to linearly taper the waveguide width (such as for inverse tapers commonly used for fiber-to-chip coupling).
 
 .. automodule:: picwriter.components
    :members: Taper
