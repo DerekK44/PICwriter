@@ -50,10 +50,10 @@ class Disk(gdspy.Cell):
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
 
@@ -154,7 +154,7 @@ class Disk(gdspy.Cell):
         self.add(path)
         self.add(clad)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["input"] = {'port':self.port,

@@ -67,11 +67,11 @@ class MetalRoute(gdspy.Cell):
         self.spec = {'layer': mt.metal_layer, 'datatype': mt.metal_datatype}
         self.clad_spec = {'layer': mt.clad_layer, 'datatype': mt.clad_datatype} #Used for 'xor' operation
 
-        self.type_check_trace()
-        self.build_cell()
-        self.build_ports()
+        self.__type_check_trace()
+        self.__build_cell()
+        self.__build_ports()
 
-    def type_check_trace(self):
+    def __type_check_trace(self):
         trace = []
         """ Round each trace value to the nearest 1e-6 -- prevents
         some typechecking errors
@@ -103,7 +103,7 @@ class MetalRoute(gdspy.Cell):
                                  " waypoints must specify a valid 90deg bend")
             prev_dx, prev_dy = dx, dy
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         br = self.mt.bend_radius
@@ -180,7 +180,7 @@ class MetalRoute(gdspy.Cell):
         self.add(path)
         self.add(path2)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["input"] = {'port':(self.trace[0][0], self.trace[0][1]),
@@ -223,10 +223,10 @@ class Bondpad(gdspy.Cell):
         self.spec = {'layer': mt.metal_layer, 'datatype': mt.metal_datatype}
         self.clad_spec = {'layer': mt.clad_layer, 'datatype': mt.clad_datatype}
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         w, l, c = self.width, self.length, self.mt.clad_width
@@ -243,7 +243,7 @@ class Bondpad(gdspy.Cell):
             self.add(gdspy.Rectangle((self.port[0]-w/2.0, self.port[1]), (self.port[0]+w/2.0, self.port[1]-l), **self.spec))
             self.add(gdspy.Rectangle((self.port[0]-w/2.0-c, self.port[1]+c), (self.port[0]+w/2.0+c, self.port[1]-l-c), **self.clad_spec))
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["output"] = {'port':self.port, 'direction':self.direction}

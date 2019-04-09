@@ -80,10 +80,10 @@ class StripSlotConverter(gdspy.Cell):
         self.trace=[port, tk.translate_point(port, length1+length2, direction)]
         self.direction = direction
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using polygons
 
         angle = tk.get_exact_angle(self.trace[0], self.trace[1])
@@ -144,7 +144,7 @@ class StripSlotConverter(gdspy.Cell):
         self.add(rail2)
         self.add(clad)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["input"] = {'port':self.trace[0], 'direction':tk.flip_direction(self.direction)}

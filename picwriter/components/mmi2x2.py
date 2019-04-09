@@ -53,8 +53,8 @@ class MMI2x2(gdspy.Cell):
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
         self.type_check_values()
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
     def type_check_values(self):
         #Check that the values for the MMI1x2 are all valid
@@ -66,7 +66,7 @@ class MMI2x2(gdspy.Cell):
             raise ValueError("Warning! Waveguide separation is smaller than the "
                              "minimum value (taper_width)")
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # then add it to the Cell
 
@@ -173,7 +173,7 @@ class MMI2x2(gdspy.Cell):
         self.add(clad_path4)
         self.add(clad_path5)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["input_top"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}

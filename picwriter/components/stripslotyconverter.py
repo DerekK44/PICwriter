@@ -66,10 +66,10 @@ class StripSlotYConverter(gdspy.Cell):
         self.trace=[port, tk.translate_point(port, length, direction)]
         self.direction = direction
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
 
@@ -98,7 +98,7 @@ class StripSlotYConverter(gdspy.Cell):
         self.add(path_slot)
         self.add(path_clad)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["input"] = {'port':self.trace[0], 'direction':tk.flip_direction(self.direction)}

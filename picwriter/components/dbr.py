@@ -63,11 +63,11 @@ class DBR(gdspy.Cell):
             self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
             self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
-        self.type_check_trace()
-        self.build_cell()
-        self.build_ports()
+        self.__type_check_trace()
+        self.__build_cell()
+        self.__build_ports()
 
-    def type_check_trace(self):
+    def __type_check_trace(self):
         trace = []
         """ Round each trace value to the nearest 1e-6 -- prevents
         some typechecking errors
@@ -80,7 +80,7 @@ class DBR(gdspy.Cell):
         if self.w_phc > self.wgt.wg_width:
             raise ValueError("Warning! The w_phc parameter must be smaller than the waveguide template wg_width.")
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         angle = tk.get_exact_angle(self.trace[0], self.trace[1])
@@ -129,7 +129,7 @@ class DBR(gdspy.Cell):
             block.rotate(angle, self.trace[0])
             self.add(block)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["input"] = {'port':self.trace[0], 'direction':tk.flip_direction(self.direction)}

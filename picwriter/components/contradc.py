@@ -92,10 +92,10 @@ class ContraDirectionalCoupler(gdspy.Cell):
             self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
             self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
 
@@ -159,7 +159,7 @@ class ContraDirectionalCoupler(gdspy.Cell):
         if self.fins:
             num_fins = self.wgt.wg_width//(2*self.fin_size[1])
             x0, y0 = x01, y01 - num_fins*(2*self.fin_size[1])/2.0 + self.fin_size[1]/2.0
-            xend = x01+distx
+#            xend = x01+distx
             for i in range(int(num_fins)):
                 y = y0 + i*2*self.fin_size[1]
                 block_list.append(gdspy.Rectangle((x0, y+shift), (x0+self.fin_size[0], y+self.fin_size[1]+shift), **self.fin_spec))
@@ -205,7 +205,7 @@ class ContraDirectionalCoupler(gdspy.Cell):
             block.rotate(angle, self.port)
             self.add(block)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         if self.parity==1:

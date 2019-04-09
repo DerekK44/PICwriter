@@ -48,8 +48,8 @@ class Taper(gdspy.Cell):
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
         self.type_check_trace()
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
     def type_check_trace(self):
         trace = []
@@ -69,7 +69,7 @@ class Taper(gdspy.Cell):
             raise ValueError("Warning! Both waypoints *must* specify horizontal "
                              "or vertical tapers.")
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         angle = tk.get_angle(self.trace[0], self.trace[1])
@@ -86,7 +86,7 @@ class Taper(gdspy.Cell):
         self.add(path)
         self.add(path2)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["input"] = {'port':self.trace[0], 'direction':tk.flip_direction(self.direction)}

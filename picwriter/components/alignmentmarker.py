@@ -29,9 +29,9 @@ class AlignmentCross(gdspy.Cell):
         self.datatype=datatype
         self.center = center
 
-        self.build_cell()
+        self.__build_cell()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes, then add it to the Cell
         x0,y0 = self.center
 

@@ -54,17 +54,17 @@ class Spiral(gdspy.Cell):
 
         self.nmax = int((self.width - self.spacing - 5*self.bend_radius)/(2*self.spacing))
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def fixed_len(self, h):
+    def __fixed_len(self, h):
         w = self.width
         s = self.spacing
         br = self.bend_radius
         wcent = (w-s-br)/2.0
         return 2*wcent + (h - s) + wcent + br + h + (w-br) + (h-s) + wcent
 
-    def spiral_len(self, h, n):
+    def __spiral_len(self, h, n):
         if n==0:
             return 0
         else:
@@ -74,7 +74,7 @@ class Spiral(gdspy.Cell):
             wcent = (w-s-br)/2.0
             return 2*((2*(wcent - n*s)) + (h-s-2*n*s))
 
-    def middle_len(self, h, n):
+    def __middle_len(self, h, n):
         return (h - 2*self.spacing) - 2*n*self.spacing
 
     def get_length(self, h, n):
@@ -82,13 +82,13 @@ class Spiral(gdspy.Cell):
         num_points = 10 + 4*n
 
 
-        length = self.fixed_len(h)
-        length += sum([self.spiral_len(h, i+1) for i in range(n)])
-        length += self.middle_len(h, n)
+        length = self.__fixed_len(h)
+        length += sum([self.__spiral_len(h, i+1) for i in range(n)])
+        length += self.__middle_len(h, n)
         length -= (num_points - 2)*self.corner_dl
         return length
 
-    def get_hmin(self, n):
+    def __get_hmin(self, n):
         # Determine the minimum height corresponding to the spiral parameters and # of spiral turns, 'n'
         br = self.bend_radius
         s = self.spacing
@@ -98,18 +98,18 @@ class Spiral(gdspy.Cell):
 		#Returns the true length of the spiral, including length from the turns
         return self.actual_length
 
-    def get_number_of_spirals(self):
+    def __get_number_of_spirals(self):
         # Find the ideal number of loops required to make the spiral such that the
         # spiral is wound as tightly as possible.  This means that the required height
         # of the spiral should be minimized appropriately.
         length_goal = self.length
 
         n = 0
-        hmin = self.get_hmin(n)
+        hmin = self.__get_hmin(n)
         length_min = self.get_length(hmin, n)
         while (length_min < length_goal) and n < self.nmax:
             n += 1
-            hmin = self.get_hmin(n)
+            hmin = self.__get_hmin(n)
             length_min = self.get_length(hmin, n)
 
         if n==0:
@@ -120,28 +120,28 @@ class Spiral(gdspy.Cell):
         else:
             return n-1
 
-    def get_spiral_height(self, n):
+    def __get_spiral_height(self, n):
         # n is the number of spirals
         # Returns the appropriate height ( > hmin) such that
         num_wg_segments = 4 + 2*n
 
-        hmin = self.get_hmin(n)
+        hmin = self.__get_hmin(n)
         delta_length = self.length - self.get_length(hmin, n)
         hnew = hmin + (delta_length/num_wg_segments)
 
         return hnew
 
-    def build_cell(self):
+    def __build_cell(self):
         # Determine the correct set of waypoints, then feed this over to a
         # Waveguide() class.
         # This is just one way of doing it... ¯\_(ツ)_/¯
 
         # Determine the number of spiral wraps
-        n = self.get_number_of_spirals()
+        n = self.__get_number_of_spirals()
 
         """ Determine the corresponding spiral height
         """
-        h = self.get_spiral_height(n)
+        h = self.__get_spiral_height(n)
 
         w = self.width
         length = self.length
@@ -262,7 +262,7 @@ class Spiral(gdspy.Cell):
         wgr.translate(self.port[0], self.port[1])
         self.add(wgr)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 

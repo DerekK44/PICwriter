@@ -94,10 +94,10 @@ class MachZehnder(gdspy.Cell):
         self.port = port
         self.direction = direction
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # then add it to the Cell
 
@@ -208,7 +208,7 @@ class MachZehnder(gdspy.Cell):
         for c in components:
             self.add(gdspy.CellReference(c, origin=self.port, rotation=angle))
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
@@ -320,10 +320,10 @@ class MachZehnderSwitch1x2(gdspy.Cell):
         self.port = port
         self.direction = direction
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # then add it to the Cell
 
@@ -438,7 +438,7 @@ class MachZehnderSwitch1x2(gdspy.Cell):
         for c in components:
             self.add(gdspy.CellReference(c, origin=self.port, rotation=angle))
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
@@ -551,10 +551,10 @@ class MachZehnderSwitchDC1x2(gdspy.Cell):
         self.port = port
         self.direction = direction
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # then add it to the Cell
 
@@ -671,7 +671,7 @@ class MachZehnderSwitchDC1x2(gdspy.Cell):
         for c in components:
             self.add(gdspy.CellReference(c, origin=self.port, rotation=angle))
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
@@ -776,10 +776,10 @@ class MachZehnderSwitchDC2x2(gdspy.Cell):
         self.port = port
         self.direction = direction
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # then add it to the Cell
         dc_in  = DirectionalCoupler(self.wgt,
@@ -908,7 +908,7 @@ class MachZehnderSwitchDC2x2(gdspy.Cell):
         for c in components:
             self.add(gdspy.CellReference(c, origin=self.port, rotation=angle))
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 

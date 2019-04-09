@@ -51,10 +51,10 @@ class GratingCouplerStraight(gdspy.Cell):
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         #Sequentially build all the geometric shapes using gdspy path functions
         #then add it to the Cell
         num_teeth = int(self.length//self.period)
@@ -92,7 +92,7 @@ class GratingCouplerStraight(gdspy.Cell):
         self.add(path)
         self.add(clad_path)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["output"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
@@ -152,10 +152,10 @@ class GratingCouplerFocusing(gdspy.Cell):
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
-        self.build_cell()
-        self.build_ports()
+        self.__build_cell()
+        self.__build_ports()
 
-    def build_cell(self):
+    def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # then add it to the Cell
 
@@ -212,7 +212,7 @@ class GratingCouplerFocusing(gdspy.Cell):
         self.add(path)
         self.add(clad_path)
 
-    def build_ports(self):
+    def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         self.portlist["output"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
