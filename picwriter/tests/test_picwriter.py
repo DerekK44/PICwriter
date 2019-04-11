@@ -242,13 +242,21 @@ class TestPICwriter(TestCase):
 		wg1=Waveguide([(0,0), (100,0)], wgt)
 		tk.add(top, wg1)
 
-		bdc = AdiabaticCoupler(wgt, 20.0, 0.5, 1.0, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
-		tk.add(top, bdc)
+		ac = AdiabaticCoupler(wgt, 
+                          length1=60.0, 
+                          length2=50.0,
+                          gap=0.5, 
+                          fargap=6.0,
+                          dw=1.0, 
+                          angle=np.pi/16.0, 
+                          parity=1, 
+                          **wg1.portlist["output"])
+		tk.add(top, ac)
 
 #		print("AdiabaticCoupler area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-8386.54754147) <= 1e-6)
+		self.assertTrue(abs(top.area()-11449.910682728) <= 1e-6)
   
   
 	def test_fullcoupler_creation(self):
