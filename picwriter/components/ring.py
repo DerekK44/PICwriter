@@ -18,7 +18,7 @@ class Ring(gdspy.Cell):
            * **parity** (1 or -1): If 1, resonator to left of bus waveguide, if -1 resonator to the right
            * **port** (tuple): Cartesian coordinate of the input port (x1, y1)
            * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
-           * **draw_bus_wg** (bool): If `False`, does not generate the bus waveguide.  Instead, the input/output port positions are at the bottom of the ring, and the user can route their own bus waveguide.  Defaults to `True`.
+           * **draw_bus_wg** (bool): If `False`, does not generate the bus waveguide.  Instead, the input/output port positions will be at the some location at the bottom of the ring, and the user can route their own bus waveguide.  Defaults to `True`.
 
         Members:
            * **portlist** (dict): Dictionary with the relevant port information
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     wg1=Waveguide([(0,-100.0), (0,0), (50,0)], wgt)
     tk.add(top, wg1)
 
-    r1 = Ring(wgt, 60.0, 1.0, parity=1, draw_bus_wg=False, **wg1.portlist["output"])
+    r1 = Ring(wgt, 60.0, 1.0, parity=1, draw_bus_wg=True, **wg1.portlist["output"])
     tk.add(top, r1)
     print(r1.portlist)
 

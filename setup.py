@@ -19,7 +19,7 @@ setup(name='picwriter',
       license='MIT',
       classifiers=[
         # How mature is this project? Common values are
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         # Indicate who your project is intended for
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)',
