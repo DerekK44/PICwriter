@@ -4,7 +4,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class MMI1x2(gdspy.Cell):
+class MMI1x2(tk.PICcomponent):
     """ 1x2 MMI Cell class (subclass of gdspy.Cell).
 
         Args:
@@ -33,8 +33,8 @@ class MMI1x2(gdspy.Cell):
 
     """
     def __init__(self, wgt, length, width, angle=np.pi/6.0, taper_width=None, taper_length=None, wg_sep=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, tk.getCellName("MMI1x2"))
-
+        tk.PICcomponent.__init__(self, "MMI1x2")
+        
         self.portlist = {}
 
         self.wgt = wgt
@@ -53,11 +53,21 @@ class MMI1x2(gdspy.Cell):
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
-        self.type_check_values()
+        self.__type_check_values()
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
+        
+        """ The _hash_cell_ function makes sure that duplicate cells are not created.
+        Pass to it all the unique properties of this cell, which are used to check for duplicates.
+        Do *not* include properties like port, direction.  These are specific to Cell References only.
+        """
+        self._hash_cell_(wgt, length, width, angle, taper_width, taper_length, wg_sep)
 
-    def type_check_values(self):
+    def __type_check_values(self):
         #Check that the values for the MMI1x2 are all valid
 
         if self.wg_sep > (self.width-self.taper_width):
@@ -74,7 +84,7 @@ class MMI1x2(gdspy.Cell):
         angle_x_dist = 2*self.wgt.bend_radius*np.sin(self.angle)
         angle_y_dist = 2*self.wgt.bend_radius*(1-np.cos(self.angle))
 
-        path1 = gdspy.Path(self.wgt.wg_width, self.port)
+        path1 = gdspy.Path(self.wgt.wg_width, (0,0))
         path1.segment(self.taper_length, direction='+x', final_width=self.taper_width, **self.wg_spec)
 
         path2 = gdspy.Path(self.width, (path1.x, path1.y))
@@ -88,14 +98,14 @@ class MMI1x2(gdspy.Cell):
         path4.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width, **self.wg_spec)
         path4.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.wg_spec)
 
-        clad_pts = [(self.port[0], self.port[1]-self.wgt.wg_width/2.0-self.wgt.clad_width),
-                    (self.port[0]+self.taper_length, self.port[1]-self.width/2.0-self.wgt.clad_width),
-                    (self.port[0]+self.taper_length+self.length, self.port[1]-self.width/2.0-self.wgt.clad_width),
-                    (self.port[0]+2*self.taper_length+self.length, self.port[1]-self.wg_sep/2.0-self.wgt.wg_width/2.0-self.wgt.clad_width),
-                    (self.port[0]+2*self.taper_length+self.length, self.port[1]+self.wg_sep/2.0+self.wgt.wg_width/2.0+self.wgt.clad_width),
-                    (self.port[0]+self.taper_length+self.length, self.port[1]+self.width/2.0+self.wgt.clad_width),
-                    (self.port[0]+self.taper_length, self.port[1]+self.width/2.0+self.wgt.clad_width),
-                    (self.port[0], self.port[1]+self.wgt.wg_width/2.0+self.wgt.clad_width)]
+        clad_pts = [(0.0, -self.wgt.wg_width/2.0-self.wgt.clad_width),
+                    (self.taper_length, -self.width/2.0-self.wgt.clad_width),
+                    (self.taper_length+self.length, -self.width/2.0-self.wgt.clad_width),
+                    (2*self.taper_length+self.length, -self.wg_sep/2.0-self.wgt.wg_width/2.0-self.wgt.clad_width),
+                    (2*self.taper_length+self.length, self.wg_sep/2.0+self.wgt.wg_width/2.0+self.wgt.clad_width),
+                    (self.taper_length+self.length, self.width/2.0+self.wgt.clad_width),
+                    (self.taper_length, self.width/2.0+self.wgt.clad_width),
+                    (0.0, self.wgt.wg_width/2.0+self.wgt.clad_width)]
         clad = gdspy.Polygon(clad_pts, **self.clad_spec)
 
         clad_path3 = gdspy.Path(self.taper_width+2*self.wgt.clad_width, (path2.x, path2.y+self.wg_sep/2.0))
@@ -106,54 +116,25 @@ class MMI1x2(gdspy.Cell):
         clad_path4.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
         clad_path4.turn(self.wgt.bend_radius, +self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.clad_spec)
 
-        angle=0
         totlength = self.length + angle_x_dist + self.taper_length #2*self.taper_length+self.length
         ylength = self.wg_sep/2.0 + angle_y_dist
-        if self.direction=="EAST":
-            self.output_port_top = (self.port[0]+totlength, self.port[1]+ylength)
-            self.output_port_bot = (self.port[0]+totlength, self.port[1]-ylength)
-        elif self.direction=="NORTH":
-            self.output_port_top = (self.port[0]-ylength, self.port[1]+totlength)
-            self.output_port_bot = (self.port[0]+ylength, self.port[1]+totlength)
-            angle=np.pi/2.0
-        elif self.direction=="WEST":
-            self.output_port_top = (self.port[0]-totlength, self.port[1]-ylength)
-            self.output_port_bot = (self.port[0]-totlength, self.port[1]+ylength)
-            angle=np.pi
-        elif self.direction=="SOUTH":
-            self.output_port_top = (self.port[0]+ylength, self.port[1]-totlength)
-            self.output_port_bot = (self.port[0]-ylength, self.port[1]-totlength)
-            angle=-np.pi/2.0
-        elif isinstance(self.direction, float) or isinstance(self.direction, int):
-            angle=float(self.direction)
-            x1, y1 = totlength, ylength
-            x1r, y1r = np.cos(angle)*x1 - np.sin(angle)*y1, np.sin(angle)*x1 + np.cos(angle)*y1
-            x2, y2 = totlength, -ylength
-            x2r, y2r = np.cos(angle)*x2 - np.sin(angle)*y2, np.sin(angle)*x2 + np.cos(angle)*y2
-            self.output_port_top = (self.port[0]+x1r, self.port[1]+y1r)
-            self.output_port_bot = (self.port[0]+x2r, self.port[1]+y2r)
+        
+        self.output_port_top = (totlength, ylength)
+        self.output_port_bot = (totlength, -ylength)
 
-        path1.rotate(angle, self.port)
-        path2.rotate(angle, self.port)
-        path3.rotate(angle, self.port)
-        path4.rotate(angle, self.port)
-        clad_path3.rotate(angle, self.port)
-        clad_path4.rotate(angle, self.port)
-        clad.rotate(angle, self.port)
-
-        self.add(path1)
-        self.add(path2)
-        self.add(path3)
-        self.add(path4)
-        self.add(clad_path3)
-        self.add(clad_path4)
-        self.add(clad)
+        self.cell.add(path1)
+        self.cell.add(path2)
+        self.cell.add(path3)
+        self.cell.add(path4)
+        self.cell.add(clad_path3)
+        self.cell.add(clad_path4)
+        self.cell.add(clad)
 
     def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
-        self.portlist["input"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
+        self.portlist["input"] = {'port':(0,0), 'direction':tk.flip_direction(self.direction)}
         self.portlist["output_top"] = {'port':self.output_port_top, 'direction':self.direction}
         self.portlist["output_bot"] = {'port':self.output_port_bot, 'direction':self.direction}
 
@@ -162,16 +143,19 @@ if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, wg_width=1.0, resist='+')
 
-    wg1=Waveguide([(0, 0), (0, 100)], wgt)
+    wg1=Waveguide([(0, 0), (100, 100)], wgt)
     tk.add(top, wg1)
 
     mmi = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **wg1.portlist["output"])
     mmi2 = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **mmi.portlist["output_top"])
     mmi3 = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **mmi.portlist["output_bot"])
     # mmi = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=4.0, port=(0,0), direction='EAST')
-    tk.add(top, mmi)
-    tk.add(top, mmi2)
-    tk.add(top, mmi3)
+    mmi.addto(top)
+    mmi2.addto(top)
+    mmi3.addto(top)
+#    tk.add(top, mmi)
+#    tk.add(top, mmi2)
+#    tk.add(top, mmi3)
 
     gdspy.LayoutViewer()
     # gdspy.write_gds('mmi1x2.gds', unit=1.0e-6, precision=1.0e-9)
