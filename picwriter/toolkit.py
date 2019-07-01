@@ -238,13 +238,16 @@ def flip_direction(direction):
     elif isinstance(direction, float):
         return (direction + np.pi)%(2*np.pi)
 
-def translate_point(pt, length, direction):
+def translate_point(pt, length, direction, height=0.0):
     """  Returns the point (tuple) corresponding to `pt` translated by distance `length` in direction `direction` where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
 
         Args:
            * **pt** (tuple):  Starting point
-           * **length** (float): Distance to move
+           * **length** (float): Distance to move in *direction*
            * **direction** (direction):  Direction to move in
+           
+        Keyword Args:
+           * **height** (float):  Distance to move perpendicular to *direction*.  Defaults to 0.
 
         Returns:
            point, tuple (x, y)
@@ -252,15 +255,15 @@ def translate_point(pt, length, direction):
     """
     if isinstance(direction,float):
         # direction is a float (in radians)
-        return (pt[0]+length*np.cos(direction), pt[1]+length*np.sin(direction))
+        return (pt[0]+length*np.cos(direction)-height*np.sin(direction), pt[1]+length*np.sin(direction)+height*np.cos(direction))
     elif str(direction)=="NORTH":
-        return (pt[0], pt[1]+length)
+        return (pt[0]-height, pt[1]+length)
     elif str(direction)=="SOUTH":
-        return (pt[0], pt[1]-length)
+        return (pt[0]+height, pt[1]-length)
     elif str(direction)=="WEST":
-        return (pt[0]-length, pt[1])
+        return (pt[0]-length, pt[1]-height)
     elif str(direction)=="EAST":
-        return (pt[0]+length, pt[1])
+        return (pt[0]+length, pt[1]+height)
 
 def normalize_angle(angle):
     """  Returns the angle (in radians) between -pi and +pi that corresponds to the input angle

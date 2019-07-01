@@ -16,6 +16,7 @@ class WaveguideTemplate:
            * **period** (float): Period of the SWG. This is only used if `wg_type`=`'swg'`. Defaults to 0.1.
            * **duty_cycle** (float): Duty cycle of the SWG. This is only used if `wg_type`=`'swg'`. Defaults to 0.5.
            * **clad_width** (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff).  Defaults to 10.
+           * **grid** (float): Defines the grid spacing in units of microns, so that the number of points per bend can be automatically calculated.  Defaults to 0.001 (1 nm).
            * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used.  Defaults to '+'
            * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.   Defaults to 'ETCH'.
            * **wg_layer** (int): Layer type used for waveguides.  Defaults to 1.
@@ -24,7 +25,7 @@ class WaveguideTemplate:
            * **clad_datatype** (int): Data type used for cladding.  Defaults to 0.
 
     """
-    def __init__(self, wg_type='strip', bend_radius=50.0, wg_width=2.0, clad_width=10.0,
+    def __init__(self, wg_type='strip', bend_radius=50.0, wg_width=2.0, clad_width=10.0, grid=0.001,
                  resist='+', fab='ETCH', slot=0.1, period=0.1, duty_cycle=0.5,
                  wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0):
         self.wg_width = wg_width
@@ -54,6 +55,8 @@ class WaveguideTemplate:
         self.wg_datatype = wg_datatype
         self.clad_layer = clad_layer
         self.clad_datatype = clad_datatype
+        
+        self.grid = grid
 
         if self.wg_type =='swg':
             self.straight_period_cell = gdspy.Cell("swg_seg_"+str(self.wg_width)+"_"+str(self.period)+"_"+str(self.duty_cycle)+"_"+str(self.wg_layer)+"_"+str(self.clad_layer))
@@ -64,6 +67,11 @@ class WaveguideTemplate:
             bend_path = gdspy.Path(self.wg_width, initial_point=(self.bend_radius,0))
             bend_path.arc(self.bend_radius, 0, self.period*self.duty_cycle/self.bend_radius, layer=self.wg_layer, datatype=self.wg_datatype)
             self.bend_period_cell.add(bend_path)
+            
+    def get_num_points(self, angle):
+        # This is determined from Eq 1 and 2 in "Design and simulation of silicon photonic schematics and layouts" by Chrostowski et al.
+        return int(abs(np.ceil(angle * 1.0/np.arccos(2*(1-(0.5*self.grid/self.bend_radius))**2 - 1))))
+            
 
 class Waveguide(gdspy.Cell):
     """ Waveguide Cell class (subclass of gdspy.Cell).
@@ -310,9 +318,7 @@ class Waveguide(gdspy.Cell):
                     # The following makes sure the turn-by angle is *always* between -pi and +pi
                     turnby = tk.normalize_angle(next_angle - start_angle)
 
-                    # points defining the curve = length (in um) / number_of_points
-                    # for example: number_of_points=0.1 corresponds to 1 point every 0.1um
-                    path.turn(br, turnby, number_of_points=0.1, **self.wg_spec)
+                    path.turn(br, turnby, number_of_points=self.wgt.get_num_points(turnby), **self.wg_spec)
                     prev_dl = dl
 
                 path.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
@@ -342,7 +348,7 @@ class Waveguide(gdspy.Cell):
 
                 turnby = tk.normalize_angle(next_angle - start_angle)
 
-                path2.turn(br, turnby, number_of_points=0.1, **self.clad_spec)
+                path2.turn(br, turnby, number_of_points=self.wgt.get_num_points(turnby), **self.clad_spec)
                 prev_dl = dl
 
             path2.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,

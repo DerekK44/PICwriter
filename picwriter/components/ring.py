@@ -70,14 +70,14 @@ class Ring(gdspy.Cell):
                 # Ring resonator
                 if self.parity==1:
                     ring = gdspy.Round((self.port[0]+self.radius, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap),
-                                        self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
+                                        self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
                     clad_ring = gdspy.Round((self.port[0]+self.radius, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap),
-                                             self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
+                                             self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
                 elif self.parity==-1:
                     ring = gdspy.Round((self.port[0]+self.radius, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap),
-                                        self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
+                                        self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
                     clad_ring = gdspy.Round((self.port[0]+self.radius, self.port[1] - self.radius - self.wgt.wg_width - self.coupling_gap),
-                                             self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
+                                             self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
                 else:
                     raise ValueError("Warning!  Parity value is not an acceptable value (must be +1 or -1).")
             elif self.wrap_angle>0:
@@ -97,32 +97,32 @@ class Ring(gdspy.Cell):
                     xcenter = self.port[0] + 2*dx
 
                 if self.parity==1:
-                    path.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=0.1, **self.wg_spec)
-                    path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=0.1, **self.wg_spec)
-                    path.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=0.1, **self.wg_spec)
-                    clad.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=0.1, **self.clad_spec)
-                    clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=0.1, **self.clad_spec)
-                    clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=0.1, **self.clad_spec)
+                    path.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.wg_spec)
+                    path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.wg_spec)
+                    path.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.wg_spec)
+                    clad.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.clad_spec)
+                    clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.clad_spec)
+                    clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.clad_spec)
 
                     # Make the ring resonator
                     ring = gdspy.Round((xcenter, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap - 2*dy),
-                                        self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
+                                        self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
                     clad_ring = gdspy.Round((xcenter, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap - 2*dy),
-                                             self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
+                                             self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
 
                 elif self.parity==-1:
-                    path.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=0.1, **self.wg_spec)
-                    path.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=0.1, **self.wg_spec)
-                    path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=0.1, **self.wg_spec)
-                    clad.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=0.1, **self.clad_spec)
-                    clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=0.1, **self.clad_spec)
-                    clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=0.1, **self.clad_spec)
+                    path.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.wg_spec)
+                    path.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.wg_spec)
+                    path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.wg_spec)
+                    clad.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.clad_spec)
+                    clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.clad_spec)
+                    clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=self.wgt.get_num_points(self.wrap_angle), **self.clad_spec)
 
                     # Make the ring resonator
                     ring = gdspy.Round((xcenter, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
-                                        self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
+                                        self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
                     clad_ring = gdspy.Round((xcenter, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
-                                             self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
+                                             self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
                 else:
                     raise ValueError("Warning!  Parity value is not an acceptable value (must be +1 or -1).")
 
@@ -134,14 +134,14 @@ class Ring(gdspy.Cell):
             bus_length = 0
             if self.parity==1:
                 ring = gdspy.Round((self.port[0], self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap),
-                                    self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
+                                    self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
                 clad_ring = gdspy.Round((self.port[0], self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap),
-                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
+                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
             elif self.parity==-1:
                 ring = gdspy.Round((self.port[0], self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap),
-                                    self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=0.1, **self.wg_spec)
+                                    self.radius+self.wgt.wg_width/2.0, self.radius-self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
                 clad_ring = gdspy.Round((self.port[0], self.port[1] - self.radius - self.wgt.wg_width - self.coupling_gap),
-                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=0.1, **self.clad_spec)
+                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, self.radius-self.wgt.wg_width/2.0-self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
             else:
                 raise ValueError("Warning!  Parity value is not an acceptable value (must be +1 or -1).")
 

@@ -75,34 +75,34 @@ class FullCoupler(gdspy.Cell):
         """ Build the adiabatic DC from gdspy Path derivatives """
         """ First the top waveguide """
         wg_top = gdspy.Path(self.wgt.wg_width, (x0, y0))
-        wg_top.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+self.dw, **self.wg_spec)
-        wg_top.turn(self.wgt.bend_radius, p*self.angle, number_of_points=0.1, **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width+self.dw, **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.wg_spec)
         wg_top.segment(self.length, final_width=self.wgt.wg_width-self.dw, **self.wg_spec)
-        wg_top.turn(self.wgt.bend_radius, p*self.angle, number_of_points=0.1, **self.wg_spec)
-        wg_top.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width, **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width, **self.wg_spec)
 
         wg_top_clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (x0, y0))
-        wg_top_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, **self.clad_spec)
-        wg_top_clad.turn(self.wgt.bend_radius, p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
         wg_top_clad.segment(self.length, **self.clad_spec)
-        wg_top_clad.turn(self.wgt.bend_radius, p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
-        wg_top_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.clad_spec)
 
         """ Next, the bottom waveguide """
         x1, y1 = self.port[0], self.port[1] - disty
         wg_bot = gdspy.Path(self.wgt.wg_width, (x1, y1))
-        wg_bot.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width-self.dw, **self.wg_spec)
-        wg_bot.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, **self.wg_spec)
+        wg_bot.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width-self.dw, **self.wg_spec)
+        wg_bot.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.wg_spec)
         wg_bot.segment(self.length, final_width=self.wgt.wg_width+self.dw, **self.wg_spec)
-        wg_bot.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, **self.wg_spec)
-        wg_bot.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width, **self.wg_spec)
+        wg_bot.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.wg_spec)
+        wg_bot.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width, **self.wg_spec)
 
         wg_bot_clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (x1, y1))
-        wg_bot_clad.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=0.1, **self.clad_spec)
-        wg_bot_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_bot_clad.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.clad_spec)
+        wg_bot_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
         wg_bot_clad.segment(self.length, **self.clad_spec)
-        wg_bot_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=0.1, final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
-        wg_bot_clad.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=0.1, **self.clad_spec)
+        wg_bot_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_bot_clad.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.clad_spec)
 
         if self.direction=="WEST":
             angle = np.pi
