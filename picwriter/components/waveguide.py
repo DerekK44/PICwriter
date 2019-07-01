@@ -70,7 +70,7 @@ class WaveguideTemplate:
             
     def get_num_points(self, angle):
         # This is determined from Eq 1 and 2 in "Design and simulation of silicon photonic schematics and layouts" by Chrostowski et al.
-        return int(abs(np.ceil(angle * 1.0/np.arccos(2*(1-(0.5*self.grid/self.bend_radius))**2 - 1))))
+        return int(np.ceil(abs(angle * 1.0/np.arccos(2*(1-(0.5*self.grid/self.bend_radius))**2 - 1))))
             
 
 class Waveguide(gdspy.Cell):
