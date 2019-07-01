@@ -11,7 +11,7 @@ import numpy as np
 from picwriter.components import *
 from picwriter import toolkit as tk
 
-""" Test case below not necessary, but should serve as framework for later """
+""" Test cases below for each component type in the library.  Checks creation and size. """
 class TestPICwriter(TestCase):
 	def test_waveguide_creation(self):
 		top = gdspy.Cell("t1")
@@ -20,16 +20,16 @@ class TestPICwriter(TestCase):
 		wg2=Waveguide([(0,0), (0,100), (-250, 100), (-250, -100)], wgt)
 		tk.add(top, wg1)
 		tk.add(top, wg2)
-#		print("Waveguide area = "+str(top.area()))
+		print("Waveguide area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-33939.818854) <= 1e-6)
+		self.assertTrue(abs(top.area()-33939.416641588556) <= 1e-6)
 
 	def test_metal_creation(self):
 		top = gdspy.Cell("t-electrical")
 		mt = MetalTemplate(bend_radius=0, resist='+', fab="ETCH")
 		mt1=MetalRoute([(0,0), (0,250), (100,250), (100,500), (400,500)], mt)
 		tk.add(top, mt1)
-#		print("MetalRoute area = "+str(top.area()))
+		print("MetalRoute area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==1)
 		self.assertTrue(abs(top.area()-88800.0) <= 1e-6)
 
@@ -42,9 +42,9 @@ class TestPICwriter(TestCase):
 		tp2 = Taper(wgt, 100.0, 0.0, **wg1.portlist["output"])
 		tk.add(top, tp1)
 		tk.add(top, tp2)
-#		print("Taper area = "+str(top.area()))
+		print("Taper area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==3)
-		self.assertTrue(abs(top.area()-27005.909427) <= 1e-6)
+		self.assertTrue(abs(top.area()-27005.71027807154) <= 1e-6)
 
 	def test_grating_coupler_creation(self):
 		top = gdspy.Cell("t3")
@@ -55,9 +55,9 @@ class TestPICwriter(TestCase):
 		tk.add(top, gc1)
 		gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=50, period=1.0, dutycycle=0.7, **wg1.portlist["output"])
 		tk.add(top, gc2)
-#		print("Grating coupler area = "+str(top.area()))
+		print("Grating coupler area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==3)
-		self.assertTrue(abs(top.area()-30061.6918115) <= 1e-6)
+		self.assertTrue(abs(top.area()-30061.492662598197) <= 1e-6)
 
 	def test_spiral_creation(self):
 		top = gdspy.Cell("t4")
@@ -72,9 +72,9 @@ class TestPICwriter(TestCase):
 		direction='WEST')
 		tk.add(top, sp1)
 
-#		print("Spiral area = "+str(top.area()))
+		print("Spiral area = "+str(top.area()))
 		self.assertTrue(len(top.elements)==1)
-		self.assertTrue(abs(top.area()-479999.98235) <= 1e-6)
+		self.assertTrue(abs(top.area()-479997.9908607155) <= 1e-6)
 
 	def test_mmi1x2_creation(self):
 		top = gdspy.Cell("t-mmi1x2")
@@ -83,10 +83,10 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg1)
 		mmi = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **wg1.portlist["output"])
 		tk.add(top, mmi)
-#		print("MMI1x2 area = "+str(top.area()))
+		print("MMI1x2 area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-11623.2729314) <= 1e-6)
+		self.assertTrue(abs(top.area()-11623.153798646574) <= 1e-6)
 
 	def test_mmi2x2_creation(self):
 		top = gdspy.Cell("t6")
@@ -96,10 +96,10 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg1)
 		mmi = MMI2x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3.0, port=(0,0), direction='EAST')
 		tk.add(top, mmi)
-#		print("MMI2x2 area = "+str(top.area()))
+		print("MMI2x2 area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-9482.38678993) <= 1e-6)
+		self.assertTrue(abs(top.area()-9482.165964182654) <= 1e-6)
 
 	def test_ring_creation(self):
 		top = gdspy.Cell("t7")
@@ -112,7 +112,7 @@ class TestPICwriter(TestCase):
 		print("Ring area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-13133.8016946) <= 1e-6)
+		self.assertTrue(abs(top.area()-13133.377916248292) <= 1e-6)
 
 	def test_disk_creation(self):
 		top = gdspy.Cell("t8")
@@ -122,10 +122,10 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg1)
 		d1 = Disk(wgt, 60.0, 1.0, parity=1, **wg1.portlist["output"])
 		tk.add(top, d1)
-#		print("Disk area = "+str(top.area()))
+		print("Disk area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-31953.5046652) <= 1e-6)
+		self.assertTrue(abs(top.area()-31953.142850436107) <= 1e-6)
 
 	def test_mzi_creation(self):
 		top = gdspy.Cell("t-mzi")
@@ -139,10 +139,10 @@ class TestPICwriter(TestCase):
 		tk.add(top, mzi)
 		wg_out = Waveguide([mzi.portlist["output"]["port"], (mzi.portlist["output"]["port"][0]+300, mzi.portlist["output"]["port"][1])], wgt)
 		tk.add(top, wg_out)
-#		print("MZI area = "+str(top.area()))
+		print("MZI area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==3)
-		self.assertTrue(abs(top.area()-184111.305754) <= 1e-6)
+		self.assertTrue(abs(top.area()-184110.35649104256) <= 1e-6)
 	def test_dbr_creation(self):
 		top = gdspy.Cell("t-dbr")
 		wgt = WaveguideTemplate(bend_radius=50, resist='+')
@@ -159,10 +159,10 @@ class TestPICwriter(TestCase):
 
 		dbr2 = DBR(wgt, 10.0, 0.85, 0.5, 0.6, **wg2.portlist["output"])
 		tk.add(top, dbr2)
-#		print("DBR area = "+str(top.area()))
+		print("DBR area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==4)
-		self.assertTrue(abs(top.area()-9093.55471349) <= 1e-6)
+		self.assertTrue(abs(top.area()-9093.453181758501) <= 1e-6)
 
 	def test_dc_creation(self):
 		top = gdspy.Cell("t-dc")
@@ -185,10 +185,10 @@ class TestPICwriter(TestCase):
 		tk.add(top, dc5)
 		tk.add(top, dc6)
 
-#		print("DC area = "+str(top.area()))
+		print("DC area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==7)
-		self.assertTrue(abs(top.area()-65615.850449) <= 1e-6)
+		self.assertTrue(abs(top.area()-65614.33107612531) <= 1e-6)
 
 	def test_contradc_creation(self):
 		top = gdspy.Cell("t-contradc")
@@ -199,10 +199,10 @@ class TestPICwriter(TestCase):
 
 		cdc = ContraDirectionalCoupler(wgt, length=30.0, gap=0.5, period=0.220, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=0.75, input_bot=True, **wg1.portlist["output"])
 		tk.add(top, cdc)
-#		print("Contra DC area = "+str(top.area()))
+		print("Contra DC area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-4222.12846627) <= 1e-6)
+		self.assertTrue(abs(top.area()-4221.992567042908) <= 1e-6)
 
 	def test_stripslotconverter_creation(self):
 		top = gdspy.Cell("t-stripslotyconverter")
@@ -231,7 +231,7 @@ class TestPICwriter(TestCase):
                              **coup2.portlist["output"])
 		tk.add(top, coup3)
 		
-#		print("StripSlotConverter area = "+str(top.area()))
+		print("StripSlotConverter area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==5)
 		self.assertTrue(abs(top.area()-5559.85) <= 1e-6)
@@ -253,10 +253,10 @@ class TestPICwriter(TestCase):
                           **wg1.portlist["output"])
 		tk.add(top, ac)
 
-#		print("AdiabaticCoupler area = "+str(top.area()))
+		print("AdiabaticCoupler area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-11449.910682728) <= 1e-6)
+		self.assertTrue(abs(top.area()-11449.803524547198) <= 1e-6)
   
   
 	def test_fullcoupler_creation(self):
@@ -268,7 +268,7 @@ class TestPICwriter(TestCase):
 		fc = FullCoupler(wgt, 40.0, 0.5, 1.0, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
 		tk.add(top, fc)
 
-#		print("FullCoupler area = "+str(top.area()))
+		print("FullCoupler area = "+str(top.area()))
 		print(len(top.elements))
 		self.assertTrue(len(top.elements)==2)
-		self.assertTrue(abs(top.area()-9346.547542019445) <= 1e-6)
+		self.assertTrue(abs(top.area()-9346.404699396264) <= 1e-6)
