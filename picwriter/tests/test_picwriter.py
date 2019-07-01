@@ -21,7 +21,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg1)
 		tk.add(top, wg2)
 		print("Waveguide area = "+str(top.area()))
-		self.assertTrue(len(top.elements)==2)
+		self.assertTrue(len(top.references)==2)
 		self.assertTrue(abs(top.area()-33939.416641588556) <= 1e-6)
 
 	def test_metal_creation(self):
@@ -30,7 +30,7 @@ class TestPICwriter(TestCase):
 		mt1=MetalRoute([(0,0), (0,250), (100,250), (100,500), (400,500)], mt)
 		tk.add(top, mt1)
 		print("MetalRoute area = "+str(top.area()))
-		self.assertTrue(len(top.elements)==1)
+		self.assertTrue(len(top.references)==1)
 		self.assertTrue(abs(top.area()-88800.0) <= 1e-6)
 
 	def test_taper_creation(self):
@@ -43,7 +43,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, tp1)
 		tk.add(top, tp2)
 		print("Taper area = "+str(top.area()))
-		self.assertTrue(len(top.elements)==3)
+		self.assertTrue(len(top.references)==3)
 		self.assertTrue(abs(top.area()-27005.71027807154) <= 1e-6)
 
 	def test_grating_coupler_creation(self):
@@ -56,7 +56,7 @@ class TestPICwriter(TestCase):
 		gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=50, period=1.0, dutycycle=0.7, **wg1.portlist["output"])
 		tk.add(top, gc2)
 		print("Grating coupler area = "+str(top.area()))
-		self.assertTrue(len(top.elements)==3)
+		self.assertTrue(len(top.references)==3)
 		self.assertTrue(abs(top.area()-30061.492662598197) <= 1e-6)
 
 	def test_spiral_creation(self):
@@ -73,7 +73,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, sp1)
 
 		print("Spiral area = "+str(top.area()))
-		self.assertTrue(len(top.elements)==1)
+		self.assertTrue(len(top.references)==1)
 		self.assertTrue(abs(top.area()-479997.9908607155) <= 1e-6)
 
 	def test_mmi1x2_creation(self):
@@ -84,8 +84,8 @@ class TestPICwriter(TestCase):
 		mmi = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **wg1.portlist["output"])
 		tk.add(top, mmi)
 		print("MMI1x2 area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==2)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==2)
 		self.assertTrue(abs(top.area()-11623.153798646574) <= 1e-6)
 
 	def test_mmi2x2_creation(self):
@@ -97,8 +97,8 @@ class TestPICwriter(TestCase):
 		mmi = MMI2x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3.0, port=(0,0), direction='EAST')
 		tk.add(top, mmi)
 		print("MMI2x2 area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==2)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==2)
 		self.assertTrue(abs(top.area()-9482.165964182654) <= 1e-6)
 
 	def test_ring_creation(self):
@@ -110,8 +110,8 @@ class TestPICwriter(TestCase):
 		r1 = Ring(wgt, 60.0, 1.0, parity=1, **wg1.portlist["output"])
 		tk.add(top, r1)
 		print("Ring area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==2)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==2)
 		self.assertTrue(abs(top.area()-13133.377916248292) <= 1e-6)
 
 	def test_disk_creation(self):
@@ -123,8 +123,8 @@ class TestPICwriter(TestCase):
 		d1 = Disk(wgt, 60.0, 1.0, parity=1, **wg1.portlist["output"])
 		tk.add(top, d1)
 		print("Disk area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==2)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==2)
 		self.assertTrue(abs(top.area()-31953.142850436107) <= 1e-6)
 
 	def test_mzi_creation(self):
@@ -140,9 +140,9 @@ class TestPICwriter(TestCase):
 		wg_out = Waveguide([mzi.portlist["output"]["port"], (mzi.portlist["output"]["port"][0]+300, mzi.portlist["output"]["port"][1])], wgt)
 		tk.add(top, wg_out)
 		print("MZI area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==3)
-		self.assertTrue(abs(top.area()-184110.35649104256) <= 1e-6)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==3)
+		self.assertTrue(abs(top.area()-184056.06564828393) <= 1e-6)
 	def test_dbr_creation(self):
 		top = gdspy.Cell("t-dbr")
 		wgt = WaveguideTemplate(bend_radius=50, resist='+')
@@ -160,8 +160,8 @@ class TestPICwriter(TestCase):
 		dbr2 = DBR(wgt, 10.0, 0.85, 0.5, 0.6, **wg2.portlist["output"])
 		tk.add(top, dbr2)
 		print("DBR area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==4)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==4)
 		self.assertTrue(abs(top.area()-9093.453181758501) <= 1e-6)
 
 	def test_dc_creation(self):
@@ -186,8 +186,8 @@ class TestPICwriter(TestCase):
 		tk.add(top, dc6)
 
 		print("DC area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==7)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==7)
 		self.assertTrue(abs(top.area()-65614.33107612531) <= 1e-6)
 
 	def test_contradc_creation(self):
@@ -200,8 +200,8 @@ class TestPICwriter(TestCase):
 		cdc = ContraDirectionalCoupler(wgt, length=30.0, gap=0.5, period=0.220, dc=0.5, angle=np.pi/12.0, width_top=3.0, width_bot=0.75, input_bot=True, **wg1.portlist["output"])
 		tk.add(top, cdc)
 		print("Contra DC area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==2)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==2)
 		self.assertTrue(abs(top.area()-4221.992567042908) <= 1e-6)
 
 	def test_stripslotconverter_creation(self):
@@ -232,8 +232,8 @@ class TestPICwriter(TestCase):
 		tk.add(top, coup3)
 		
 		print("StripSlotConverter area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==5)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==5)
 		self.assertTrue(abs(top.area()-5559.85) <= 1e-6)
 
 	def test_adiabaticcoupler_creation(self):
@@ -254,8 +254,8 @@ class TestPICwriter(TestCase):
 		tk.add(top, ac)
 
 		print("AdiabaticCoupler area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==2)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==2)
 		self.assertTrue(abs(top.area()-11449.803524547198) <= 1e-6)
   
   
@@ -269,6 +269,6 @@ class TestPICwriter(TestCase):
 		tk.add(top, fc)
 
 		print("FullCoupler area = "+str(top.area()))
-		print(len(top.elements))
-		self.assertTrue(len(top.elements)==2)
+		print(len(top.references))
+		self.assertTrue(len(top.references)==2)
 		self.assertTrue(abs(top.area()-9346.404699396264) <= 1e-6)
