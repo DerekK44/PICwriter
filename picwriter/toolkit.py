@@ -304,11 +304,6 @@ class PICcomponent():
     def __init__(self, name):
         self.cell = gdspy.Cell(getCellName(name)) # getCellName is local to toolkit.py
         
-        # Initialize some basic things (that will be overwritten in child objects)
-        self.portlist = {}
-        self.port = (0,0)
-        self.direction = 'EAST'
-        
     def _auto_transform_(self):
         """ 
         Go through all the ports and do the appropriate 
