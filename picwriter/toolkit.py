@@ -12,29 +12,37 @@ import gdspy
 
 TOL=1e-6
 CURRENT_CELLS = {}
+CURRENT_CELL_NAMES = {}
 
-def add(topcell, subcell, center=(0,0)):
+def add(top_cell, component_cell, center=(0,0), x_reflection=False):
     """ First creates a CellReference to subcell, then adds this to topcell at location center
 
         Args:
-           * **topcell** (gdspy.Cell):  Cell to be added to
-           * **subcell** (gdspy.Cell):  Cell being added
+           * **top_cell** (gdspy.Cell):  Cell being added to
+           * **component_cell** (gdspy.Cell):  Cell of the component being added
 
         Keyword Args:
-           * **center** (tuple): center location for subcell to be added
+           * **port** (tuple): location for the subcell to be added
+           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to 'EAST' (zero degrees of rotation).
 
         Returns:
            None
     """
-    topcell.add(gdspy.CellReference(subcell, origin=center))
+    
+    if isinstance(component_cell, gdspy.Cell):
+        top_cell.add(gdspy.CellReference(component_cell, 
+                                         origin = center,
+                                         x_reflection=x_reflection))
+    elif isinstance(component_cell, PICcomponent):
+        component_cell.addto(top_cell)
     
 def getCellName(name):
-    global CURRENT_CELLS
-    if name not in CURRENT_CELLS.keys():
-        CURRENT_CELLS[name] = 1
+    global CURRENT_CELL_NAMES
+    if name not in CURRENT_CELL_NAMES.keys():
+        CURRENT_CELL_NAMES[name] = 1
     else:
-        CURRENT_CELLS[name] += 1
-    return str(name)+"_"+str(CURRENT_CELLS[name])
+        CURRENT_CELL_NAMES[name] += 1
+    return str(name)+"_"+str(CURRENT_CELL_NAMES[name])
 
 def build_mask(cell, wgt, final_layer=None, final_datatype=None):
     """ Builds the appropriate mask according to the resist specifications and fabrication type.  Does this by applying a boolean 'XOR' or 'AND' operation on the waveguide and clad masks.
@@ -279,3 +287,81 @@ def normalize_angle(angle):
     if angle > np.pi:
         angle -= 2*np.pi
     return angle
+
+    
+class PICcomponent():
+    """ Super class for all objects created in PICwriter.  This class handles rotations, naming, etc. for all components,
+        so that writing python code for new cells requires less overhead.
+
+        Args:
+           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+
+        Keyword Args:
+           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
+
+    """
+    
+    def __init__(self, name):
+        self.cell = gdspy.Cell(getCellName(name)) # getCellName is local to toolkit.py
+        
+        # Initialize some basic things (that will be overwritten in child objects)
+        self.portlist = {}
+        self.port = (0,0)
+        self.direction = 'EAST'
+        
+    def _auto_transform_(self):
+        """ 
+        Go through all the ports and do the appropriate 
+        rotations and translations corresponding to the specified 'port' and 'direction'
+        """
+        for key in self.portlist.keys():
+            cur_port = self.portlist[key]['port']
+            
+            if self.direction=="EAST": #direction of the input port (which specifies whole component orientation)
+                angle = 0.0
+            elif self.direction=="NORTH":
+                angle = np.pi/2.0
+            elif self.direction=="WEST":
+                angle = np.pi
+            elif self.direction=="SOUTH":
+                angle = 3*np.pi/2.0
+            elif isinstance(self.direction, float) or isinstance(self.direction, int):
+                angle=float(self.direction)
+            dx = cur_port[0]*np.cos(angle) - cur_port[1]*np.sin(angle)
+            dy = cur_port[0]*np.sin(angle) + cur_port[1]*np.cos(angle)
+            
+            self.portlist[key]['port'] = (self.port[0] + dx,
+                                          self.port[1] + dy)
+            
+    def _hash_cell_(self, *args):
+        """ Check to see if the same exact cell has been created already (with the same parameters).
+        If not, add the cell to the global CURRENT_CELLS dictionary.
+        If so, point to the identical cell in the CURRENT_CELLS dictionary.
+        """
+        global CURRENT_CELLS
+        properties = (p for p in args)
+        self.cell_hash = hash(properties)
+        if self.cell_hash not in CURRENT_CELLS.keys():
+            CURRENT_CELLS[self.cell_hash] = self.cell
+
+        # Now delete the cell completely to save memory (since this info is stored globally in CURRENT_CELLS)
+        del self.cell
+
+    def addto(self, top_cell, x_reflection=False):
+        
+        if isinstance(self.direction,float):
+            # direction is a float in radians, but rotation should be a float in degrees
+            rot = self.direction*180.0/np.pi
+        elif str(self.direction)=="EAST":
+            rot = 0.0
+        elif str(self.direction)=="NORTH":
+            rot = 90.0
+        elif str(self.direction)=="WEST":
+            rot = 180.0
+        elif str(self.direction)=="SOUTH":
+            rot = 270.0
+            
+        top_cell.add(gdspy.CellReference(CURRENT_CELLS[self.cell_hash], 
+                                         origin=self.port, 
+                                         rotation=rot, 
+                                         x_reflection=x_reflection))
