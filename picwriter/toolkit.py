@@ -15,7 +15,7 @@ CURRENT_CELLS = {}
 CURRENT_CELL_NAMES = {}
 
 def add(top_cell, component_cell, center=(0,0), x_reflection=False):
-    """ First creates a CellReference to subcell, then adds this to topcell at location center
+    """ First creates a CellReference to subcell, then adds this to topcell at location center.
 
         Args:
            * **top_cell** (gdspy.Cell):  Cell being added to
@@ -302,6 +302,7 @@ class PICcomponent():
     """
     
     def __init__(self, name):
+        self.name_prefix = name
         self.cell = gdspy.Cell(getCellName(name)) # getCellName is local to toolkit.py
         
     def _auto_transform_(self):
@@ -334,8 +335,8 @@ class PICcomponent():
         If so, point to the identical cell in the CURRENT_CELLS dictionary.
         """
         global CURRENT_CELLS
-        properties = (p for p in args)
-        self.cell_hash = hash(properties)
+        properties = self.name_prefix+''.join([str(p) for p in args])
+        self.cell_hash = properties
         if self.cell_hash not in CURRENT_CELLS.keys():
             CURRENT_CELLS[self.cell_hash] = self.cell
 
