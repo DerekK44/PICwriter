@@ -33,7 +33,7 @@ def add(top_cell, component_cell, center=(0,0), x_reflection=False):
         top_cell.add(gdspy.CellReference(component_cell, 
                                          origin = center,
                                          x_reflection=x_reflection))
-    elif isinstance(component_cell, PICcomponent):
+    elif isinstance(component_cell, Component):
         component_cell.addto(top_cell)
     
 def getCellName(name):
@@ -289,12 +289,12 @@ def normalize_angle(angle):
     return angle
 
     
-class PICcomponent():
+class Component():
     """ Super class for all objects created in PICwriter.  This class handles rotations, naming, etc. for all components,
-        so that writing python code for new cells requires less overhead.
+        so that writing python code for new cells requires less overhead.  Component is a wrapper around gdspy Cell objects.
 
         Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+           * **name** (string):  The name prefix to be used for these 
 
         Keyword Args:
            * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
@@ -304,6 +304,11 @@ class PICcomponent():
     def __init__(self, name):
         self.name_prefix = name
         self.cell = gdspy.Cell(getCellName(name)) # getCellName is local to toolkit.py
+        
+        # Add default values below.
+        self.portlist = {}
+        self.port = (0,0)
+        self.direction = 0.0
         
     def _auto_transform_(self):
         """ 
@@ -342,6 +347,19 @@ class PICcomponent():
 
         # Now delete the cell completely to save memory (since this info is stored globally in CURRENT_CELLS)
         del self.cell
+        
+    def __get_cell(self):
+        return CURRENT_CELLS[self.cell_hash]
+
+    def add(self, element, origin=(0,0), rotation=0.0, x_reflection=False):
+        """ Add a reference to an element or list of elements to the cell associated with this component """
+        if isinstance(element, Component):
+            element_cell = CURRENT_CELLS[element.cell_hash]
+            self.cell.add(gdspy.CellReference(element_cell, origin=origin, rotation=rotation, x_reflection=x_reflection))
+        elif isinstance(element, gdspy.Cell):
+            self.cell.add(gdspy.CellReference(element, origin=origin, rotation=rotation, x_reflection=x_reflection))
+        else:
+            self.cell.add(element)
 
     def addto(self, top_cell, x_reflection=False):
         
@@ -357,7 +375,15 @@ class PICcomponent():
         elif str(self.direction)=="SOUTH":
             rot = 270.0
             
-        top_cell.add(gdspy.CellReference(CURRENT_CELLS[self.cell_hash], 
-                                         origin=self.port, 
-                                         rotation=rot, 
-                                         x_reflection=x_reflection))
+        if isinstance(top_cell, gdspy.Cell):
+            top_cell.add(gdspy.CellReference(CURRENT_CELLS[self.cell_hash], 
+                                             origin=self.port, 
+                                             rotation=rot, 
+                                             x_reflection=x_reflection))
+            
+        elif isinstance(top_cell, Component):
+            tc = CURRENT_CELLS[top_cell.cell_hash]
+            tc.add(gdspy.CellReference(CURRENT_CELLS[self.cell_hash], 
+                                                     origin=self.port, 
+                                                     rotation=rot, 
+                                                     x_reflection=x_reflection))
