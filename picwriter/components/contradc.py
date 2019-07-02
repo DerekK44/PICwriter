@@ -6,8 +6,8 @@ import gdspy
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
-class ContraDirectionalCoupler(gdspy.Cell):
-    """ Grating-Assisted Contra-Directional Coupler Cell class (subclass of gdspy.Cell).
+class ContraDirectionalCoupler(tk.Component):
+    """ Grating-Assisted Contra-Directional Coupler Cell class.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
@@ -46,7 +46,6 @@ class ContraDirectionalCoupler(gdspy.Cell):
         gdspy.Cell.__init__(self, tk.getCellName("ContraDirectionalCoupler"))
 
         self.portlist = {}
-
         self.port = port
         self.direction = direction
 
@@ -94,6 +93,16 @@ class ContraDirectionalCoupler(gdspy.Cell):
 
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
+        
+        """ The _hash_cell_ function makes sure that duplicate cells are not created.
+        Pass to it all the unique properties of this cell, which are used to check for duplicates.
+        Do *not* include properties like port, direction.  These are specific to Cell References only.
+        """
+        self._hash_cell_(wgt, length, gap, period, dc, angle, width_top, width_bot, dw_top, dw_bot, input_bot, fins, fin_size, contradc_wgt)
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions

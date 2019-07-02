@@ -4,8 +4,8 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class MMI1x2(tk.PICcomponent):
-    """ 1x2 MMI Cell class (subclass of gdspy.Cell).
+class MMI1x2(tk.Component):
+    """ 1x2 multi-mode interfereomter (MMI) Cell class.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
@@ -33,7 +33,7 @@ class MMI1x2(tk.PICcomponent):
 
     """
     def __init__(self, wgt, length, width, angle=np.pi/6.0, taper_width=None, taper_length=None, wg_sep=None, port=(0,0), direction='EAST'):
-        tk.PICcomponent.__init__(self, "MMI1x2")
+        tk.Component.__init__(self, "MMI1x2")
         
         self.portlist = {}
 

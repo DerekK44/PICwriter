@@ -5,8 +5,8 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class AlignmentCross(tk.PICcomponent):
-    """ Cross Cell class (subclass of gdspy.Cell), used for alignment
+class AlignmentCross(tk.Component):
+    """ Cross Cell class, used for alignment
 
         Args:
            * **cross_length** (float):  Length of each arm of the cross.
@@ -20,7 +20,7 @@ class AlignmentCross(tk.PICcomponent):
 
     """
     def __init__(self, cross_length, cross_width, small_cross_width=None, center=(0,0), layer=1, datatype=0):
-        tk.PICcomponent.__init__(self, "AlignmentCross")
+        tk.Component.__init__(self, "AlignmentCross")
 
         self.cross_length = cross_length
         self.cross_width = cross_width
@@ -62,8 +62,8 @@ class AlignmentCross(tk.PICcomponent):
     def __build_ports(self):
         self.portlist["center"] = {'port':(0,0), 'direction':self.direction}
         
-class AlignmentTarget(tk.PICcomponent):
-    """ Standard Target Cell class (subclass of gdspy.Cell), used for alignment.  Set of concentric circles
+class AlignmentTarget(tk.Component):
+    """ Standard Target Cell class, used for alignment.  Set of concentric circles
 
         Args:
            * **diameter** (float):  Total diameter of the target marker
@@ -77,7 +77,7 @@ class AlignmentTarget(tk.PICcomponent):
 
     """
     def __init__(self, diameter, ring_width, num_rings=10, center=(0,0), layer=1, datatype=0):
-        tk.PICcomponent.__init__(self, "AlignmentTarget")
+        tk.Component.__init__(self, "AlignmentTarget")
 
         self.diameter = diameter
         self.ring_width = ring_width

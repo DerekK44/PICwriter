@@ -6,8 +6,8 @@ import gdspy
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
-class AdiabaticCoupler(tk.PICcomponent):
-    """ Adiabatic Coupler Cell class (subclass of gdspy.Cell).  Design based on asymmetric adiabatic 3dB coupler designs, such as those from https://doi.org/10.1364/CLEO.2010.CThAA2, https://doi.org/10.1364/CLEO_SI.2017.SF1I.5, and https://doi.org/10.1364/CLEO_SI.2018.STh4B.4.
+class AdiabaticCoupler(tk.Component):
+    """ Adiabatic Coupler Cell class.  Design based on asymmetric adiabatic 3dB coupler designs, such as those from https://doi.org/10.1364/CLEO.2010.CThAA2, https://doi.org/10.1364/CLEO_SI.2017.SF1I.5, and https://doi.org/10.1364/CLEO_SI.2018.STh4B.4.
 
     In this design, Region I is the first half of the input S-bend waveguide where the input waveguides widths taper by +dw and -dw, Region II is the second half of the S-bend waveguide with constant, unbalanced widths, Region III is the region where the two asymmetric waveguides gradually come together, Region IV is the coupling region where the waveguides taper back to the original width at a fixed distance from one another, and Region IV is the  output S-bend waveguide.
 
@@ -47,7 +47,7 @@ class AdiabaticCoupler(tk.PICcomponent):
                  angle=np.pi/6.0, 
                  port=(0,0), 
                  direction='EAST'):
-        tk.PICcomponent.__init__(self, "AdiabaticCoupler")
+        tk.Component.__init__(self, "AdiabaticCoupler")
 
         self.portlist = {}
 
@@ -146,14 +146,14 @@ class AdiabaticCoupler(tk.PICcomponent):
         self.portlist_output_top = (distx, -port_dy)
         self.portlist_output_bot = (distx, -disty1+port_dy)
 
-        self.cell.add(wg_top)
-        self.cell.add(wg_bot)
-        self.cell.add(wg_top_clad)
-        self.cell.add(wg_bot_clad)
-        self.cell.add(taper_top)
-        self.cell.add(taper_bot)
-        self.cell.add(wg_top2)
-        self.cell.add(wg_bot2)
+        self.add(wg_top)
+        self.add(wg_bot)
+        self.add(wg_top_clad)
+        self.add(wg_bot_clad)
+        self.add(taper_top)
+        self.add(taper_bot)
+        self.add(wg_top2)
+        self.add(wg_bot2)
 
     def __build_ports(self):
         # Portlist format:
