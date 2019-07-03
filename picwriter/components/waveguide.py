@@ -11,6 +11,7 @@ class WaveguideTemplate:
         Keyword Args:
            * **wg_type** (string): Type of waveguide used.  Options are 'strip', 'slot', and 'swg'.  Defaults to 'strip'.
            * **bend_radius** (float): Radius of curvature for waveguide bends (circular).  Defaults to 50.
+           * **waveguide_stack** (list): List of layers and path widths to be drawn when waveguides are routed & placed.  Format is '[[width1, (layer1, datatype1)], [width2, (layer2, datatype2)], ...]'.  The first element defines the main waveguide width & layer for slot and subwavelength gratings.  If using waveguide_stack, the following keyword arguments are ignored: wg_width, clad_width, wg_layer, wg_datatype, clad_layer, clad_datatype.  Defaults to [[2.0, (1,0)], [10.0, (2,0)]].
            * **wg_width** (float): Width of the waveguide as shown on the mask.  Defaults to 2.
            * **slot** (float): Size of the waveguide slot region.  This is only used if `wg_type`=`'slot'`.  Defaults to 0.1.
            * **period** (float): Period of the SWG. This is only used if `wg_type`=`'swg'`. Defaults to 0.1.
@@ -18,17 +19,37 @@ class WaveguideTemplate:
            * **clad_width** (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff).  Defaults to 10.
            * **grid** (float): Defines the grid spacing in units of microns, so that the number of points per bend can be automatically calculated.  Defaults to 0.001 (1 nm).
            * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used.  Defaults to '+'
-           * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.   Defaults to 'ETCH'.
+           * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.   Defaults to 'ETCH'.           
            * **wg_layer** (int): Layer type used for waveguides.  Defaults to 1.
            * **wg_datatype** (int): Data type used for waveguides.  Defaults to 0.
            * **clad_layer** (int): Layer type used for cladding.  Defaults to 2.
            * **clad_datatype** (int): Data type used for cladding.  Defaults to 0.
 
     """
-    def __init__(self, wg_type='strip', bend_radius=50.0, wg_width=2.0, clad_width=10.0, grid=0.001,
+    def __init__(self, wg_type='strip', bend_radius=50.0,
+                 waveguide_stack = None,
+                 wg_width=2.0, clad_width=10.0, grid=0.001,
                  resist='+', fab='ETCH', slot=0.1, period=0.1, duty_cycle=0.5,
                  wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0):
-        self.wg_width = wg_width
+        
+        if waveguide_stack==None:
+            self.waveguide_stack = [[wg_width, (wg_layer,wg_datatype)], 
+                                    [2*clad_width+wg_width, (clad_layer,clad_datatype)]]
+            self.wg_width = wg_width
+            self.wg_layer = wg_layer
+            self.wg_datatype = wg_datatype
+            self.clad_width = clad_width
+            self.clad_layer = clad_layer
+            self.clad_datatype = clad_datatype
+        else:
+            if (len(waveguide_stack)<=1):
+                raise ValueError("Warning, waveguide_stack must be a list with more than 1 element")
+            self.waveguide_stack = waveguide_stack
+            self.wg_width = waveguide_stack[0][0]
+            self.wg_layer, self.wg_datatype = waveguide_stack[0][1]
+            self.clad_width = waveguide_stack[1][0]
+            self.clad_layer, self.clad_datatype = waveguide_stack[1][1]
+        
         if wg_type in ['strip', 'slot', 'swg']:
             self.wg_type = wg_type
         else:
@@ -42,7 +63,7 @@ class WaveguideTemplate:
             self.duty_cycle = duty_cycle
 
         self.bend_radius = bend_radius
-        self.clad_width = clad_width
+
         if resist != '+' and resist != '-':
             raise ValueError("Warning, invalid input for kwarg resist in "
                              "WaveguideTemplate")
@@ -50,11 +71,6 @@ class WaveguideTemplate:
             self.resist = resist #default state assumes 'etching'
         else: #reverse waveguide type if liftoff or something else
             self.resist = '+' if resist=='-' else '-'
-
-        self.wg_layer = wg_layer
-        self.wg_datatype = wg_datatype
-        self.clad_layer = clad_layer
-        self.clad_datatype = clad_datatype
         
         self.grid = grid
 
@@ -327,33 +343,36 @@ class Waveguide(gdspy.Cell):
             self.add(path)
 
         # add cladding
-        if len(self.trace)==2:
-            path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
-            path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **self.clad_spec)
-        else:
-            path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, self.trace[0])
-            prev_dl = 0.0
-            for i in range(len(self.trace)-2):
-                start_angle = tk.get_exact_angle(self.trace[i], self.trace[i+1])
-                next_angle = tk.get_exact_angle(self.trace[i+1], self.trace[i+2])
-
-                #dl is the amount of distance that is taken *off* the waveguide from the curved section
-                dl = abs(br*np.tan((next_angle-start_angle)/2.0))
-                if (dl+prev_dl) > tk.dist(self.trace[i], self.trace[i+1])+1E-6:
-                    raise ValueError("Warning! The waypoints "+str(self.trace[i])+" and "+str(self.trace[i+1])+" are too close to accommodate "
-                                     " the necessary bend-radius of "+str(br)+", the points were closer than "+str(dl+prev_dl))
-
-                path2.segment(tk.dist(self.trace[i], self.trace[i+1])-dl-prev_dl,
-                              direction=start_angle, **self.clad_spec)
-
-                turnby = tk.normalize_angle(next_angle - start_angle)
-
-                path2.turn(br, turnby, number_of_points=self.wgt.get_num_points(turnby), **self.clad_spec)
-                prev_dl = dl
-
-            path2.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
-                          direction=next_angle, **self.clad_spec)
-        self.add(path2)
+        for i in range(len(self.wgt.waveguide_stack)-1):
+            cur_width = self.wgt.waveguide_stack[i+1][0]
+            cur_spec = {'layer': self.wgt.waveguide_stack[i+1][1][0], 'datatype': self.wgt.waveguide_stack[i+1][1][1]}
+            if len(self.trace)==2:
+                path2 = gdspy.Path(cur_width, self.trace[0])
+                path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_exact_angle(self.trace[0], self.trace[1]), **cur_spec)
+            else:
+                path2 = gdspy.Path(cur_width, self.trace[0])
+                prev_dl = 0.0
+                for i in range(len(self.trace)-2):
+                    start_angle = tk.get_exact_angle(self.trace[i], self.trace[i+1])
+                    next_angle = tk.get_exact_angle(self.trace[i+1], self.trace[i+2])
+    
+                    #dl is the amount of distance that is taken *off* the waveguide from the curved section
+                    dl = abs(br*np.tan((next_angle-start_angle)/2.0))
+                    if (dl+prev_dl) > tk.dist(self.trace[i], self.trace[i+1])+1E-6:
+                        raise ValueError("Warning! The waypoints "+str(self.trace[i])+" and "+str(self.trace[i+1])+" are too close to accommodate "
+                                         " the necessary bend-radius of "+str(br)+", the points were closer than "+str(dl+prev_dl))
+    
+                    path2.segment(tk.dist(self.trace[i], self.trace[i+1])-dl-prev_dl,
+                                  direction=start_angle, **cur_spec)
+    
+                    turnby = tk.normalize_angle(next_angle - start_angle)
+    
+                    path2.turn(br, turnby, number_of_points=self.wgt.get_num_points(turnby), **cur_spec)
+                    prev_dl = dl
+    
+                path2.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
+                              direction=next_angle, **cur_spec)
+            self.add(path2)
 
 
     def __build_ports(self):
@@ -370,6 +389,8 @@ if __name__ == "__main__":
     wgt1= WaveguideTemplate(wg_type='strip', wg_width=1.0, bend_radius=25, resist='+', fab="ETCH")
     wgt2= WaveguideTemplate(wg_type='slot', wg_width=1.0, bend_radius=25, slot=0.3, resist='+', fab="ETCH")
     wgt3= WaveguideTemplate(wg_type='swg', wg_width=1.0, bend_radius=25, duty_cycle=0.50, period=1.0, resist='+', fab="ETCH")
+    wg_stack = [[0.5, (1,0)], [2.0, (2,0)], [10, (4,0)]]
+    wgt1= WaveguideTemplate(wg_type='strip', bend_radius=25, waveguide_stack=wg_stack, resist='+', fab="ETCH")
 
     space = 10.0
     wg1=Waveguide([(0, 0), (140.0-space, 0), (160.0-space, 50.0), (300.0, 50.0)], wgt1)
@@ -380,4 +401,4 @@ if __name__ == "__main__":
     tk.add(top, wg3)
 
     gdspy.LayoutViewer()
-    gdspy.write_gds('waveguide.gds', unit=1.0e-6, precision=1.0e-9)
+#    gdspy.write_gds('waveguide.gds', unit=1.0e-6, precision=1.0e-9)
