@@ -50,14 +50,14 @@ class AlignmentCross(tk.Component):
         x0,y0 = (0,0)
 
         #Add big cross arms
-        self.cell.add(gdspy.Rectangle((x0-self.cross_length, y0-self.cross_width/2.0), (x0-self.cross_width/2.0, y0+self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
-        self.cell.add(gdspy.Rectangle((x0+self.cross_length, y0-self.cross_width/2.0), (x0+self.cross_width/2.0, y0+self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
-        self.cell.add(gdspy.Rectangle((x0-self.cross_width/2.0, y0-self.cross_length), (x0+self.cross_width/2.0, y0-self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
-        self.cell.add(gdspy.Rectangle((x0-self.cross_width/2.0, y0+self.cross_length), (x0+self.cross_width/2.0, y0+self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
+        self.add(gdspy.Rectangle((x0-self.cross_length, y0-self.cross_width/2.0), (x0-self.cross_width/2.0, y0+self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
+        self.add(gdspy.Rectangle((x0+self.cross_length, y0-self.cross_width/2.0), (x0+self.cross_width/2.0, y0+self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
+        self.add(gdspy.Rectangle((x0-self.cross_width/2.0, y0-self.cross_length), (x0+self.cross_width/2.0, y0-self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
+        self.add(gdspy.Rectangle((x0-self.cross_width/2.0, y0+self.cross_length), (x0+self.cross_width/2.0, y0+self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
 
         #Add little cross arms
-        self.cell.add(gdspy.Rectangle((x0-self.cross_width/2.0, y0-self.small_cross_width/2.0), (x0+self.cross_width/2.0, y0+self.small_cross_width/2.0), layer=self.layer, datatype=self.datatype))
-        self.cell.add(gdspy.Rectangle((x0-self.small_cross_width/2.0, y0-self.cross_width/2.0), (x0+self.small_cross_width/2.0, y0+self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
+        self.add(gdspy.Rectangle((x0-self.cross_width/2.0, y0-self.small_cross_width/2.0), (x0+self.cross_width/2.0, y0+self.small_cross_width/2.0), layer=self.layer, datatype=self.datatype))
+        self.add(gdspy.Rectangle((x0-self.small_cross_width/2.0, y0-self.cross_width/2.0), (x0+self.small_cross_width/2.0, y0+self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
 
     def __build_ports(self):
         self.portlist["center"] = {'port':(0,0), 'direction':self.direction}
@@ -109,7 +109,7 @@ class AlignmentTarget(tk.Component):
         x0,y0 = (0,0)
         spacing = self.diameter/(4.0*self.num_rings)
         for i in range(self.num_rings):
-            self.cell.add(gdspy.Round((x0,y0), 2*(i+1)*spacing, 2*(i+1)*spacing-self.ring_width, layer=self.layer, datatype=self.datatype, number_of_points=0.1))
+            self.add(gdspy.Round((x0,y0), 2*(i+1)*spacing, 2*(i+1)*spacing-self.ring_width, layer=self.layer, datatype=self.datatype, number_of_points=0.1))
 
     def __build_ports(self):
         self.portlist["center"] = {'port':(0,0), 'direction':self.direction}

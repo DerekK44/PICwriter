@@ -133,16 +133,16 @@ class MMI2x2(tk.Component):
         self.output_port_top = (2*angle_x_dist+self.length, 0.0)
         self.output_port_bot = (2*angle_x_dist+self.length, -self.wg_sep-2*angle_y_dist)
 
-        self.cell.add(path1)
-        self.cell.add(path2)
-        self.cell.add(path3)
-        self.cell.add(path4)
-        self.cell.add(path5)
-        self.cell.add(clad_path1)
-        self.cell.add(clad_path2)
-        self.cell.add(clad_path3)
-        self.cell.add(clad_path4)
-        self.cell.add(clad_path5)
+        self.add(path1)
+        self.add(path2)
+        self.add(path3)
+        self.add(path4)
+        self.add(path5)
+        self.add(clad_path1)
+        self.add(clad_path2)
+        self.add(clad_path3)
+        self.add(clad_path4)
+        self.add(clad_path5)
 
     def __build_ports(self):
         # Portlist format:
