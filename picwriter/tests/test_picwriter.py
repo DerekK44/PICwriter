@@ -22,7 +22,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg2)
 		print("Waveguide area = "+str(top.area()))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-33939.416641588556) <= 1e-6)
+		self.assertTrue(abs(top.area()-33939.41272703404) <= 1e-6)
 
 	def test_metal_creation(self):
 		top = gdspy.Cell("t-electrical")
@@ -44,7 +44,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, tp2)
 		print("Taper area = "+str(top.area()))
 		self.assertTrue(len(top.references)==3)
-		self.assertTrue(abs(top.area()-27005.71027807154) <= 1e-6)
+		self.assertTrue(abs(top.area()-27005.706363517016) <= 1e-6)
 
 	def test_grating_coupler_creation(self):
 		top = gdspy.Cell("t3")
@@ -57,7 +57,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, gc2)
 		print("Grating coupler area = "+str(top.area()))
 		self.assertTrue(len(top.references)==3)
-		self.assertTrue(abs(top.area()-30061.492662598197) <= 1e-6)
+		self.assertTrue(abs(top.area()-30061.488748043674) <= 1e-6)
 
 	def test_spiral_creation(self):
 		top = gdspy.Cell("t4")
@@ -74,7 +74,7 @@ class TestPICwriter(TestCase):
 
 		print("Spiral area = "+str(top.area()))
 		self.assertTrue(len(top.references)==1)
-		self.assertTrue(abs(top.area()-479997.9908607155) <= 1e-6)
+		self.assertTrue(abs(top.area()-479997.9517151703) <= 1e-6)
 
 	def test_mmi1x2_creation(self):
 		top = gdspy.Cell("t-mmi1x2")
@@ -188,7 +188,7 @@ class TestPICwriter(TestCase):
 		print("DC area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==7)
-		self.assertTrue(abs(top.area()-65614.33107612531) <= 1e-6)
+		self.assertTrue(abs(top.area()-65614.5258016434) <= 1e-6)
 
 	def test_contradc_creation(self):
 		top = gdspy.Cell("t-contradc")
@@ -249,7 +249,6 @@ class TestPICwriter(TestCase):
                           fargap=6.0,
                           dw=1.0, 
                           angle=np.pi/16.0, 
-                          parity=1, 
                           **wg1.portlist["output"])
 		tk.add(top, ac)
 

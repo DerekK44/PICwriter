@@ -351,11 +351,29 @@ class Component():
     def __get_cell(self):
         return CURRENT_CELLS[self.cell_hash]
 
+    def __direction_to_rotation(self, direction):
+        # Returns a rotation (in degrees) given a 'direction' which can be a cardinal direction or an angle in radians
+        if isinstance(direction,float):
+            # direction is a float in radians, but rotation should be a float in degrees
+            return direction*180.0/np.pi
+        elif str(direction)=="EAST":
+            return 0.0
+        elif str(direction)=="NORTH":
+            return 90.0
+        elif str(direction)=="WEST":
+            return 180.0
+        elif str(direction)=="SOUTH":
+            return 270.0
+
     def add(self, element, origin=(0,0), rotation=0.0, x_reflection=False):
         """ Add a reference to an element or list of elements to the cell associated with this component """
         if isinstance(element, Component):
             element_cell = CURRENT_CELLS[element.cell_hash]
-            self.cell.add(gdspy.CellReference(element_cell, origin=origin, rotation=rotation, x_reflection=x_reflection))
+            rot = self.__direction_to_rotation(element.direction)
+            self.cell.add(gdspy.CellReference(element_cell, 
+                                              origin=element.port, 
+                                              rotation=rot, 
+                                              x_reflection=x_reflection))
         elif isinstance(element, gdspy.Cell):
             self.cell.add(gdspy.CellReference(element, origin=origin, rotation=rotation, x_reflection=x_reflection))
         else:
@@ -363,17 +381,7 @@ class Component():
 
     def addto(self, top_cell, x_reflection=False):
         
-        if isinstance(self.direction,float):
-            # direction is a float in radians, but rotation should be a float in degrees
-            rot = self.direction*180.0/np.pi
-        elif str(self.direction)=="EAST":
-            rot = 0.0
-        elif str(self.direction)=="NORTH":
-            rot = 90.0
-        elif str(self.direction)=="WEST":
-            rot = 180.0
-        elif str(self.direction)=="SOUTH":
-            rot = 270.0
+        rot = self.__direction_to_rotation(self.direction)
             
         if isinstance(top_cell, gdspy.Cell):
             top_cell.add(gdspy.CellReference(CURRENT_CELLS[self.cell_hash], 
