@@ -93,6 +93,7 @@ class DirectionalCoupler(tk.Component):
 
         self.add(wg_top)
         self.add(wg_bot)
+        self.portlist_input = (0,0)
         self.portlist_output_straight = (distx, 0.0)
         self.portlist_output_cross = (distx, -disty)
         self.portlist_input_cross = (0.0, -disty)
@@ -101,13 +102,13 @@ class DirectionalCoupler(tk.Component):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         if self.parity==1:
-            self.portlist["input_top"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
+            self.portlist["input_top"] = {'port':self.portlist_input, 'direction':tk.flip_direction(self.direction)}
             self.portlist["input_bot"] = {'port':self.portlist_input_cross, 'direction':tk.flip_direction(self.direction)}
             self.portlist["output_top"] = {'port':self.portlist_output_straight, 'direction':self.direction}
             self.portlist["output_bot"] = {'port':self.portlist_output_cross, 'direction':self.direction}
         elif self.parity==-1:
             self.portlist["input_top"] = {'port':self.portlist_input_cross, 'direction':tk.flip_direction(self.direction)}
-            self.portlist["input_bot"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
+            self.portlist["input_bot"] = {'port':self.portlist_input, 'direction':tk.flip_direction(self.direction)}
             self.portlist["output_top"] = {'port':self.portlist_output_cross, 'direction':self.direction}
             self.portlist["output_bot"] = {'port':self.portlist_output_straight, 'direction':self.direction}
 
