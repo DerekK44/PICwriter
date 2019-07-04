@@ -6,8 +6,8 @@ import gdspy
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
-class Spiral(gdspy.Cell):
-    """ Spiral Waveguide Cell class (subclass of gdspy.Cell).  The desired length of the spiral is first set, along with the spacing between input and output (the 'width' paramter).  Then, the corresponding height of the spiral is automatically set.
+class Spiral(tk.Component):
+    """ Spiral Waveguide Cell class.  The desired length of the spiral is first set, along with the spacing between input and output (the 'width' paramter).  Then, the corresponding height of the spiral is automatically set.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
@@ -32,7 +32,7 @@ class Spiral(gdspy.Cell):
 
     """
     def __init__(self, wgt, width, length, spacing=None, parity=1, port=(0,0), direction="NORTH"):
-        gdspy.Cell.__init__(self, tk.getCellName("Spiral"))
+        tk.Component.__init__(self, "Spiral", locals())
 
         self.portlist = {}
 
@@ -56,6 +56,10 @@ class Spiral(gdspy.Cell):
 
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
 
     def __fixed_len(self, h):
         w = self.width
@@ -243,30 +247,17 @@ class Spiral(gdspy.Cell):
         wg = Waveguide(waypoints, self.wgt)
 
         dist = self.width
-        if self.direction=="WEST":
-            wgr = gdspy.CellReference(wg, rotation=180)
-            self.portlist_output = (self.port[0]-dist, self.port[1])
-        elif self.direction=="SOUTH":
-            wgr = gdspy.CellReference(wg, rotation=-90)
-            self.portlist_output = (self.port[0], self.port[1]-dist)
-        elif self.direction=="EAST":
-            wgr = gdspy.CellReference(wg, rotation=0.0)
-            self.portlist_output = (self.port[0]+dist, self.port[1])
-        elif self.direction=="NORTH":
-            wgr = gdspy.CellReference(wg, rotation=90)
-            self.portlist_output = (self.port[0], self.port[1]+dist)
-        elif isinstance(self.direction, float) or isinstance(self.direction, int):
-            wgr = gdspy.CellReference(wg, rotation=(float(self.direction)*180/np.pi))
-            self.portlist_output = (self.port[0]+dist*np.cos(float(self.direction)), self.port[1]+dist*np.sin(float(self.direction)))
 
-        wgr.translate(self.port[0], self.port[1])
-        self.add(wgr)
+        self.add(wg)
+        self.portlist_input = (0, 0)
+        self.portlist_output = (dist, 0)
+
 
     def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
-        self.portlist["input"] = {'port':self.port,
+        self.portlist["input"] = {'port':self.portlist_input,
                                     'direction':tk.flip_direction(self.direction)}
         self.portlist["output"] = {'port':self.portlist_output,
                                     'direction':self.direction}
@@ -275,14 +266,14 @@ if __name__ == "__main__":
     from picwriter.components.waveguide import WaveguideTemplate
     gdspy.current_library = gdspy.GdsLibrary()
     top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(bend_radius=50,
+    wgt = WaveguideTemplate(bend_radius=200,
                             wg_width=1.0,
                             clad_width=10.0)
 
     sp1 = Spiral(wgt,
-                 width=300.0,
+                 width=1700.0,
                  length=20000.0,
-                 spacing=50.0,
+                 spacing=20.0,
                  parity=1,
                  port=(0,0),
                  direction='WEST')

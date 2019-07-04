@@ -6,8 +6,8 @@ import gdspy
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
-class DirectionalCoupler(gdspy.Cell):
-    """ Directional Coupler Cell class (subclass of gdspy.Cell).
+class DirectionalCoupler(tk.Component):
+    """ Directional Coupler Cell class.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
@@ -34,7 +34,7 @@ class DirectionalCoupler(gdspy.Cell):
 
     """
     def __init__(self, wgt, length, gap, angle=np.pi/6.0, parity=1, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, tk.getCellName("DirectionalCoupler"))
+        tk.Component.__init__(self, "DirectionalCoupler", locals())
 
         self.portlist = {}
 
@@ -55,6 +55,10 @@ class DirectionalCoupler(gdspy.Cell):
 
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
@@ -86,41 +90,12 @@ class DirectionalCoupler(gdspy.Cell):
 
         distx = 4*dlx+2*angle_x_dist+self.length
         disty = (2*abs(angle_y_dist) + self.gap + self.wgt.wg_width)*self.parity
-        if self.direction=="WEST":
-            wgr_top = gdspy.CellReference(wg_top, rotation=180)
-            wgr_bot = gdspy.CellReference(wg_bot, rotation=180)
-            self.portlist_output_straight = (self.port[0]-distx, self.port[1])
-            self.portlist_output_cross = (self.port[0]-distx, self.port[1] + disty)
-            self.portlist_input_cross = (self.port[0], self.port[1] + disty)
-        elif self.direction=="SOUTH":
-            wgr_top = gdspy.CellReference(wg_top, rotation=-90/0)
-            wgr_bot = gdspy.CellReference(wg_bot, rotation=-90.0)
-            self.portlist_output_straight = (self.port[0], self.port[1]-distx)
-            self.portlist_output_cross = (self.port[0]-disty, self.port[1]-distx)
-            self.portlist_input_cross = (self.port[0]-disty, self.port[1])
-        elif self.direction=="EAST":
-            wgr_top = gdspy.CellReference(wg_top)
-            wgr_bot = gdspy.CellReference(wg_bot)
-            self.portlist_output_straight = (self.port[0]+distx, self.port[1])
-            self.portlist_output_cross = (self.port[0]+distx, self.port[1]-disty)
-            self.portlist_input_cross = (self.port[0], self.port[1]-disty)
-        elif self.direction=="NORTH":
-            wgr_top = gdspy.CellReference(wg_top, rotation=90.0)
-            wgr_bot = gdspy.CellReference(wg_bot, rotation=90.0)
-            self.portlist_output_straight = (self.port[0], self.port[1]+distx)
-            self.portlist_output_cross = (self.port[0]+disty, self.port[1]+distx)
-            self.portlist_input_cross = (self.port[0]+disty, self.port[1])
-        elif isinstance(self.direction, float):
-            wgr_top = gdspy.CellReference(wg_top, rotation=(self.direction*180/np.pi))
-            wgr_bot = gdspy.CellReference(wg_bot, rotation=(self.direction*180/np.pi))
-            self.portlist_output_straight = (self.port[0]+distx*np.cos(self.direction), self.port[1]+distx*np.sin(self.direction))
-            self.portlist_input_cross = (self.port[0]-(-disty)*np.sin(self.direction), self.port[1]+(-disty)*np.cos(self.direction))
-            self.portlist_output_cross = (self.port[0]-(-disty)*np.sin(self.direction)+distx*np.cos(self.direction), self.port[1]+(-disty)*np.cos(self.direction)+distx*np.sin(self.direction))
 
-        wgr_top.translate(self.port[0], self.port[1])
-        wgr_bot.translate(self.port[0], self.port[1])
-        self.add(wgr_top)
-        self.add(wgr_bot)
+        self.add(wg_top)
+        self.add(wg_bot)
+        self.portlist_output_straight = (distx, 0.0)
+        self.portlist_output_cross = (distx, -disty)
+        self.portlist_input_cross = (0.0, -disty)
 
     def __build_ports(self):
         # Portlist format:

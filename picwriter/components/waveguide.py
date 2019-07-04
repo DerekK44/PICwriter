@@ -89,8 +89,8 @@ class WaveguideTemplate:
         return int(np.ceil(abs(angle * 1.0/np.arccos(2*(1-(0.5*self.grid/self.bend_radius))**2 - 1))))
             
 
-class Waveguide(gdspy.Cell):
-    """ Waveguide Cell class (subclass of gdspy.Cell).
+class Waveguide(tk.Component):
+    """ Waveguide Cell class.
 
         Args:
            * **trace** (list):  List of coordinates used to generate the waveguide (such as '[(x1,y1), (x2,y2), ...]').
@@ -107,7 +107,7 @@ class Waveguide(gdspy.Cell):
 
     """
     def __init__(self, trace, wgt):
-        gdspy.Cell.__init__(self, tk.getCellName("Waveguide"))
+        tk.Component.__init__(self, "Waveguide", locals())
 
         self.portlist = {}
 

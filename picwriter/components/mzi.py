@@ -10,7 +10,7 @@ from picwriter.components.electrical import MetalRoute
 from picwriter.components.directionalcoupler import DirectionalCoupler
 
 class MachZehnder(tk.Component):
-    """ Mach-Zehnder Cell class with thermo-optic option (subclass of gdspy.Cell).  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
+    """ Mach-Zehnder Cell class with thermo-optic option.  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
@@ -186,7 +186,7 @@ class MachZehnder(tk.Component):
             self.portlist["heater_bot_out"] = {'port': self.htr_bot_out, 'direction':self.htr_bot_out_dir}
 
 class MachZehnderSwitch1x2(tk.Component):
-    """ Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm (subclass of gdspy.Cell).  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
+    """ Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm.  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
@@ -377,7 +377,7 @@ class MachZehnderSwitch1x2(tk.Component):
             self.portlist["heater_bot_out"] = {'port': self.htr_bot_out, 'direction':self.htr_bot_out_dir}
 
 class MachZehnderSwitchDC1x2(tk.Component):
-    """ Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm and a directional coupler (subclass of gdspy.Cell).  It is possible to generate your own Mach-Zehnder from the other classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
+    """ Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm and a directional coupler.  It is possible to generate your own Mach-Zehnder from the other classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
@@ -569,7 +569,7 @@ class MachZehnderSwitchDC1x2(tk.Component):
             self.portlist["heater_bot_out"] = {'port': self.htr_bot_out, 'direction':self.htr_bot_out_dir}
 
 class MachZehnderSwitchDC2x2(tk.Component):
-    """ Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm and a directional coupler (subclass of gdspy.Cell) for both input and output.  It is possible to generate your own Mach-Zehnder from the other classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
+    """ Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm and a directional coupler for both input and output.  It is possible to generate your own Mach-Zehnder from the other classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
