@@ -3,7 +3,7 @@ Windows: [![Build status](https://ci.appveyor.com/api/projects/status/f9q96u9na6
 Documentation: [![Documentation Status](https://readthedocs.org/projects/picwriter/badge/?version=latest)](http://picwriter.readthedocs.io/en/latest/?badge=latest)
 
 # PICwriter README
-Picwriter (Photonic-Integrated-Circuit Writer) is a [Python](https://www.python.org/) module, built above the [gdspy](https://github.com/heitzmann/gdspy) module, aimed at simplifying the process of designing complex masks for photonic integrated circuits through a prebuilt library of easy-to-implement PCells (technically all sub-classes of the gdspy Cell class).  Supported blocks currently include: 
+Picwriter (Photonic-Integrated-Circuit Writer) is a [Python](https://www.python.org/) module, built above the [gdspy](https://github.com/heitzmann/gdspy) module, aimed at simplifying the process of designing complex masks for photonic integrated circuits through a prebuilt library of easy-to-implement PCells.  Supported blocks currently include: 
 * waveguides (strip, slot, and sub-wavelength grating)
 * grating couplers (straight and focusing)
 * tapers
