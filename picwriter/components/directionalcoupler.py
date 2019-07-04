@@ -42,17 +42,17 @@ class DirectionalCoupler(tk.Component):
         self.direction = direction
 
         if angle > np.pi/2.0 or angle < 0:
-            raise ValueError("Warning! Improper angle specified ("+str(angle)+").  Must be between 0 and pi/2.0.")
+            raise ValueError("Warning! Improper angle specified ("+str(angle)+"). Must be between 0 and pi/2.0.")
         self.angle = angle
         if parity != 1 and parity!=-1:
-            raise ValueError("Warning!  Parity input *must* be 1 or -1.  Received parity="+str(parity)+" instead.")
+            raise ValueError("Warning! Parity input *must* be 1 or -1. Received parity="+str(parity)+" instead.")
         self.parity = parity
         self.length = length
         self.gap = gap
         self.wgt = wgt
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
-
+        
         self.__build_cell()
         self.__build_ports()
         
@@ -121,21 +121,23 @@ if __name__ == "__main__":
     wg1=Waveguide([(0,0), (100,0)], wgt)
     tk.add(top, wg1)
 
-    dc = DirectionalCoupler(wgt, 20.0, 0.5, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
-    tk.add(top, dc)
+#    dc = DirectionalCoupler(wgt, 20.0, 0.5, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
+#    tk.add(top, dc)
 
-    # dc1 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **wg1.portlist["output"])
-    # dc2 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=-1, **dc1.portlist["output_top"])
-    # dc3 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc1.portlist["output_bot"])
-    # dc4 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc2.portlist["output_bot"])
-    # dc5 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=-1, **dc2.portlist["output_top"])
-    # dc6 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc3.portlist["output_bot"])
-    # tk.add(top, dc1)
-    # tk.add(top, dc2)
-    # tk.add(top, dc3)
-    # tk.add(top, dc4)
-    # tk.add(top, dc5)
-    # tk.add(top, dc6)
+    dc1 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **wg1.portlist["output"])
+    dc2 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=-1, **dc1.portlist["output_top"])
+    dc3 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc1.portlist["output_bot"])
+    dc4 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc2.portlist["output_bot"])
+    dc5 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=-1, **dc2.portlist["output_top"])
+    dc6 = DirectionalCoupler(wgt, 10.0, 0.5, angle=np.pi/6.0, parity=1, **dc3.portlist["output_bot"])
+    tk.add(top, dc1)
+    tk.add(top, dc2)
+    tk.add(top, dc3)
+    tk.add(top, dc4)
+    tk.add(top, dc5)
+    tk.add(top, dc6)
 
+    print(top.area())
+    
     gdspy.LayoutViewer()
-    # gdspy.write_gds('dc2.gds', unit=1.0e-6, precision=1.0e-9)
+#    gdspy.write_gds('dc2.gds', unit=1.0e-6, precision=1.0e-9)

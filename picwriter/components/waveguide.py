@@ -118,8 +118,19 @@ class Waveguide(tk.Component):
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype} #Used for 'xor' operation
 
         self.__type_check_trace()
+        
         self.__build_cell()
         self.__build_ports()
+        
+    def __normalize_trace(self):
+        """ Rotates and translates the input trace so the following two constraints are satisfied:
+            1. The input point (first point) lies at the origin (0,0)
+            2. The second point lies in the +x direction (rot angle = 0.0)
+            
+            This allows the trace to be properly hashed, so duplicate traces can be referenced
+            rather than have new cells for identical waveguides.
+        """
+        return None
 
     def __type_check_trace(self):
         trace = []

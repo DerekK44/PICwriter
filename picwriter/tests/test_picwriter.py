@@ -127,7 +127,7 @@ class TestPICwriter(TestCase):
 		print("Disk area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-31953.142850436107) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-32153.142850436107) <= AREA_TOL)
 
 	def test_mzi_creation(self):
 		top = gdspy.Cell("t-mzi")
@@ -194,9 +194,6 @@ class TestPICwriter(TestCase):
 		tk.add(top, dc4)
 		tk.add(top, dc5)
 		tk.add(top, dc6)
-
-		print("DC area = "+str(top.area()))
-		print(len(top.references))
 		self.assertTrue(len(top.references)==7)
 		self.assertTrue(abs(top.area()-65614.5258016434) <= AREA_TOL)
 
