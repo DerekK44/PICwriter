@@ -47,7 +47,7 @@ class AdiabaticCoupler(tk.Component):
                  angle=np.pi/6.0, 
                  port=(0,0), 
                  direction='EAST'):
-        tk.Component.__init__(self, "AdiabaticCoupler")
+        tk.Component.__init__(self, "AdiabaticCoupler", locals())
 
         self.portlist = {}
 
@@ -72,12 +72,6 @@ class AdiabaticCoupler(tk.Component):
         """ Translate & rotate the ports corresponding to this specific component object
         """
         self._auto_transform_()
-        
-        """ The _hash_cell_ function makes sure that duplicate cells are not created.
-        Pass to it all the unique properties of this cell, which are used to check for duplicates.
-        Do *not* include properties like port, direction.  These are specific to Cell References only.
-        """
-        self._hash_cell_(wgt, length1, length2, gap, fargap, dw, angle)
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions

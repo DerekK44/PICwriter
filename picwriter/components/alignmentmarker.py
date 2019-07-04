@@ -77,7 +77,7 @@ class AlignmentTarget(tk.Component):
 
     """
     def __init__(self, diameter, ring_width, num_rings=10, center=(0,0), layer=1, datatype=0):
-        tk.Component.__init__(self, "AlignmentTarget")
+        tk.Component.__init__(self, "AlignmentTarget", locals())
 
         self.diameter = diameter
         self.ring_width = ring_width
@@ -95,14 +95,6 @@ class AlignmentTarget(tk.Component):
         """ Translate & rotate the ports corresponding to this specific component object
         """
         self._auto_transform_()
-        
-        """ The _hash_cell_ function makes sure that duplicate cells are not created.
-        Pass to it all the unique properties of this cell, which are used to check for duplicates.
-        Do *not* include properties like port, direction.  These are specific to Cell References only.
-        """
-        self._hash_cell_(self.diameter, self.ring_width, self.num_rings, self.layer, self.datatype)
-        print(self.cell_hash)
-        print("num_rings = "+str(self.num_rings))
 
     def build_cell(self):
         # Sequentially build all the geometric shapes, then add it to the Cell

@@ -33,7 +33,7 @@ class MMI1x2(tk.Component):
 
     """
     def __init__(self, wgt, length, width, angle=np.pi/6.0, taper_width=None, taper_length=None, wg_sep=None, port=(0,0), direction='EAST'):
-        tk.Component.__init__(self, "MMI1x2")
+        tk.Component.__init__(self, "MMI1x2", locals())
         
         self.portlist = {}
 
@@ -60,12 +60,6 @@ class MMI1x2(tk.Component):
         """ Translate & rotate the ports corresponding to this specific component object
         """
         self._auto_transform_()
-        
-        """ The _hash_cell_ function makes sure that duplicate cells are not created.
-        Pass to it all the unique properties of this cell, which are used to check for duplicates.
-        Do *not* include properties like port, direction.  These are specific to Cell References only.
-        """
-        self._hash_cell_(wgt, length, width, angle, taper_width, taper_length, wg_sep)
 
     def __type_check_values(self):
         #Check that the values for the MMI1x2 are all valid

@@ -43,7 +43,7 @@ class ContraDirectionalCoupler(tk.Component):
 
     """
     def __init__(self, wgt, length, gap, period, dc, angle=np.pi/6.0, width_top=None, width_bot=None, dw_top=None, dw_bot=None, input_bot=False, fins=False, fin_size=(0.2, 0.05), contradc_wgt=None, port=(0,0), direction='EAST'):
-        tk.Component.__init__(self, "ContraDirectionalCoupler")
+        tk.Component.__init__(self, "ContraDirectionalCoupler", locals())
 
         self.portlist = {}
         self.port = port
@@ -97,12 +97,6 @@ class ContraDirectionalCoupler(tk.Component):
         """ Translate & rotate the ports corresponding to this specific component object
         """
         self._auto_transform_()
-        
-        """ The _hash_cell_ function makes sure that duplicate cells are not created.
-        Pass to it all the unique properties of this cell, which are used to check for duplicates.
-        Do *not* include properties like port, direction.  These are specific to Cell References only.
-        """
-        self._hash_cell_(wgt, length, gap, period, dc, angle, width_top, width_bot, dw_top, dw_bot, input_bot, fins, fin_size, contradc_wgt)
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions

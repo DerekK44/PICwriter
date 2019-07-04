@@ -301,7 +301,7 @@ class Component():
 
     """
     
-    def __init__(self, name):
+    def __init__(self, name, *args):
         self.name_prefix = name
         self.cell = gdspy.Cell(getCellName(name)) # getCellName is local to toolkit.py
         
@@ -309,6 +309,8 @@ class Component():
         self.portlist = {}
         self.port = (0,0)
         self.direction = 0.0
+        
+        self._hash_cell_(args[0])
         
     def _auto_transform_(self):
         """ 
@@ -339,13 +341,20 @@ class Component():
         If not, add the cell to the global CURRENT_CELLS dictionary.
         If so, point to the identical cell in the CURRENT_CELLS dictionary.
         """
+        dont_hash = ['port', 'direction', str(self)] #list of keys not to be hashed
+        args = args[0]
+        new_args = []
+        for k in args.keys():
+            if k not in dont_hash:
+                new_args.append(args[k])
+
         global CURRENT_CELLS
-        properties = self.name_prefix+''.join([str(p) for p in args])
+        properties = self.name_prefix+''.join([str(p) for p in new_args])
         self.cell_hash = properties
         if self.cell_hash not in CURRENT_CELLS.keys():
             CURRENT_CELLS[self.cell_hash] = self.cell
 
-        # Now delete the cell completely to save memory (since this info is stored globally in CURRENT_CELLS)
+        # Now delete the cell completely to save memory (since this info is now stored globally in CURRENT_CELLS)
         del self.cell
         
     def __get_cell(self):
@@ -367,17 +376,18 @@ class Component():
 
     def add(self, element, origin=(0,0), rotation=0.0, x_reflection=False):
         """ Add a reference to an element or list of elements to the cell associated with this component """
+        this_cell = CURRENT_CELLS[self.cell_hash]
         if isinstance(element, Component):
             element_cell = CURRENT_CELLS[element.cell_hash]
             rot = self.__direction_to_rotation(element.direction)
-            self.cell.add(gdspy.CellReference(element_cell, 
+            this_cell.add(gdspy.CellReference(element_cell, 
                                               origin=element.port, 
                                               rotation=rot, 
                                               x_reflection=x_reflection))
         elif isinstance(element, gdspy.Cell):
-            self.cell.add(gdspy.CellReference(element, origin=origin, rotation=rotation, x_reflection=x_reflection))
+            this_cell.add(gdspy.CellReference(element, origin=origin, rotation=rotation, x_reflection=x_reflection))
         else:
-            self.cell.add(element)
+            this_cell.add(element)
 
     def addto(self, top_cell, x_reflection=False):
         
