@@ -5,7 +5,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class Disk(gdspy.Cell):
+class Disk(tk.Component):
     """ Disk Resonator Cell class (subclass of gdspy.Cell).
 
         Args:
@@ -31,7 +31,7 @@ class Disk(gdspy.Cell):
 
     """
     def __init__(self, wgt, radius, coupling_gap, wrap_angle=0, parity=1, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, tk.getCellName("Disk"))
+        tk.Component.__init__(self, "Disk", locals())
 
         self.portlist = {}
 
@@ -52,6 +52,10 @@ class Disk(gdspy.Cell):
 
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
@@ -60,21 +64,21 @@ class Disk(gdspy.Cell):
         if self.wrap_angle==0:
             bus_length = 2*self.radius
             # Add bus waveguide with cladding
-            path = gdspy.Path(self.wgt.wg_width, self.port)
+            path = gdspy.Path(self.wgt.wg_width, (0,0))
             path.segment(2*self.radius, direction='+x', **self.wg_spec)
-            clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, self.port)
+            clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (0,0))
             clad.segment(2*self.radius, direction='+x', **self.clad_spec)
 
             # Ring resonator
             if self.parity==1:
-                ring = gdspy.Round((self.port[0]+self.radius, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap),
+                ring = gdspy.Round((self.radius, self.radius+self.wgt.wg_width + self.coupling_gap),
                                     self.radius+self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
-                clad_ring = gdspy.Round((self.port[0]+self.radius, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap),
+                clad_ring = gdspy.Round((self.radius, self.radius+self.wgt.wg_width + self.coupling_gap),
                                          self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
             elif self.parity==-1:
-                ring = gdspy.Round((self.port[0]+self.radius, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap),
+                ring = gdspy.Round((self.radius, -self.radius-self.wgt.wg_width - self.coupling_gap),
                                     self.radius+self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
-                clad_ring = gdspy.Round((self.port[0]+self.radius, self.port[1] - self.radius - self.wgt.wg_width - self.coupling_gap),
+                clad_ring = gdspy.Round((self.radius, -self.radius - self.wgt.wg_width - self.coupling_gap),
                                          self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
             else:
                 raise ValueError("Warning!  Parity value is not an acceptable value (must be +1 or -1).")
@@ -85,14 +89,14 @@ class Disk(gdspy.Cell):
             bus_length = 2*self.radius if (4*dx < 2*self.radius) else 4*dx
 
             # Add bus waveguide with cladding that wraps
-            path = gdspy.Path(self.wgt.wg_width, self.port)
-            clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, self.port)
+            path = gdspy.Path(self.wgt.wg_width, (0,0))
+            clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (0,0))
             if 4*dx < bus_length:
                 path.segment((bus_length-4*dx)/2.0, direction='+x', **self.wg_spec)
                 clad.segment((bus_length-4*dx)/2.0, direction='+x', **self.clad_spec)
-                xcenter = self.port[0] + self.radius
+                xcenter = self.radius
             else:
-                xcenter = self.port[0] + 2*dx
+                xcenter =2*dx
 
             if self.parity==1:
                 path.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
@@ -103,9 +107,9 @@ class Disk(gdspy.Cell):
                 clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
 
                 # Make the disk resonator
-                ring = gdspy.Round((xcenter, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap - 2*dy),
+                ring = gdspy.Round((xcenter, self.radius+self.wgt.wg_width + self.coupling_gap - 2*dy),
                                     self.radius+self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
-                clad_ring = gdspy.Round((xcenter, self.port[1]+self.radius+self.wgt.wg_width + self.coupling_gap - 2*dy),
+                clad_ring = gdspy.Round((xcenter, self.radius+self.wgt.wg_width + self.coupling_gap - 2*dy),
                                          self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
 
             elif self.parity==-1:
@@ -117,9 +121,9 @@ class Disk(gdspy.Cell):
                 clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
 
                 # Make the disk resonator
-                ring = gdspy.Round((xcenter, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
+                ring = gdspy.Round((xcenter, -self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
                                     self.radius+self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
-                clad_ring = gdspy.Round((xcenter, self.port[1]-self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
+                clad_ring = gdspy.Round((xcenter, -self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
                                          self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
 
 
@@ -127,27 +131,9 @@ class Disk(gdspy.Cell):
                 path.segment((bus_length-4*dx)/2.0, **self.wg_spec)
                 clad.segment((bus_length-4*dx)/2.0, **self.clad_spec)
 
-        angle=0
-        if self.direction=="EAST":
-            self.port_output = (self.port[0]+bus_length, self.port[1])
-            angle=0
-        elif self.direction=="NORTH":
-            self.port_output = (self.port[0], self.port[1]+bus_length)
-            angle=np.pi/2.0
-        elif self.direction=="WEST":
-            self.port_output = (self.port[0]-bus_length, self.port[1])
-            angle=np.pi
-        elif self.direction=="SOUTH":
-            self.port_output = (self.port[0], self.port[1]-bus_length)
-            angle=-np.pi/2.0
-        elif isinstance(self.direction, float):
-            angle = self.direction
-            self.port_output = (self.port[0]+bus_length*np.cos(angle), self.port[1]+bus_length*np.sin(angle))
 
-        ring.rotate(angle, self.port)
-        clad_ring.rotate(angle, self.port)
-        path.rotate(angle, self.port)
-        clad.rotate(angle, self.port)
+        self.port_input = (0,0)
+        self.port_output = (bus_length, 0)
 
         self.add(ring)
         self.add(clad_ring)
@@ -157,7 +143,7 @@ class Disk(gdspy.Cell):
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':self.port,
+        self.portlist["input"] = {'port':(0,0),
                                     'direction':tk.flip_direction(self.direction)}
         self.portlist["output"] = {'port':self.port_output,
                                     'direction':self.direction}
@@ -189,5 +175,5 @@ if __name__ == "__main__":
     tk.add(top, r2)
     tk.add(top, r3)
 
-    gdspy.LayoutViewer()
-    # gdspy.write_gds('disk.gds', unit=1.0e-6, precision=1.0e-9)
+#    gdspy.LayoutViewer()
+    gdspy.write_gds('disk.gds', unit=1.0e-6, precision=1.0e-9)
