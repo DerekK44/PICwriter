@@ -100,10 +100,10 @@ class Disk(tk.Component):
 
             if self.parity==1:
                 path.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
-                path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
+                path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(2*theta), **self.wg_spec)
                 path.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
                 clad.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
-                clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
+                clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(2*theta), **self.clad_spec)
                 clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
 
                 # Make the disk resonator
@@ -114,10 +114,10 @@ class Disk(tk.Component):
 
             elif self.parity==-1:
                 path.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
-                path.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
+                path.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(2*theta), **self.wg_spec)
                 path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
                 clad.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
-                clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
+                clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(2*theta), **self.clad_spec)
                 clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
 
                 # Make the disk resonator
@@ -143,7 +143,7 @@ class Disk(tk.Component):
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':(0,0),
+        self.portlist["input"] = {'port':self.port_input,
                                     'direction':tk.flip_direction(self.direction)}
         self.portlist["output"] = {'port':self.port_output,
                                     'direction':self.direction}

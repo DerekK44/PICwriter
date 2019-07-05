@@ -126,6 +126,11 @@ class TestPICwriter(TestCase):
 		tk.add(top, d1)
 		print("Disk area = "+str(top.area()))
 		print(len(top.references))
+		for t in top.references:
+			print("reference cell = "+str(t.ref_cell))
+			print("reference cell polygons = "+str(t.ref_cell.polygons))
+			for polyset in t.ref_cell.polygons:
+				print("polygon = "+str(polyset.polygons))
 		self.assertTrue(len(top.references)==2)
 		self.assertTrue(abs(top.area()-32153.142850436107) <= AREA_TOL)
 
