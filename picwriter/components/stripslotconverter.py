@@ -5,7 +5,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class StripSlotConverter(gdspy.Cell):
+class StripSlotConverter(tk.Component):
     """ Strip-to-Slot Side Converter Cell class (subclass of gdspy.Cell).  Adiabatically transforms a strip to a slot waveguide mode, with two sections.  Section 1 introduces a narrow waveguide alongside the input strip waveguide and gradually lowers the gap between the strip waveguide and narrow side waveguide.  Section 2 gradually converts the widths of the two waveguides until they are equal to the slot rail widths.  
 
         Args:
@@ -47,7 +47,7 @@ class StripSlotConverter(gdspy.Cell):
                  port=(0,0), 
                  direction='EAST'):
         
-        gdspy.Cell.__init__(self, tk.getCellName("StripSlotConverter"))
+        tk.Component.__init__(self, "StripSlotConverter", locals())
 
         self.portlist = {}
 
@@ -77,26 +77,26 @@ class StripSlotConverter(gdspy.Cell):
         self.end_strip_width = end_strip_width
 
         self.port = port
-        self.trace=[port, tk.translate_point(port, length1+length2, direction)]
         self.direction = direction
 
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using polygons
 
-        angle = tk.get_exact_angle(self.trace[0], self.trace[1])
-
         # Add strip waveguide taper for region 1
-        x0, y0 = self.trace[0]
+        x0, y0 = (0,0)
 
         pts = [(x0, y0 - self.wgt_strip.wg_width/2.0),
                (x0, y0 + self.wgt_strip.wg_width/2.0),
                (x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width),
                (x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0)]
         strip1 = gdspy.Polygon(pts, layer=self.wgt_strip.wg_layer, datatype = self.wgt_strip.wg_datatype)
-        strip1.rotate(angle, self.trace[0])
         
         # Add the thin side waveguide for region 1
         pts = [(x0, y0 + self.wgt_strip.wg_width/2.0 + self.d),
@@ -104,7 +104,6 @@ class StripSlotConverter(gdspy.Cell):
                (x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot + self.start_rail_width),
                (x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot)]
         thin_strip = gdspy.Polygon(pts, layer=self.wgt_strip.wg_layer, datatype=self.wgt_strip.wg_datatype)   
-        thin_strip.rotate(angle, self.trace[0])
         
         # Add the bottom rail for region 2
         pts = [(x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width),
@@ -112,7 +111,6 @@ class StripSlotConverter(gdspy.Cell):
                (x0 + self.length1 + self.length2, y0 - self.wgt_slot.wg_width/2.0),
                (x0 + self.length1 + self.length2, y0 - self.wgt_slot.wg_width/2.0 + self.wgt_slot.rail)]
         rail1 = gdspy.Polygon(pts, layer=self.wgt_strip.wg_layer, datatype = self.wgt_strip.wg_datatype)
-        rail1.rotate(angle, self.trace[0])
         
         # Add the top rail for region 2
         pts = [(x0 + self.length1, y0 - self.wgt_strip.wg_width/2.0 + self.end_strip_width + self.wgt_slot.slot + self.start_rail_width),
@@ -120,7 +118,6 @@ class StripSlotConverter(gdspy.Cell):
                (x0 + self.length1 + self.length2, y0 + self.wgt_slot.wg_width/2.0 - self.wgt_slot.rail),
                (x0 + self.length1 + self.length2, y0 + self.wgt_slot.wg_width/2.0)]
         rail2 = gdspy.Polygon(pts, layer=self.wgt_strip.wg_layer, datatype = self.wgt_strip.wg_datatype)
-        rail2.rotate(angle, self.trace[0])
         
         # Add a cladding polygon
         pts = [(x0, y0 + self.wgt_strip.clad_width + self.wgt_strip.wg_width/2.0),
@@ -128,15 +125,6 @@ class StripSlotConverter(gdspy.Cell):
                (x0 + self.length1 + self.length2, y0 - self.wgt_slot.clad_width - self.wgt_slot.wg_width/2.0),
                (x0, y0 - self.wgt_strip.clad_width - self.wgt_strip.wg_width/2.0)]
         clad = gdspy.Polygon(pts, layer=self.wgt_strip.clad_layer, datatype=self.wgt_strip.clad_datatype)
-        clad.rotate(angle, self.trace[0])
-
-        if not self.input_strip:
-            center_pt = ((self.trace[0][0]+self.trace[1][0])/2.0, (self.trace[0][1]+self.trace[1][1])/2.0)
-            strip1.rotate(np.pi, center_pt)
-            thin_strip.rotate(np.pi, center_pt)
-            rail1.rotate(np.pi, center_pt)
-            rail2.rotate(np.pi, center_pt)
-            clad.rotate(np.pi, center_pt)
 
         self.add(strip1)
         self.add(thin_strip)
@@ -147,8 +135,8 @@ class StripSlotConverter(gdspy.Cell):
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':self.trace[0], 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output"] = {'port':self.trace[1], 'direction':self.direction}
+        self.portlist["input"] = {'port':(0,0), 'direction':tk.flip_direction(self.direction)}
+        self.portlist["output"] = {'port':(self.length1 + self.length2, 0), 'direction':self.direction}
 
 if __name__ == "__main__":
     from . import *

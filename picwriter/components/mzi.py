@@ -177,8 +177,8 @@ class MachZehnder(tk.Component):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
-        self.portlist["input"] = {'port':(0,0), 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output"] = {'port':self.port_output, 'direction':self.direction}
+        self.portlist["input"] = {'port':(0,0), 'direction':'WEST'}
+        self.portlist["output"] = {'port':self.port_output, 'direction':'EAST'}
         if self.heater:
             self.portlist["heater_top_in"] = {'port': self.htr_top_in, 'direction':self.htr_top_in_dir}
             self.portlist["heater_top_out"] = {'port': self.htr_top_out, 'direction':self.htr_top_out_dir}
@@ -367,9 +367,9 @@ class MachZehnderSwitch1x2(tk.Component):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
-        self.portlist["input"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output_top"] = {'port':self.port_output_top, 'direction':self.direction}
-        self.portlist["output_bot"] = {'port':self.port_output_bot, 'direction':self.direction}
+        self.portlist["input"] = {'port':self.port, 'direction':'WEST'}
+        self.portlist["output_top"] = {'port':self.port_output_top, 'direction':'EAST'}
+        self.portlist["output_bot"] = {'port':self.port_output_bot, 'direction':'EAST'}
         if self.heater:
             self.portlist["heater_top_in"] = {'port': self.htr_top_in, 'direction':self.htr_top_in_dir}
             self.portlist["heater_top_out"] = {'port': self.htr_top_out, 'direction':self.htr_top_out_dir}
@@ -559,9 +559,9 @@ class MachZehnderSwitchDC1x2(tk.Component):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
-        self.portlist["input"] = {'port':(0,0), 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output_top"] = {'port':self.port_output_top, 'direction':self.direction}
-        self.portlist["output_bot"] = {'port':self.port_output_bot, 'direction':self.direction}
+        self.portlist["input"] = {'port':(0,0), 'direction':'WEST'}
+        self.portlist["output_top"] = {'port':self.port_output_top, 'direction':'EAST'}
+        self.portlist["output_bot"] = {'port':self.port_output_bot, 'direction':'EAST'}
         if self.heater:
             self.portlist["heater_top_in"] = {'port': self.htr_top_in, 'direction':self.htr_top_in_dir}
             self.portlist["heater_top_out"] = {'port': self.htr_top_out, 'direction':self.htr_top_out_dir}
@@ -745,10 +745,10 @@ class MachZehnderSwitchDC2x2(tk.Component):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
-        self.portlist["input_top"] = {'port':self.port_input_top, 'direction':tk.flip_direction(self.direction)}
-        self.portlist["input_bot"] = {'port':self.port_input_bot, 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output_top"] = {'port':self.port_output_top, 'direction':self.direction}
-        self.portlist["output_bot"] = {'port':self.port_output_bot, 'direction':self.direction}
+        self.portlist["input_top"] = {'port':self.port_input_top, 'direction':'WEST'}
+        self.portlist["input_bot"] = {'port':self.port_input_bot, 'direction':'WEST'}
+        self.portlist["output_top"] = {'port':self.port_output_top, 'direction':'EAST'}
+        self.portlist["output_bot"] = {'port':self.port_output_bot, 'direction':'EAST'}
         if self.heater:
             self.portlist["heater_top_in"] = {'port': self.htr_top_in, 'direction':self.htr_top_in_dir}
             self.portlist["heater_top_out"] = {'port': self.htr_top_out, 'direction':self.htr_top_out_dir}

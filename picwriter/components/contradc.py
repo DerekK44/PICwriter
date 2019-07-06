@@ -196,15 +196,15 @@ class ContraDirectionalCoupler(tk.Component):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         if self.parity==1:
-            self.portlist["input_top"] = {'port':self.portlist_input_top, 'direction':tk.flip_direction(self.direction)}
-            self.portlist["input_bot"] = {'port':self.portlist_input_bottom, 'direction':tk.flip_direction(self.direction)}
-            self.portlist["output_top"] = {'port':self.portlist_output_top, 'direction':self.direction}
-            self.portlist["output_bot"] = {'port':self.portlist_output_bottom, 'direction':self.direction}
+            self.portlist["input_top"] = {'port':self.portlist_input_top, 'direction':'WEST'}
+            self.portlist["input_bot"] = {'port':self.portlist_input_bottom, 'direction':'WEST'}
+            self.portlist["output_top"] = {'port':self.portlist_output_top, 'direction':'EAST'}
+            self.portlist["output_bot"] = {'port':self.portlist_output_bottom, 'direction':'EAST'}
         elif self.parity==-1:
-            self.portlist["input_top"] = {'port':self.portlist_input_top, 'direction':tk.flip_direction(self.direction)}
-            self.portlist["input_bot"] = {'port':self.portlist_input_bottom, 'direction':tk.flip_direction(self.direction)}
-            self.portlist["output_top"] = {'port':self.portlist_output_top, 'direction':self.direction}
-            self.portlist["output_bot"] = {'port':self.portlist_output_bottom, 'direction':self.direction}
+            self.portlist["input_top"] = {'port':self.portlist_input_top, 'direction':'WEST'}
+            self.portlist["input_bot"] = {'port':self.portlist_input_bottom, 'direction':'WEST'}
+            self.portlist["output_top"] = {'port':self.portlist_output_top, 'direction':'EAST'}
+            self.portlist["output_bot"] = {'port':self.portlist_output_bottom, 'direction':'EAST'}
 
 if __name__ == "__main__":
     from . import *

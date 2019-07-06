@@ -128,9 +128,9 @@ class MMI1x2(tk.Component):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
-        self.portlist["input"] = {'port':(0,0), 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output_top"] = {'port':self.output_port_top, 'direction':self.direction}
-        self.portlist["output_bot"] = {'port':self.output_port_bot, 'direction':self.direction}
+        self.portlist["input"] = {'port':(0,0), 'direction':'WEST'}
+        self.portlist["output_top"] = {'port':self.output_port_top, 'direction':'EAST'}
+        self.portlist["output_bot"] = {'port':self.output_port_bot, 'direction':'EAST'}
 
 if __name__ == "__main__":
     from . import *

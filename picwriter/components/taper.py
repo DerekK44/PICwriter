@@ -5,7 +5,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class Taper(gdspy.Cell):
+class Taper(tk.Component):
     """ Taper Cell class (subclass of gdspy.Cell).
 
         Args:
@@ -31,56 +31,40 @@ class Taper(gdspy.Cell):
 
     """
     def __init__(self, wgt, length, end_width, end_clad_width=None, extra_clad_length=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, tk.getCellName("Taper"))
-
+        tk.Component.__init__(self, "Taper", locals())
+        
         self.portlist = {}
 
         self.port = port
-        self.trace=[port, tk.translate_point(port, length, direction)]
         self.direction = direction
-        self.start_width = wgt.wg_width
+        
+        self.length = length
         self.end_width = end_width
         self.end_clad_width = wgt.clad_width if end_clad_width==None else end_clad_width
         self.extra_clad_length = 2*self.end_clad_width if extra_clad_length==None else extra_clad_length
-        self.resist = wgt.resist
         self.wgt = wgt
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
-        self.type_check_trace()
         self.__build_cell()
         self.__build_ports()
-
-    def type_check_trace(self):
-        trace = []
-        """ Round each trace value to the nearest 1e-6 -- prevents
-        some typechecking errors
+        
+        """ Translate & rotate the ports corresponding to this specific component object
         """
-        for t in self.trace:
-            trace.append((round(t[0], 6), round(t[1], 5)))
-        self.trace = trace
-        """ Make sure all waypoints specify 90degree angles.  This might be
-        updated in the future to allow for 45deg, or arbitrary bends.  For now,
-        though, rotations are supported via gdspy library
-        """
-        dx = abs(self.trace[1][0]-self.trace[0][0])
-        dy = abs(self.trace[1][1]-self.trace[0][1])
-        if dx>=1e-6 and dy>=1e-6:
-            raise ValueError("Warning! Both waypoints *must* specify horizontal "
-                             "or vertical tapers.")
+        self._auto_transform_()
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
-        angle = tk.get_angle(self.trace[0], self.trace[1])
+
         # Add waveguide taper
-        path = gdspy.Path(self.wgt.wg_width, self.trace[0])
-        path.segment(tk.dist(self.trace[0], self.trace[1]),
-                     direction=angle, final_width=self.end_width, **self.wg_spec)
+        path = gdspy.Path(self.wgt.wg_width, (0,0))
+        path.segment(self.length, direction=0.0, 
+                     final_width=self.end_width, **self.wg_spec)
         # Cladding for waveguide taper
-        path2 = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, self.trace[0])
-        path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=angle,
-                     final_width=2*self.end_clad_width+self.end_width, **self.clad_spec)
+        path2 = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (0,0))
+        path2.segment(self.length, direction=0.0, 
+                      final_width=2*self.end_clad_width+self.end_width, **self.clad_spec)
         path2.segment(self.extra_clad_length, **self.clad_spec)
 
         self.add(path)
@@ -89,15 +73,15 @@ class Taper(gdspy.Cell):
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':self.trace[0], 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output"] = {'port':self.trace[1], 'direction':self.direction}
+        self.portlist["input"] = {'port':(0,0), 'direction':tk.flip_direction(self.direction)}
+        self.portlist["output"] = {'port':(self.length,0), 'direction':self.direction}
 
 if __name__ == "__main__":
     from . import *
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, resist='+')
 
-    wg1=Waveguide([(0,0), (100,0)], wgt)
+    wg1=Waveguide([(0,0), (100,40)], wgt)
     tk.add(top, wg1)
 
     tp1 = Taper(wgt, 100.0, 0.3, end_clad_width=50, **wg1.portlist["input"])

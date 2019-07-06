@@ -4,7 +4,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class GratingCouplerStraight(gdspy.Cell):
+class GratingCouplerStraight(tk.Component):
     """ Straight Grating Coupler Cell class (subclass of gdspy.Cell).
 
         Args:
@@ -31,7 +31,7 @@ class GratingCouplerStraight(gdspy.Cell):
     """
     def __init__(self, wgt, port=(0,0), direction='EAST', width=20, length=50,
                  taper_length=20, period=1.0, dutycycle=0.5):
-        gdspy.Cell.__init__(self, tk.getCellName("GratingCouplerStraight"))
+        tk.Component.__init__(self, "GratingCouplerStraight", locals())
 
         self.portlist = {}
 
@@ -53,6 +53,10 @@ class GratingCouplerStraight(gdspy.Cell):
 
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
 
     def __build_cell(self):
         #Sequentially build all the geometric shapes using gdspy path functions
@@ -61,33 +65,17 @@ class GratingCouplerStraight(gdspy.Cell):
         """ Create a straight grating GratingCoupler
         """
         gap = self.period - (self.period*self.dc)
-        path = gdspy.Path(self.wgt.wg_width, self.port)
-        path.segment(self.taper_length, direction='+y',
+        path = gdspy.Path(self.wgt.wg_width, (0,0))
+        path.segment(self.taper_length, direction='+x',
                      final_width=self.width, **self.wg_spec)
-        teeth = gdspy.L1Path((self.port[0]-0.5*self.width, gap+self.taper_length+self.port[1]+0.5*(num_teeth-1+self.dc)*self.period),
-                            '+x', self.period*self.dc, [self.width], [], num_teeth, self.period, **self.wg_spec)
+        teeth = gdspy.L1Path((gap+self.taper_length+0.5*(num_teeth-1+self.dc)*self.period, -0.5*self.width),
+                            '+y', self.period*self.dc, [self.width], [], num_teeth, self.period, **self.wg_spec)
 
-        clad_path = gdspy.Path(self.wgt.wg_width + 2*self.wgt.clad_width, self.port)
-        clad_path.segment(self.taper_length, direction='+y',
+        clad_path = gdspy.Path(self.wgt.wg_width + 2*self.wgt.clad_width, (0,0))
+        clad_path.segment(self.taper_length, direction='+x',
                      final_width=self.width+2*self.wgt.clad_width, **self.clad_spec)
-        clad_path.segment(self.length, direction='+y', **self.clad_spec)
+        clad_path.segment(self.length, direction='+x', **self.clad_spec)
 
-        if self.direction=="WEST":
-            teeth.rotate(np.pi/2.0, self.port)
-            path.rotate(np.pi/2.0, self.port)
-            clad_path.rotate(np.pi/2.0, self.port)
-        elif self.direction=="SOUTH":
-            teeth.rotate(np.pi, self.port)
-            path.rotate(np.pi, self.port)
-            clad_path.rotate(np.pi, self.port)
-        elif self.direction=="EAST":
-            teeth.rotate(-np.pi/2.0, self.port)
-            path.rotate(-np.pi/2.0, self.port)
-            clad_path.rotate(-np.pi/2.0, self.port)
-        elif isinstance(self.direction, float):
-            teeth.rotate(self.direction - np.pi/2.0, self.port)
-            path.rotate(self.direction -np.pi/2.0, self.port)
-            clad_path.rotate(self.direction-np.pi/2.0, self.port)
         self.add(teeth)
         self.add(path)
         self.add(clad_path)
@@ -95,9 +83,9 @@ class GratingCouplerStraight(gdspy.Cell):
     def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["output"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
+        self.portlist["output"] = {'port':(0,0), 'direction':'WEST'}
 
-class GratingCouplerFocusing(gdspy.Cell):
+class GratingCouplerFocusing(tk.Component):
     """ Standard Focusing Grating Coupler Cell class (subclass of gdspy.Cell).
 
         Args:
@@ -129,7 +117,7 @@ class GratingCouplerFocusing(gdspy.Cell):
                     width=20, length=50, period=1.0, dutycycle=0.5,
                     wavelength=1.55, sin_theta=np.sin(np.pi * 8 / 180),
                     evaluations=99):
-        gdspy.Cell.__init__(self, tk.getCellName("GratingCouplerFocusing"))
+        tk.Component.__init__(self, "GratingCouplerFocusing", locals())
 
         self.portlist = {}
 
@@ -154,6 +142,10 @@ class GratingCouplerFocusing(gdspy.Cell):
 
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
@@ -167,10 +159,10 @@ class GratingCouplerFocusing(gdspy.Cell):
         max_points = 199
         c3 = neff**2 - self.sin_theta**2
         w = 0.5 * self.width
-        path = gdspy.Path(self.wgt.clad_width, self.port, number_of_paths=2,
+        path = gdspy.Path(self.wgt.clad_width, (0,0), number_of_paths=2,
                           distance=self.wgt.wg_width + self.wgt.clad_width)
 
-        teeth = gdspy.Path(self.period * self.dc, self.port)
+        teeth = gdspy.Path(self.period * self.dc, (0,0))
         for q in range(qmin, qmin + num_teeth):
             c1 = q * self.wavelength * self.sin_theta
             c2 = (q * self.wavelength)**2
@@ -179,35 +171,24 @@ class GratingCouplerFocusing(gdspy.Cell):
                             number_of_evaluations=self.evaluations,
                             max_points=max_points,
                             **self.wg_spec)
-            teeth.x = self.port[0]
-            teeth.y = self.port[1]
+            teeth.x = 0
+            teeth.y = 0
         teeth.polygons[0] = np.vstack(
             (teeth.polygons[0][:self.evaluations, :],
-             ([(self.port[0] + 0.5 * self.wgt.wg_width, self.port[1]),
-               (self.port[0] - 0.5 * self.wgt.wg_width, self.port[1])])))
+             ([( 0.5 * self.wgt.wg_width, 0),
+               (-0.5 * self.wgt.wg_width, 0)])))
         teeth.fracture()
 
-        clad_path = gdspy.Path(self.wgt.wg_width + 2*self.wgt.clad_width, self.port)
+        clad_path = gdspy.Path(self.wgt.wg_width + 2*self.wgt.clad_width, (0,0))
         clad_path.segment(self.focus_distance, direction='+y',
                      final_width=self.width+2*self.wgt.clad_width, **self.clad_spec)
         clad_path.segment(self.length, direction='+y', **self.clad_spec)
 
-        if self.direction=="WEST":
-            teeth.rotate(np.pi/2.0, self.port)
-            path.rotate(np.pi/2.0, self.port)
-            clad_path.rotate(np.pi/2.0, self.port)
-        if self.direction=="SOUTH":
-            teeth.rotate(np.pi, self.port)
-            path.rotate(np.pi, self.port)
-            clad_path.rotate(np.pi, self.port)
-        if self.direction=="EAST":
-            teeth.rotate(-np.pi/2.0, self.port)
-            path.rotate(-np.pi/2.0, self.port)
-            clad_path.rotate(-np.pi/2.0, self.port)
-        elif isinstance(self.direction, float):
-            teeth.rotate(self.direction - np.pi/2.0, self.port)
-            path.rotate(self.direction -np.pi/2.0, self.port)
-            clad_path.rotate(self.direction-np.pi/2.0, self.port)
+        
+        teeth.rotate(-np.pi/2.0, (0,0))
+        path.rotate(-np.pi/2.0, (0,0))
+        clad_path.rotate(-np.pi/2.0, (0,0))
+        
         self.add(teeth)
         self.add(path)
         self.add(clad_path)
@@ -215,7 +196,7 @@ class GratingCouplerFocusing(gdspy.Cell):
     def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["output"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
+        self.portlist["output"] = {'port':(0,0), 'direction':'WEST'}
 
 if __name__ == "__main__":
     from picwriter.components.waveguide import Waveguide, WaveguideTemplate

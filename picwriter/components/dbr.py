@@ -5,7 +5,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class DBR(gdspy.Cell):
+class DBR(tk.Component):
     """ Distributed Bragg Reflector Cell class (subclass of gdspy.Cell).  Tapers the input waveguide to a periodic waveguide structure with varying width (1-D photonic crystal).
 
         Args:
@@ -35,12 +35,11 @@ class DBR(gdspy.Cell):
 
     """
     def __init__(self, wgt, length, period, dc, w_phc, taper_length=20.0, fins=False, fin_size = (0.2,0.05), dbr_wgt=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, tk.getCellName("DBR"))
+        tk.Component.__init__(self, "DBR", locals())
 
         self.portlist = {}
 
         self.port = port
-        self.trace=[port, tk.translate_point(port, length+2*taper_length, direction)]
         self.direction = direction
         self.length = length
         self.taper_length = taper_length
@@ -63,35 +62,28 @@ class DBR(gdspy.Cell):
             self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
             self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
 
-        self.__type_check_trace()
-        self.__build_cell()
-        self.__build_ports()
-
-    def __type_check_trace(self):
-        trace = []
-        """ Round each trace value to the nearest 1e-6 -- prevents
-        some typechecking errors
-        """
-        for t in self.trace:
-            trace.append((round(t[0], 6), round(t[1], 5)))
-        self.trace = trace
-
         """ Make sure the photonic crystal waveguide width is smaller than the waveguide width """
         if self.w_phc > self.wgt.wg_width:
             raise ValueError("Warning! The w_phc parameter must be smaller than the waveguide template wg_width.")
+            
+        self.__build_cell()
+        self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
-        angle = tk.get_exact_angle(self.trace[0], self.trace[1])
         # Add waveguide tapers leading to DBR region
-        taper = gdspy.Path(self.wgt.wg_width, self.trace[0])
-        taper.segment(self.taper_length, direction=angle, final_width=self.w_phc, **self.wg_spec)
+        taper = gdspy.Path(self.wgt.wg_width, (0,0))
+        taper.segment(self.taper_length, direction=0.0, final_width=self.w_phc, **self.wg_spec)
         taper.segment(self.length, **self.wg_spec)
         taper.segment(self.taper_length, final_width=self.wgt.wg_width, **self.wg_spec)
         # Cladding for DBR region
-        clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, self.trace[0])
-        clad.segment(tk.dist(self.trace[0], self.trace[1]), direction=angle, **self.clad_spec)
+        clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (0,0))
+        clad.segment(self.length + 2*self.taper_length, direction=0.0, **self.clad_spec)
 
         self.add(taper)
         self.add(clad)
@@ -99,8 +91,8 @@ class DBR(gdspy.Cell):
         """ Now add the periodic PhC components """
         num_blocks = (2*self.taper_length + self.length)//self.period
         blockx = self.period*self.dc
-        startx = self.trace[0][0] + self.taper_length + self.length/2.0 -(num_blocks-1)*self.period/2.0 - blockx/2.0
-        y0 = self.trace[0][1]
+        startx = self.taper_length + self.length/2.0 -(num_blocks-1)*self.period/2.0 - blockx/2.0
+        y0 = 0
         block_list = []
         for i in range(int(num_blocks)):
             x = startx + i*self.period
@@ -109,31 +101,21 @@ class DBR(gdspy.Cell):
         """ And add the 'fins' if self.fins==True """
         if self.fins:
             num_fins = self.wgt.wg_width//(2*self.fin_size[1])
-            x0, y0 = self.trace[0][0], self.trace[0][1] - num_fins*(2*self.fin_size[1])/2.0 + self.fin_size[1]/2.0
-            xend = self.trace[0][0] + 2*self.taper_length + self.length
+            x0, y0 = 0, - num_fins*(2*self.fin_size[1])/2.0 + self.fin_size[1]/2.0
+            xend = 2*self.taper_length + self.length
             for i in range(int(num_fins)):
                 y = y0 + i*2*self.fin_size[1]
                 block_list.append(gdspy.Rectangle((x0, y), (x0+self.fin_size[0], y+self.fin_size[1]), **self.fin_spec))
                 block_list.append(gdspy.Rectangle((xend-self.fin_size[0], y), (xend, y+self.fin_size[1]), **self.fin_spec))
-
-        angle=0
-        if self.direction=="NORTH":
-            angle=np.pi/2.0
-        elif self.direction=="WEST":
-            angle=np.pi
-        elif self.direction=="SOUTH":
-            angle=-np.pi/2.0
-        elif isinstance(self.direction, float):
-            angle = self.direction
+                
         for block in block_list:
-            block.rotate(angle, self.trace[0])
             self.add(block)
 
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':self.trace[0], 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output"] = {'port':self.trace[1], 'direction':self.direction}
+        self.portlist["input"] = {'port':(0,0), 'direction':'WEST'}
+        self.portlist["output"] = {'port':(self.length + 2*self.taper_length, 0), 'direction':'EAST'}
 
 if __name__ == "__main__":
     from . import *

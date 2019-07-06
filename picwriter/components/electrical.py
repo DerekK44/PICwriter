@@ -22,6 +22,7 @@ class MetalTemplate:
     """
     def __init__(self, bend_radius=0, width=20.0, clad_width=20.0,
                  resist='+', fab='ETCH', metal_layer=11, metal_datatype=0, clad_layer=12, clad_datatype=0):
+        self.name = tk.getCellName("MetalTemplate") #Each MetalTemplate is given a unique name
         self.width = width
         self.bend_radius = bend_radius
         self.clad_width = clad_width
@@ -38,7 +39,7 @@ class MetalTemplate:
         self.clad_layer = clad_layer
         self.clad_datatype = clad_datatype
 
-class MetalRoute(gdspy.Cell):
+class MetalRoute(tk.Component):
     """ Standard MetalRoute Cell class (subclass of gdspy.Cell).
 
         Args:
@@ -56,7 +57,7 @@ class MetalRoute(gdspy.Cell):
 
     """
     def __init__(self, trace, mt):
-        gdspy.Cell.__init__(self,tk.getCellName("MetalRoute"))
+        tk.Component.__init__(self, "MetalRoute", locals())
 
         self.portlist = {}
 
@@ -188,7 +189,7 @@ class MetalRoute(gdspy.Cell):
         self.portlist["output"] = {'port':(self.trace[-1][0], self.trace[-1][1]),
                                    'direction':tk.get_direction(self.trace[-2], self.trace[-1])}
 
-class Bondpad(gdspy.Cell):
+class Bondpad(tk.Component):
     """ Standard Bondpad Cell class (subclass of gdspy.Cell).
 
         Args:
@@ -210,7 +211,7 @@ class Bondpad(gdspy.Cell):
 
     """
     def __init__(self, mt, length=150, width=100, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, tk.getCellName("Bondpad"))
+        tk.Component.__init__(self, "Bondpad", locals())
 
         self.portlist = {}
 
@@ -225,28 +226,22 @@ class Bondpad(gdspy.Cell):
 
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         w, l, c = self.width, self.length, self.mt.clad_width
-        if self.direction=="EAST":
-            self.add(gdspy.Rectangle((self.port[0], self.port[1]-w/2.0), (self.port[0]+l, self.port[1]+w/2.0), **self.spec))
-            self.add(gdspy.Rectangle((self.port[0]-c, self.port[1]-w/2.0-c), (self.port[0]+l+c, self.port[1]+w/2.0+c), **self.clad_spec))
-        elif self.direction=="NORTH":
-            self.add(gdspy.Rectangle((self.port[0]-w/2.0, self.port[1]), (self.port[0]+w/2.0, self.port[1]+l), **self.spec))
-            self.add(gdspy.Rectangle((self.port[0]-w/2.0-c, self.port[1]-c), (self.port[0]+w/2.0+c, self.port[1]+l+c), **self.clad_spec))
-        elif self.direction=="WEST":
-            self.add(gdspy.Rectangle((self.port[0], self.port[1]-w/2.0), (self.port[0]-l, self.port[1]+w/2.0), **self.spec))
-            self.add(gdspy.Rectangle((self.port[0]+c, self.port[1]-w/2.0-c), (self.port[0]-l-c, self.port[1]+w/2.0+c), **self.clad_spec))
-        elif self.direction=="SOUTH":
-            self.add(gdspy.Rectangle((self.port[0]-w/2.0, self.port[1]), (self.port[0]+w/2.0, self.port[1]-l), **self.spec))
-            self.add(gdspy.Rectangle((self.port[0]-w/2.0-c, self.port[1]+c), (self.port[0]+w/2.0+c, self.port[1]-l-c), **self.clad_spec))
+        self.add(gdspy.Rectangle((0, -w/2.0), (l, w/2.0), **self.spec))
+        self.add(gdspy.Rectangle((-c, -w/2.0-c), (l+c, w/2.0+c), **self.clad_spec))
 
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["output"] = {'port':self.port, 'direction':self.direction}
+        self.portlist["output"] = {'port':(0,0), 'direction':'EAST'}
 
 if __name__ == "__main__":
     top = gdspy.Cell("top")
@@ -260,5 +255,5 @@ if __name__ == "__main__":
     tk.add(top, bp2)
     tk.add(top, mt1)
 
-    # gdspy.LayoutViewer()
-    gdspy.write_gds('metal.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.LayoutViewer()
+#    gdspy.write_gds('metal.gds', unit=1.0e-6, precision=1.0e-9)

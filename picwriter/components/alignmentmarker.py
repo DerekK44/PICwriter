@@ -60,7 +60,7 @@ class AlignmentCross(tk.Component):
         self.add(gdspy.Rectangle((x0-self.small_cross_width/2.0, y0-self.cross_width/2.0), (x0+self.small_cross_width/2.0, y0+self.cross_width/2.0), layer=self.layer, datatype=self.datatype))
 
     def __build_ports(self):
-        self.portlist["center"] = {'port':(0,0), 'direction':self.direction}
+        self.portlist["center"] = {'port':(0,0), 'direction':'WEST'}
         
 class AlignmentTarget(tk.Component):
     """ Standard Target Cell class, used for alignment.  Set of concentric circles
@@ -104,7 +104,7 @@ class AlignmentTarget(tk.Component):
             self.add(gdspy.Round((x0,y0), 2*(i+1)*spacing, 2*(i+1)*spacing-self.ring_width, layer=self.layer, datatype=self.datatype, number_of_points=0.1))
 
     def __build_ports(self):
-        self.portlist["center"] = {'port':(0,0), 'direction':self.direction}
+        self.portlist["center"] = {'port':(0,0), 'direction':'WEST'}
 
 if __name__ == "__main__":
     from . import *

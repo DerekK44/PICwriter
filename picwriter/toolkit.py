@@ -346,7 +346,7 @@ class Component():
         for k in args.keys():
             if k not in dont_hash:
                 try:
-                    if "WaveguideTemplate" in args[k].name:
+                    if ("WaveguideTemplate" in args[k].name) or ("MetalTemplate" in args[k].name):
                         new_args.append(args[k].name) # WaveguideTemplates each have a unique name
                 except:
                     new_args.append(args[k])

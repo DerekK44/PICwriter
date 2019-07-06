@@ -136,7 +136,7 @@ class Waveguide(tk.Component):
             This allows the trace to be properly hashed, so duplicate traces can be referenced
             rather than have new cells for identical waveguides.
         """
-        return None
+        return NotImplemented
 
     def __type_check_trace(self):
         trace = []

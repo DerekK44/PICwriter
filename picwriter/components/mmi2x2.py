@@ -141,10 +141,10 @@ class MMI2x2(tk.Component):
     def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input_top"] = {'port':self.input_port_top, 'direction':tk.flip_direction(self.direction)}
-        self.portlist["input_bot"] = {'port':self.input_port_bot, 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output_top"] = {'port':self.output_port_top, 'direction':self.direction}
-        self.portlist["output_bot"] = {'port':self.output_port_bot, 'direction':self.direction}
+        self.portlist["input_top"] = {'port':self.input_port_top, 'direction':'WEST'}
+        self.portlist["input_bot"] = {'port':self.input_port_bot, 'direction':'WEST'}
+        self.portlist["output_top"] = {'port':self.output_port_top, 'direction':'EAST'}
+        self.portlist["output_bot"] = {'port':self.output_port_bot, 'direction':'EAST'}
 
 if __name__ == "__main__":
     from . import *
