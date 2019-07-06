@@ -258,9 +258,9 @@ class Spiral(tk.Component):
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
 
         self.portlist["input"] = {'port':self.portlist_input,
-                                    'direction':tk.flip_direction(self.direction)}
+                                    'direction':'WEST'}
         self.portlist["output"] = {'port':self.portlist_output,
-                                    'direction':self.direction}
+                                    'direction':'EAST'}
 
 if __name__ == "__main__":
     from picwriter.components.waveguide import WaveguideTemplate
