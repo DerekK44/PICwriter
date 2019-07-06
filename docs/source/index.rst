@@ -1,7 +1,7 @@
 PICwriter Documentation
 =======================
 
-Picwriter (Photonic-Integrated-Circuit Writer) is a free Python module, built above the gdspy module, aimed at simplifying the process of designing complex GDSII masks for photonic integrated circuits through a prebuilt library of easy-to-implement PCells (technically all sub-classes of the gdspy Cell class). Supported blocks include waveguides, straight grating couplers, focusing grating couplers, tapers, directional couplers, multi-mode interferometers (MMI's), resonators, spiral structures, and more that are coming soon!
+Picwriter (Photonic-Integrated-Circuit Writer) is a free Python module, built above the gdspy module, aimed at simplifying the process of designing complex GDSII masks for photonic integrated circuits through a prebuilt library of easy-to-implement PCells. Supported blocks include waveguides, straight grating couplers, focusing grating couplers, tapers, directional couplers, multi-mode interferometers (MMI's), resonators, spiral structures, and more that are coming soon!
 
 Features
 --------
@@ -9,8 +9,10 @@ Features
 The ultimate goal of this module is to reduce the time required to generate photonic integrated circuit mask designs, by extending the functionality of the gdspy library.
 
 * High-level specification of common building blocks for photonic-integrated circuits
-* Fabrication specific masks. Specify the photoresist type (`'+'` or `'-'`) and fabrication type (such as `'ETCH'`) and PICwriter will generate the appropriate mask files for single-layer electron-beam or photolithography.
-* All library components are subclasses of the `gdspy Cell class <http://gdspy.readthedocs.io/en/latest/library.html#cell>`_, so gdspy Cell features such as `rotation()`, `copy()`, `flatten()`, `get_bounding_box()`, etc. are all supported.
+* Easily snap photonic components together using portlist syntax and waypoint routing of waveguides and metal traces
+* PICwriter will automatically detect if you are adding a cell to the mask which is identical to one added before, so you don't have to worry about referencing existing cells.
+* Waveguide bends and curves automatically compute the number of vertices per polygon to minimize grid errors.
+* (coming soon!) simple templates for writing your own custom PCells to be used with PICwriter
 
 Contribute
 ----------
