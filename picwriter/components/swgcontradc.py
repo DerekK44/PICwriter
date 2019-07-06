@@ -6,7 +6,7 @@ import gdspy
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
-class SWGContraDirectionalCoupler(gdspy.Cell):
+class SWGContraDirectionalCoupler(tk.Component):
     """ SWG Contra-Directional Coupler Cell class (subclass of gdspy.Cell).
 
         Args:
@@ -51,7 +51,7 @@ class SWGContraDirectionalCoupler(gdspy.Cell):
                  input_bot=False, apodization_top=False, apodization_far_dist=1.0,
                  apodization_curv=None, fins=False, fin_size=(0.2, 0.05), contradc_wgt=None,
                  port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, tk.getCellName("SWGContraDirectionalCoupler"))
+        tk.Component.__init__(self, "SWGContraDirectionalCoupler", locals())
 
         self.portlist = {}
 
@@ -109,6 +109,10 @@ class SWGContraDirectionalCoupler(gdspy.Cell):
 
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
@@ -132,7 +136,7 @@ class SWGContraDirectionalCoupler(gdspy.Cell):
         elif self.parity==-1:
             shift = (angle_y_dist_top + self.gap + (self.width_top+self.width_bot)/2.0)
 
-        x01, y01 = self.port[0],self.port[1]+shift #shift to port location after rotation later
+        x01, y01 = 0,shift #shift to port location after rotation later
 
         """ Build the contra-DC from gdspy Path derivatives """
         """ First the top waveguide """
@@ -146,8 +150,8 @@ class SWGContraDirectionalCoupler(gdspy.Cell):
             return (x, y)
 
         wg_top = gdspy.Path(self.wgt.wg_width, (x01, y01))
-        wg_top.turn(self.wgt.bend_radius, -self.top_angle, number_of_points=self.wgt.get_num_points(self.top_angle), final_width=self.width_top, **self.wg_spec)
-        wg_top.turn(self.wgt.bend_radius, self.top_angle, number_of_points=self.wgt.get_num_points(self.top_angle), **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, -self.top_angle, number_of_points=self.wgt.get_num_points_wg(self.top_angle), final_width=self.width_top, **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, self.top_angle, number_of_points=self.wgt.get_num_points_wg(self.top_angle), **self.wg_spec)
         if self.apodization_top:
             wg_apod = gdspy.Path(self.width_top, (0, 0))
             wg_apod.direction='+x'
@@ -155,20 +159,20 @@ class SWGContraDirectionalCoupler(gdspy.Cell):
             wg_top.x, wg_top.y = wg_apod.x, wg_apod.y
         else:
             wg_top.segment(self.length, **self.wg_spec)
-        wg_top.turn(self.wgt.bend_radius, self.top_angle, number_of_points=self.wgt.get_num_points(self.top_angle), **self.wg_spec)
-        wg_top.turn(self.wgt.bend_radius, -self.top_angle, number_of_points=self.wgt.get_num_points(self.top_angle), final_width=self.wgt.wg_width, **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, self.top_angle, number_of_points=self.wgt.get_num_points_wg(self.top_angle), **self.wg_spec)
+        wg_top.turn(self.wgt.bend_radius, -self.top_angle, number_of_points=self.wgt.get_num_points_wg(self.top_angle), final_width=self.wgt.wg_width, **self.wg_spec)
 
         wg_top_clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (x01, y01))
-        wg_top_clad.turn(self.wgt.bend_radius, -self.top_angle, number_of_points=self.wgt.get_num_points(self.top_angle), **self.clad_spec)
-        wg_top_clad.turn(self.wgt.bend_radius, self.top_angle, number_of_points=self.wgt.get_num_points(self.top_angle), final_width=self.width_top+2*self.wgt.clad_width, **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, -self.top_angle, number_of_points=self.wgt.get_num_points_wg(self.top_angle), **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, self.top_angle, number_of_points=self.wgt.get_num_points_wg(self.top_angle), final_width=self.width_top+2*self.wgt.clad_width, **self.clad_spec)
         wg_top_clad.segment(self.length, **self.clad_spec)
-        wg_top_clad.turn(self.wgt.bend_radius, self.top_angle, number_of_points=self.wgt.get_num_points(self.top_angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
-        wg_top_clad.turn(self.wgt.bend_radius, -self.top_angle, number_of_points=self.wgt.get_num_points(self.top_angle), **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, self.top_angle, number_of_points=self.wgt.get_num_points_wg(self.top_angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_top_clad.turn(self.wgt.bend_radius, -self.top_angle, number_of_points=self.wgt.get_num_points_wg(self.top_angle), **self.clad_spec)
 
 
         """ Add the bottom waveguide
         """
-        x02, y02 = self.port[0], self.port[1] - (angle_y_dist_top + self.gap + (self.width_top+self.width_bot)/2.0) + shift
+        x02, y02 = 0, - (angle_y_dist_top + self.gap + (self.width_top+self.width_bot)/2.0) + shift
         wg_bot = gdspy.Path(self.wgt.wg_width, (x02, y02))
         if self.w_phc_bot > 1E-6:
             wg_bot.segment(angle_x_dist-self.taper_length-self.extra_swg_length, final_width=self.width_bot, **self.wg_spec)
@@ -192,8 +196,8 @@ class SWGContraDirectionalCoupler(gdspy.Cell):
         """ Now add the periodic PhC components """
         num_blocks = (self.length+2*(self.taper_length+self.extra_swg_length))//self.period
         blockx = self.period*self.dc
-        startx = self.port[0] + distx/2.0 - (num_blocks-1)*self.period/2.0 - blockx/2.0
-        y0 = self.port[1] - angle_y_dist_top - self.gap/2.0 - self.width_top/2.0 + shift
+        startx = distx/2.0 - (num_blocks-1)*self.period/2.0 - blockx/2.0
+        y0 = - angle_y_dist_top - self.gap/2.0 - self.width_top/2.0 + shift
         block_list = []
         for i in range(int(num_blocks)):
             x = startx + i*self.period
@@ -203,7 +207,7 @@ class SWGContraDirectionalCoupler(gdspy.Cell):
         """ And add the 'fins' if self.fins==True """
         if self.fins:
             num_fins = self.wgt.wg_width//(2*self.fin_size[1])
-            x0, y0 = self.port[0], self.port[1] - num_fins*(2*self.fin_size[1])/2.0 + self.fin_size[1]/2.0
+            x0, y0 = 0, - num_fins*(2*self.fin_size[1])/2.0 + self.fin_size[1]/2.0
             for i in range(int(num_fins)):
                 y = y0 + i*2*self.fin_size[1]
                 block_list.append(gdspy.Rectangle((x0, y), (x0+self.fin_size[0], y+self.fin_size[1]), **self.fin_spec))
@@ -211,61 +215,33 @@ class SWGContraDirectionalCoupler(gdspy.Cell):
                 block_list.append(gdspy.Rectangle((x0+distx-self.fin_size[0], y), (x0+distx, y+self.fin_size[1]), **self.fin_spec))
                 block_list.append(gdspy.Rectangle((x0+distx-self.fin_size[0], y-disty), (x0+distx, y-disty+self.fin_size[1]), **self.fin_spec))
 
-        if self.direction=="WEST":
-            angle = np.pi
-            self.portlist_output_straight = (self.port[0]-distx, self.port[1])
-            self.portlist_output_cross = (self.port[0]-distx, self.port[1] + disty)
-            self.portlist_input_cross = (self.port[0], self.port[1] + disty)
-        elif self.direction=="SOUTH":
-            angle = -np.pi/2.0
-            self.portlist_output_straight = (self.port[0], self.port[1]-distx)
-            self.portlist_output_cross = (self.port[0]-disty, self.port[1]-distx)
-            self.portlist_input_cross = (self.port[0]-disty, self.port[1])
-        elif self.direction=="EAST":
-            angle = 0
-            self.portlist_output_straight = (self.port[0]+distx, self.port[1])
-            self.portlist_output_cross = (self.port[0]+distx, self.port[1]-disty)
-            self.portlist_input_cross = (self.port[0], self.port[1]-disty)
-        elif self.direction=="NORTH":
-            angle = np.pi/2.0
-            self.portlist_output_straight = (self.port[0], self.port[1]+distx)
-            self.portlist_output_cross = (self.port[0]+disty, self.port[1]+distx)
-            self.portlist_input_cross = (self.port[0]+disty, self.port[1])
-        elif isinstance(self.direction, float):
-            angle = self.direction
-            self.portlist_output_straight = (self.port[0]+distx*np.cos(self.direction), self.port[1]+distx*np.sin(self.direction))
-            self.portlist_input_cross = (self.port[0]-(-disty)*np.sin(self.direction), self.port[1]+(-disty)*np.cos(self.direction))
-            self.portlist_output_cross = (self.port[0]-(-disty)*np.sin(self.direction)+distx*np.cos(self.direction), self.port[1]+(-disty)*np.cos(self.direction)+distx*np.sin(self.direction))
+        self.portlist_input_straight = (0,0)
+        self.portlist_output_straight = (distx, 0)
+        self.portlist_output_cross = (distx, -disty)
+        self.portlist_input_cross = (0, -disty)
 
-        wg_top.rotate(angle, self.port)
-        wg_bot.rotate(angle, self.port)
-        wg_top_clad.rotate(angle, self.port)
-        wg_bot_clad.rotate(angle, self.port)
         if self.w_phc_bot <= 1E-6: # Unconnected bottom SWG waveguides (2 paths)
-            wg_bot2.rotate(angle, self.port)
             self.add(wg_bot2)
         if self.apodization_top:
-            wg_apod.rotate(angle, self.port)
             self.add(wg_apod)
         self.add(wg_top)
         self.add(wg_bot)
         self.add(wg_top_clad)
         self.add(wg_bot_clad)
         for block in block_list:
-            block.rotate(angle, self.port)
             self.add(block)
 
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
         if self.parity==1:
-            self.portlist["input_top"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
+            self.portlist["input_top"] = {'port':self.portlist_input_straight, 'direction':tk.flip_direction(self.direction)}
             self.portlist["input_bot"] = {'port':self.portlist_input_cross, 'direction':tk.flip_direction(self.direction)}
             self.portlist["output_top"] = {'port':self.portlist_output_straight, 'direction':self.direction}
             self.portlist["output_bot"] = {'port':self.portlist_output_cross, 'direction':self.direction}
         elif self.parity==-1:
             self.portlist["input_top"] = {'port':self.portlist_input_cross, 'direction':tk.flip_direction(self.direction)}
-            self.portlist["input_bot"] = {'port':self.port, 'direction':tk.flip_direction(self.direction)}
+            self.portlist["input_bot"] = {'port':self.port_input_straight, 'direction':tk.flip_direction(self.direction)}
             self.portlist["output_top"] = {'port':self.portlist_output_cross, 'direction':self.direction}
             self.portlist["output_bot"] = {'port':self.portlist_output_straight, 'direction':self.direction}
 
@@ -277,7 +253,7 @@ if __name__ == "__main__":
 
     contradc_wgt = WaveguideTemplate(bend_radius=50, resist='+', wg_layer=3, wg_datatype=0)
 
-    wg1=Waveguide([(0,0), (100,0)], wgt)
+    wg1=Waveguide([(0,0), (100,30)], wgt)
     tk.add(top, wg1)
 
     cdc = SWGContraDirectionalCoupler(wgt, length=50.0, gap=0.2, period=0.5, dc=0.5, taper_length=5.0,
@@ -306,5 +282,5 @@ if __name__ == "__main__":
 #                                      **wg1.portlist["output"])
     tk.add(top, cdc)
 
-#    gdspy.LayoutViewer(cells=top)
-    gdspy.write_gds('swgcontradc.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.LayoutViewer(cells=top)
+#    gdspy.write_gds('swgcontradc.gds', unit=1.0e-6, precision=1.0e-9)

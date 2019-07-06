@@ -24,7 +24,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg2)
 		print("Waveguide area = "+str(top.area()))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-33939.41272703404) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-33939.719956968205) <= AREA_TOL)
 
 	def test_metal_creation(self):
 		top = gdspy.Cell("t-electrical")
@@ -46,7 +46,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, tp2)
 		print("Taper area = "+str(top.area()))
 		self.assertTrue(len(top.references)==3)
-		self.assertTrue(abs(top.area()-27005.706363517016) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-27005.859978484103) <= AREA_TOL)
 
 	def test_grating_coupler_creation(self):
 		top = gdspy.Cell("t3")
@@ -59,7 +59,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, gc2)
 		print("Grating coupler area = "+str(top.area()))
 		self.assertTrue(len(top.references)==3)
-		self.assertTrue(abs(top.area()-30061.488748043674) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-30061.64236301076) <= AREA_TOL)
 
 	def test_spiral_creation(self):
 		top = gdspy.Cell("t4")
@@ -76,7 +76,7 @@ class TestPICwriter(TestCase):
 
 		print("Spiral area = "+str(top.area()))
 		self.assertTrue(len(top.references)==1)
-		self.assertTrue(abs(top.area()-479997.9517151703) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-479999.4878648407) <= AREA_TOL)
 
 	def test_mmi1x2_creation(self):
 		top = gdspy.Cell("t-mmi1x2")
@@ -101,7 +101,7 @@ class TestPICwriter(TestCase):
 		print("MMI2x2 area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-9482.165964182654) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-9482.324973105131) <= AREA_TOL)
 
 	def test_ring_creation(self):
 		top = gdspy.Cell("t7")
@@ -114,7 +114,7 @@ class TestPICwriter(TestCase):
 		print("Ring area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-13133.377916248292) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-13133.710126840513) <= AREA_TOL)
 
 	def test_disk_creation(self):
 		top = gdspy.Cell("t8")
@@ -127,7 +127,7 @@ class TestPICwriter(TestCase):
 		print("Disk area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-31953.142850436103) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-31543.258086158858) <= AREA_TOL)
 
 	def test_mzi_creation(self):
 		top = gdspy.Cell("t-mzi")
@@ -144,7 +144,7 @@ class TestPICwriter(TestCase):
 		print("MZI area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==3)
-		self.assertTrue(abs(top.area()-184056.04963673785) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-184056.77190053964) <= AREA_TOL)
   		
 		mzi2 = MachZehnderSwitch1x2(wgt, MMI1x2length=50, MMI1x2width=10, MMI2x2length=100, MMI2x2width=12, angle=np.pi/6.0, MMI1x2taper_width=2.0, MMI1x2taper_length=30.0,MMI1x2wg_sep=5.0, MMI2x2taper_width=2.0, MMI2x2wg_sep=6.0, arm1=300, arm2=250, heater=False, heater_length=400, mt=None, **wg_in.portlist["output"])
 		mzi3 = MachZehnderSwitchDC1x2(wgt, MMI1x2length=50, MMI1x2width=10, MMI1x2taper_width=2.0, MMI1x2wg_sep=3, DClength=100, DCgap=0.5, arm1=500, arm2=500, heater=False, heater_length=400, mt=htr_mt, **wg_in.portlist["output"])
@@ -194,8 +194,10 @@ class TestPICwriter(TestCase):
 		tk.add(top, dc4)
 		tk.add(top, dc5)
 		tk.add(top, dc6)
+		print("DC area = "+str(top.area()))
+		print(len(top.references))
 		self.assertTrue(len(top.references)==7)
-		self.assertTrue(abs(top.area()-65614.5258016434) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-65615.44901563205) <= AREA_TOL)
 
 	def test_contradc_creation(self):
 		top = gdspy.Cell("t-contradc")
@@ -209,7 +211,7 @@ class TestPICwriter(TestCase):
 		print("Contra DC area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-4221.992567042908) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-4222.097590756624) <= AREA_TOL)
 
 	def test_stripslotconverter_creation(self):
 		top = gdspy.Cell("t-stripslotyconverter")
@@ -277,4 +279,4 @@ class TestPICwriter(TestCase):
 		print("FullCoupler area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-9346.404699396264) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-9346.514088150665) <= AREA_TOL)

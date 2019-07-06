@@ -6,11 +6,11 @@ import gdspy
 import picwriter.toolkit as tk
 
 class Disk(tk.Component):
-    """ Disk Resonator Cell class (subclass of gdspy.Cell).
+    """ Disk Resonator Cell class.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **radius** (float): Radius of the resonator
+           * **radius** (float): Radius of the disk resonator
            * **coupling_gap** (float): Distance between the bus waveguide and resonator
 
         Keyword Args:
@@ -69,22 +69,22 @@ class Disk(tk.Component):
             clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (0,0))
             clad.segment(2*self.radius, direction='+x', **self.clad_spec)
 
-            # Ring resonator
+            # Disk resonator
             if self.parity==1:
-                ring = gdspy.Round((self.radius, self.radius+self.wgt.wg_width + self.coupling_gap),
-                                    self.radius+self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
-                clad_ring = gdspy.Round((self.radius, self.radius+self.wgt.wg_width + self.coupling_gap),
-                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
+                ring = gdspy.Round((self.radius, self.radius+self.wgt.wg_width/2.0 + self.coupling_gap),
+                                    self.radius, number_of_points=self.wgt.get_num_points_curve(2*np.pi, self.radius), **self.wg_spec)
+                clad_ring = gdspy.Round((self.radius, self.radius+self.wgt.wg_width/2.0 + self.coupling_gap),
+                                         self.radius+self.wgt.clad_width, number_of_points=self.wgt.get_num_points_curve(2*np.pi, self.radius+self.wgt.clad_width), **self.clad_spec)
             elif self.parity==-1:
-                ring = gdspy.Round((self.radius, -self.radius-self.wgt.wg_width - self.coupling_gap),
-                                    self.radius+self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
-                clad_ring = gdspy.Round((self.radius, -self.radius - self.wgt.wg_width - self.coupling_gap),
-                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
+                ring = gdspy.Round((self.radius, -self.radius-self.wgt.wg_width/2.0 - self.coupling_gap),
+                                    self.radius, number_of_points=self.wgt.get_num_points_curve(2*np.pi, self.radius), **self.wg_spec)
+                clad_ring = gdspy.Round((self.radius, -self.radius - self.wgt.wg_width/2.0 - self.coupling_gap),
+                                         self.radius+self.wgt.clad_width, number_of_points=self.wgt.get_num_points_curve(2*np.pi, self.radius+self.wgt.clad_width), **self.clad_spec)
             else:
                 raise ValueError("Warning!  Parity value is not an acceptable value (must be +1 or -1).")
         elif self.wrap_angle>0:
             theta = self.wrap_angle/2.0
-            rp = self.radius + self.wgt.wg_width + self.coupling_gap
+            rp = self.radius + self.wgt.wg_width/2.0 + self.coupling_gap
             dx, dy = rp*np.sin(theta), rp - rp*np.cos(theta)
             bus_length = 2*self.radius if (4*dx < 2*self.radius) else 4*dx
 
@@ -99,32 +99,32 @@ class Disk(tk.Component):
                 xcenter =2*dx
 
             if self.parity==1:
-                path.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
-                path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(2*theta), **self.wg_spec)
-                path.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
-                clad.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
-                clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(2*theta), **self.clad_spec)
-                clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
+                path.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=2*self.wgt.get_num_points_curve(theta, rp), **self.wg_spec)
+                path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=2*self.wgt.get_num_points_curve(2*theta, rp), **self.wg_spec)
+                path.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=2*self.wgt.get_num_points_curve(theta, rp), **self.wg_spec)
+                clad.arc(rp, np.pi/2.0, np.pi/2.0 - theta, number_of_points=2*self.wgt.get_num_points_curve(theta, rp), **self.clad_spec)
+                clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0 + theta, number_of_points=2*self.wgt.get_num_points_curve(2*theta, rp), **self.clad_spec)
+                clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0, number_of_points=2*self.wgt.get_num_points_curve(theta, rp), **self.clad_spec)
 
                 # Make the disk resonator
-                ring = gdspy.Round((xcenter, self.radius+self.wgt.wg_width + self.coupling_gap - 2*dy),
-                                    self.radius+self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
-                clad_ring = gdspy.Round((xcenter, self.radius+self.wgt.wg_width + self.coupling_gap - 2*dy),
-                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
+                ring = gdspy.Round((xcenter, self.radius+self.wgt.wg_width/2.0 + self.coupling_gap - 2*dy),
+                                    self.radius, number_of_points=self.wgt.get_num_points_curve(2*np.pi, self.radius), **self.wg_spec)
+                clad_ring = gdspy.Round((xcenter, self.radius+self.wgt.wg_width/2.0 + self.coupling_gap - 2*dy),
+                                         self.radius+self.wgt.clad_width, number_of_points=self.wgt.get_num_points_curve(2*np.pi, self.radius+self.wgt.clad_width), **self.clad_spec)
 
             elif self.parity==-1:
-                path.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
-                path.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(2*theta), **self.wg_spec)
-                path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=self.wgt.get_num_points(theta), **self.wg_spec)
-                clad.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
-                clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=self.wgt.get_num_points(2*theta), **self.clad_spec)
-                clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=self.wgt.get_num_points(theta), **self.clad_spec)
+                path.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=2*self.wgt.get_num_points_curve(theta, rp), **self.wg_spec)
+                path.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=2*self.wgt.get_num_points_curve(2*theta, rp), **self.wg_spec)
+                path.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=2*self.wgt.get_num_points_curve(theta, rp), **self.wg_spec)
+                clad.arc(rp, -np.pi/2.0, -np.pi/2.0 + theta, number_of_points=2*self.wgt.get_num_points_curve(theta, rp), **self.clad_spec)
+                clad.arc(rp, np.pi/2.0 + theta, np.pi/2.0 - theta, number_of_points=2*self.wgt.get_num_points_curve(2*theta, rp), **self.clad_spec)
+                clad.arc(rp, -np.pi/2.0 - theta, -np.pi/2.0, number_of_points=2*self.wgt.get_num_points_curve(theta, rp), **self.clad_spec)
 
                 # Make the disk resonator
-                ring = gdspy.Round((xcenter, -self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
-                                    self.radius+self.wgt.wg_width/2.0, number_of_points=self.wgt.get_num_points(2*np.pi), **self.wg_spec)
-                clad_ring = gdspy.Round((xcenter, -self.radius-self.wgt.wg_width - self.coupling_gap + 2*dy),
-                                         self.radius+self.wgt.wg_width/2.0+self.wgt.clad_width, number_of_points=self.wgt.get_num_points(2*np.pi), **self.clad_spec)
+                ring = gdspy.Round((xcenter, -self.radius-self.wgt.wg_width/2.0 - self.coupling_gap + 2*dy),
+                                    self.radius, number_of_points=self.wgt.get_num_points_curve(2*np.pi, self.radius), **self.wg_spec)
+                clad_ring = gdspy.Round((xcenter, -self.radius-self.wgt.wg_width/2.0 - self.coupling_gap + 2*dy),
+                                         self.radius+self.wgt.clad_width, number_of_points=self.wgt.get_num_points_curve(2*np.pi, self.radius+self.wgt.clad_width), **self.clad_spec)
 
 
             if 4*dx < bus_length:

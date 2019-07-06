@@ -80,33 +80,33 @@ class MMI2x2(tk.Component):
         """ Waveguide paths """
         # Top input
         path1 = gdspy.Path(self.wgt.wg_width, (0,0))
-        path1.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.wg_spec)
-        path1.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.taper_width, **self.wg_spec)
+        path1.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.wg_spec)
+        path1.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.taper_width, **self.wg_spec)
         # Bottom input
         path2 = gdspy.Path(self.wgt.wg_width, (0, -self.wg_sep-2*angle_y_dist))
-        path2.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.wg_spec)
-        path2.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.taper_width, **self.wg_spec)
+        path2.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.wg_spec)
+        path2.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.taper_width, **self.wg_spec)
         # MMI body
         path3 = gdspy.Path(self.width, (angle_x_dist, -self.wg_sep/2.0-angle_y_dist))
         path3.segment(self.length, direction='+x', **self.wg_spec)
         # Top output
         path4 = gdspy.Path(self.taper_width, (path1.x+self.length, path1.y))
-        path4.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width, **self.wg_spec)
-        path4.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.wg_spec)
+        path4.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width, **self.wg_spec)
+        path4.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.wg_spec)
         # Bottom output
         path5 = gdspy.Path(self.taper_width, (path2.x+self.length, path2.y))
-        path5.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width, **self.wg_spec)
-        path5.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.wg_spec)
+        path5.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width, **self.wg_spec)
+        path5.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.wg_spec)
 
         """ Now, generate the cladding paths """
         # Top input
         clad_path1 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, (0,0))
-        clad_path1.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.clad_spec)
-        clad_path1.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.taper_width+2*self.wgt.clad_width, **self.clad_spec)
+        clad_path1.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.clad_spec)
+        clad_path1.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.taper_width+2*self.wgt.clad_width, **self.clad_spec)
         # Bottom input
         clad_path2 = gdspy.Path(self.wgt.wg_width+2*self.wgt.clad_width, (0, -self.wg_sep-2*angle_y_dist))
-        clad_path2.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.clad_spec)
-        clad_path2.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.taper_width+2*self.wgt.clad_width, **self.clad_spec)
+        clad_path2.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.clad_spec)
+        clad_path2.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.taper_width+2*self.wgt.clad_width, **self.clad_spec)
         # MMI body
         c_start_width = 2*self.wgt.clad_width + 2*self.taper_width +self.wg_sep
         clad_path3 = gdspy.Path(c_start_width, (angle_x_dist-self.wgt.clad_width, -self.wg_sep/2.0-angle_y_dist))
@@ -115,12 +115,12 @@ class MMI2x2(tk.Component):
         clad_path3.segment(self.wgt.clad_width, final_width=c_start_width, direction='+x', **self.clad_spec)
         # Top output
         clad_path4 = gdspy.Path(self.taper_width+2*self.wgt.clad_width, (clad_path1.x+self.length, clad_path1.y))
-        clad_path4.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
-        clad_path4.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.clad_spec)
+        clad_path4.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        clad_path4.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.clad_spec)
         # Bottom output
         clad_path5 = gdspy.Path(self.taper_width+2*self.wgt.clad_width, (clad_path2.x+self.length, clad_path2.y))
-        clad_path5.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
-        clad_path5.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points(self.angle), **self.clad_spec)
+        clad_path5.turn(self.wgt.bend_radius, -self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        clad_path5.turn(self.wgt.bend_radius, self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.clad_spec)
 
         self.input_port_top = (0.0, 0.0)
         self.input_port_bot = (0.0, -self.wg_sep-2*angle_y_dist)

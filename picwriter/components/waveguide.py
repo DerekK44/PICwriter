@@ -85,9 +85,14 @@ class WaveguideTemplate:
             bend_path.arc(self.bend_radius, 0, self.period*self.duty_cycle/self.bend_radius, layer=self.wg_layer, datatype=self.wg_datatype)
             self.bend_period_cell.add(bend_path)
             
-    def get_num_points(self, angle):
+    def get_num_points_wg(self, angle):
         # This is determined from Eq 1 and 2 in "Design and simulation of silicon photonic schematics and layouts" by Chrostowski et al.
-        return int(np.ceil(abs(angle * 1.0/np.arccos(2*(1-(0.5*self.grid/self.bend_radius))**2 - 1))))
+        # Factor of 2 because there are 2 sides of the path
+        return 2*int(np.ceil(abs(angle * 1.0/np.arccos(2*(1-(0.5*self.grid/self.bend_radius))**2 - 1))))
+        
+    def get_num_points_curve(self, angle, radius):
+        # This is determined from Eq 1 and 2 in "Design and simulation of silicon photonic schematics and layouts" by Chrostowski et al.
+        return int(np.ceil(abs(angle * 1.0/np.arccos(2*(1-(0.5*self.grid/radius))**2 - 1))))
             
 
 class Waveguide(tk.Component):
@@ -346,7 +351,7 @@ class Waveguide(tk.Component):
                     # The following makes sure the turn-by angle is *always* between -pi and +pi
                     turnby = tk.normalize_angle(next_angle - start_angle)
 
-                    path.turn(br, turnby, number_of_points=self.wgt.get_num_points(turnby), **self.wg_spec)
+                    path.turn(br, turnby, number_of_points=self.wgt.get_num_points_wg(turnby), **self.wg_spec)
                     prev_dl = dl
 
                 path.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
@@ -379,7 +384,7 @@ class Waveguide(tk.Component):
     
                     turnby = tk.normalize_angle(next_angle - start_angle)
     
-                    path2.turn(br, turnby, number_of_points=self.wgt.get_num_points(turnby), **cur_spec)
+                    path2.turn(br, turnby, number_of_points=self.wgt.get_num_points_wg(turnby), **cur_spec)
                     prev_dl = dl
     
                 path2.segment(tk.dist(self.trace[-2], self.trace[-1])-prev_dl,
