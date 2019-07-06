@@ -345,7 +345,11 @@ class Component():
         new_args = []
         for k in args.keys():
             if k not in dont_hash:
-                new_args.append(args[k])
+                try:
+                    if "WaveguideTemplate" in args[k].name:
+                        new_args.append(args[k].name) # WaveguideTemplates each have a unique name
+                except:
+                    new_args.append(args[k])
 
         global CURRENT_CELLS
         properties = self.name_prefix+''.join([str(p) for p in new_args])

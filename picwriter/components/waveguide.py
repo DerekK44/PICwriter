@@ -31,6 +31,7 @@ class WaveguideTemplate:
                  wg_width=2.0, clad_width=10.0, grid=0.001,
                  resist='+', fab='ETCH', slot=0.1, period=0.1, duty_cycle=0.5,
                  wg_layer=1, wg_datatype=0, clad_layer=2, clad_datatype=0):
+        self.name = tk.getCellName("WaveguideTemplate") #Each WaveguideTemplate is given a unique name
         
         if waveguide_stack==None:
             self.waveguide_stack = [[wg_width, (wg_layer,wg_datatype)], 
