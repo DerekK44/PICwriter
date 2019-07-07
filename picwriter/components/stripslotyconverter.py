@@ -5,7 +5,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
-class StripSlotYConverter(gdspy.Cell):
+class StripSlotYConverter(tk.Component):
     """ Strip-to-Slot Y Converter Cell class (subclass of gdspy.Cell).  For more information on this specific type of strip to slot mode converter, please see the original paper at https://doi.org/10.1364/OL.34.001498.
 
         Args:
@@ -35,7 +35,7 @@ class StripSlotYConverter(gdspy.Cell):
 
     """
     def __init__(self, wgt_input, wgt_output, length, d, end_strip_width=0, end_slot_width=0, input_strip=None, port=(0,0), direction='EAST'):
-        gdspy.Cell.__init__(self, tk.getCellName("StripSlotYConverter"))
+        tk.Component.__init__(self, "StripSlotYConverter", locals())
 
         self.portlist = {}
 
@@ -63,33 +63,33 @@ class StripSlotYConverter(gdspy.Cell):
         self.end_slot_width = end_slot_width
 
         self.port = port
-        self.trace=[port, tk.translate_point(port, length, direction)]
         self.direction = direction
 
         self.__build_cell()
         self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
 
-        angle = tk.get_exact_angle(self.trace[0], self.trace[1])
-        angle_opp = tk.get_exact_angle(self.trace[1], self.trace[0])
-
         # Add strip waveguide taper
-        path_strip = gdspy.Path(self.wgt_strip.wg_width, self.trace[0])
-        path_strip.segment(self.length, final_width=self.end_strip_width, direction=angle, **self.wg_spec)
+        path_strip = gdspy.Path(self.wgt_strip.wg_width, (0,0))
+        path_strip.segment(self.length, final_width=self.end_strip_width, direction=0, **self.wg_spec)
 
         # Add slot waveguide taper
-        path_slot = gdspy.Path(self.wgt_slot.rail, self.trace[1], number_of_paths=2, distance=self.wgt_slot.rail_dist)
-        path_slot.segment(self.length, final_width=self.end_slot_width, final_distance=(self.wgt_strip.wg_width+2*self.d+self.end_slot_width), direction=angle_opp, **self.wg_spec)
+        path_slot = gdspy.Path(self.wgt_slot.rail, (self.length, 0), number_of_paths=2, distance=self.wgt_slot.rail_dist)
+        path_slot.segment(self.length, final_width=self.end_slot_width, final_distance=(self.wgt_strip.wg_width+2*self.d+self.end_slot_width), direction=np.pi, **self.wg_spec)
 
         # Cladding for waveguide taper
-        path_clad = gdspy.Path(2*self.wgt_strip.clad_width+self.wgt_strip.wg_width, self.trace[0])
-        path_clad.segment(self.length, final_width=2*self.wgt_slot.clad_width+self.wgt_slot.wg_width, direction=angle, **self.clad_spec)
+        path_clad = gdspy.Path(2*self.wgt_strip.clad_width+self.wgt_strip.wg_width, (0,0))
+        path_clad.segment(self.length, final_width=2*self.wgt_slot.clad_width+self.wgt_slot.wg_width, direction=0, **self.clad_spec)
 
         if not self.input_strip:
-            center_pt = ((self.trace[0][0]+self.trace[1][0])/2.0, (self.trace[0][1]+self.trace[1][1])/2.0)
+            center_pt = (self.length/2.0, 0)
             path_strip.rotate(np.pi, center_pt)
             path_slot.rotate(np.pi, center_pt)
             path_clad.rotate(np.pi, center_pt)
@@ -101,14 +101,14 @@ class StripSlotYConverter(gdspy.Cell):
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':self.trace[0], 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output"] = {'port':self.trace[1], 'direction':self.direction}
+        self.portlist["input"] = {'port':(0,0), 'direction':'WEST'}
+        self.portlist["output"] = {'port':(self.length, 0), 'direction':'EAST'}
 
 if __name__ == "__main__":
     from . import *
     top = gdspy.Cell("top")
-    wgt_slot = WaveguideTemplate(bend_radius=50, wg_type='strip', wg_width=0.7)
-    wgt_strip = WaveguideTemplate(bend_radius=50, wg_type='slot', wg_width=0.7, slot=0.2)
+    wgt_strip = WaveguideTemplate(bend_radius=50, wg_type='strip', wg_width=0.7)
+    wgt_slot = WaveguideTemplate(bend_radius=50, wg_type='slot', wg_width=0.7, slot=0.2)
 
     wg1=Waveguide([(0,0), (100,100)], wgt_strip)
     tk.add(top, wg1)

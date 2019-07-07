@@ -162,4 +162,4 @@ if __name__ == "__main__":
     tk.add(top, wg2)
 
     gdspy.LayoutViewer(cells=top)
-    gdspy.write_gds('StripSlotConverter.gds', unit=1.0e-6, precision=1.0e-9)
+#    gdspy.write_gds('StripSlotConverter.gds', unit=1.0e-6, precision=1.0e-9)

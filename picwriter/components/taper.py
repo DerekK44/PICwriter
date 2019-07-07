@@ -73,8 +73,8 @@ class Taper(tk.Component):
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':(0,0), 'direction':tk.flip_direction(self.direction)}
-        self.portlist["output"] = {'port':(self.length,0), 'direction':self.direction}
+        self.portlist["input"] = {'port':(0,0), 'direction':'WEST'}
+        self.portlist["output"] = {'port':(self.length,0), 'direction':'EAST'}
 
 if __name__ == "__main__":
     from . import *
