@@ -1,6 +1,14 @@
 Grating Couplers
 ++++++++++++++++
 
+Grating Couplers
+-------------------------
+
+.. automodule:: picwriter.components
+   :members: GratingCoupler
+   
+.. image:: imgs/gratingcoupler.png
+
 Straight Grating Couplers
 -------------------------
 
