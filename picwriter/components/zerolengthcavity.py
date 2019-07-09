@@ -7,7 +7,7 @@ import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
 class ZeroLengthCavity(tk.Component):
-    """ Zero-Length Cavity Cell class (subclass of gdspy.Cell).
+    """ Zero-Length Cavity Cell class.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

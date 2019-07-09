@@ -7,7 +7,7 @@ import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
 class SWGContraDirectionalCoupler(tk.Component):
-    """ SWG Contra-Directional Coupler Cell class (subclass of gdspy.Cell).
+    """ SWG Contra-Directional Coupler Cell class.
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object

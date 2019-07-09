@@ -6,7 +6,7 @@ import gdspy
 import picwriter.toolkit as tk
 
 class StripSlotConverter(tk.Component):
-    """ Strip-to-Slot Side Converter Cell class (subclass of gdspy.Cell).  Adiabatically transforms a strip to a slot waveguide mode, with two sections.  Section 1 introduces a narrow waveguide alongside the input strip waveguide and gradually lowers the gap between the strip waveguide and narrow side waveguide.  Section 2 gradually converts the widths of the two waveguides until they are equal to the slot rail widths.  
+    """ Strip-to-Slot Side Converter Cell class.  Adiabatically transforms a strip to a slot waveguide mode, with two sections.  Section 1 introduces a narrow waveguide alongside the input strip waveguide and gradually lowers the gap between the strip waveguide and narrow side waveguide.  Section 2 gradually converts the widths of the two waveguides until they are equal to the slot rail widths.  
 
         Args:
            * **wgt_input** (WaveguideTemplate):  WaveguideTemplate object for the input waveguide (should be either of type `strip` or `slot`).

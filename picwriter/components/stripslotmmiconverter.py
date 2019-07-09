@@ -6,7 +6,7 @@ import gdspy
 import picwriter.toolkit as tk
 
 class StripSlotMMIConverter(tk.Component):
-    """ Strip-to-Slot MMI Converter Cell class (subclass of gdspy.Cell).  For more information on this specific type of strip to slot mode converter, please see the original papers at https://doi.org/10.1364/OL.39.005665 and https://doi.org/10.1364/OE.24.007347.
+    """ Strip-to-Slot MMI Converter Cell class.  For more information on this specific type of strip to slot mode converter, please see the original papers at https://doi.org/10.1364/OL.39.005665 and https://doi.org/10.1364/OE.24.007347.
 
         Args:
            * **wgt_input** (WaveguideTemplate):  WaveguideTemplate object for the input waveguide (should be either of type `strip` or `slot`).

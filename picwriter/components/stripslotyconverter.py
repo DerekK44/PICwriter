@@ -6,7 +6,7 @@ import gdspy
 import picwriter.toolkit as tk
 
 class StripSlotYConverter(tk.Component):
-    """ Strip-to-Slot Y Converter Cell class (subclass of gdspy.Cell).  For more information on this specific type of strip to slot mode converter, please see the original paper at https://doi.org/10.1364/OL.34.001498.
+    """ Strip-to-Slot Y Converter Cell class.  For more information on this specific type of strip to slot mode converter, please see the original paper at https://doi.org/10.1364/OL.34.001498.
 
         Args:
            * **wgt_input** (WaveguideTemplate):  WaveguideTemplate object for the input waveguide (should be either of type `strip` or `slot`).

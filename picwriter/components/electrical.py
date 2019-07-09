@@ -40,7 +40,7 @@ class MetalTemplate:
         self.clad_datatype = clad_datatype
 
 class MetalRoute(tk.Component):
-    """ Standard MetalRoute Cell class (subclass of gdspy.Cell).
+    """ Standard MetalRoute Cell class.
 
         Args:
            * **trace** (list):  List of coordinates used to generate the route (such as '[(x1,y1), (x2,y2), ...]').  For now, all trace points must specify 90 degree turns.
@@ -190,7 +190,7 @@ class MetalRoute(tk.Component):
                                    'direction':tk.get_direction(self.trace[-2], self.trace[-1])}
 
 class Bondpad(tk.Component):
-    """ Standard Bondpad Cell class (subclass of gdspy.Cell).
+    """ Standard Bondpad Cell class.
 
         Args:
            * **mt** (MetalTemplate):  WaveguideTemplate object

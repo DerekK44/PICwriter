@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from .waveguide import WaveguideTemplate, Waveguide
 from .electrical import MetalTemplate, MetalRoute, Bondpad
 from .taper import Taper
-from .gratingcoupler import GratingCouplerStraight, GratingCouplerFocusing
+from .gratingcoupler import GratingCoupler, GratingCouplerStraight, GratingCouplerFocusing
 from .spiral import Spiral
 from .mmi1x2 import MMI1x2
 from .mmi2x2 import MMI2x2

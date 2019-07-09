@@ -55,11 +55,13 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg1)
 		gc1 = GratingCouplerStraight(wgt, width=20, length=50, taper_length=20, period=1.0, dutycycle=0.7, **wg1.portlist["input"])
 		tk.add(top, gc1)
-		gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=50, period=1.0, dutycycle=0.7, **wg1.portlist["output"])
+		gc2 = GratingCouplerFocusing(wgt, focus_distance=20.0, width=20, length=50, period=1.0, dutycycle=0.7, port=(500,600), direction="NORTH")
 		tk.add(top, gc2)
+		gc3 = GratingCoupler(wgt, theta=np.pi/5.0, length=40.0, taper_length=20.0, period=1.0, dutycycle=0.6, ridge=True, **wg1.portlist["output"])
+		tk.add(top, gc3)
 		print("Grating coupler area = "+str(top.area()))
-		self.assertTrue(len(top.references)==3)
-		self.assertTrue(abs(top.area()-30061.64236301076) <= AREA_TOL)
+		self.assertTrue(len(top.references)==4)
+		self.assertTrue(abs(top.area()-32705.633256135465) <= AREA_TOL)
 
 	def test_spiral_creation(self):
 		top = gdspy.Cell("t4")
