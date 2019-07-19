@@ -287,7 +287,130 @@ def normalize_angle(angle):
     if angle > np.pi:
         angle -= 2*np.pi
     return angle
+    
+def get_curve_length(func, start, end, grid=0.001):
+    """  Returns the length (in microns) of a curve defined by the function `func` on the interval [start, end]
 
+        Args:
+           * **func** (function):  Function that takes a single (floating point) argument, and returns a (x,y) tuple.
+           * **start** (float):  Starting value (argument passed to `func`).
+           * **end** (float):  Ending value (argument passed to `func`).
+           
+        Keyword Args:
+           * **grid** (float):  Grid resolution used to determine when curve length has converged.  Defaults to 0.001.
+
+        Returns:
+           float  Length
+
+    """
+    def get_cur_length(pt_list):
+        # list of tuples [(x1,y1), (x2,y2), ...]
+        length=0
+        for i in range(len(pt_list)-1):
+            pt1, pt2 = pt_list[i], pt_list[i+1]
+            length += np.sqrt((pt2[1]-pt1[1])**2 + (pt2[0]-pt1[0])**2)
+        return length
+    
+    num_pts = 2 # start with 2 points
+    error = 2*grid  #start high
+    pts = [func(i) for i in np.linspace(start, end, num_pts)]
+    prev_length = get_cur_length(pts)
+    
+    while error > grid: #Don't exit loop until length has converged
+        print("num_pts = "+str(num_pts))
+        print("prev_length = "+str(prev_length))
+        num_pts = num_pts*2 # Increase pt resolution exponentially
+        pts = [func(i) for i in np.linspace(start, end, num_pts)]
+        cur_length = get_cur_length(pts)
+        error = abs(cur_length - prev_length)
+        prev_length = cur_length
+       
+    print("num_pts = "+str(num_pts))
+    print("Final length! = "+str(prev_length))
+    return cur_length
+    
+def build_waveguide_polygon(func, wg_width, start_direction, end_direction, start_val=0, end_val=1, grid=0.001):
+    """
+        Args:
+           * **func** (function):  Function that takes a single (floating point) argument, and returns a (x,y) tuple.
+           * **wg_width** (float):  Waveguide width
+           * **num_pts** (int):  Number of points that make up the waveguide path
+           * **start_direction** (float):  Starting direction of the path, in *radians*.
+           * **end_direction** (float):  End direction of the path, in *radians*.
+           
+        Keyword Args:
+           * **start_val** (float):  Starting value (argument passed to `func`).  Defaults to 0.
+           * **end_val** (float):  Ending value (argument passed to `func`).  Defaults to 1.
+           * **grid** (float): Grid resolution used to determine when curve length has converged.  Guarantees that polygon formed by the points results in no more than a grid/2.0 error from the true position.  Defaults to 0.001
+
+        Returns:
+           Two lists, one for each edge of the waveguide.
+    
+    """
+    def get_path_points(func, wg_width, num_pts, start_direction, end_direction, start_val=0, end_val=1):
+        poly_list1, poly_list2 = [], []
+
+        center_pts = [func(i) for i in np.linspace(start_val, end_val, num_pts)]
+        
+        # Add the first points
+        angle = (start_direction + np.pi/2.0)%(2*np.pi)
+        poly_list1.append((center_pts[0][0] + (wg_width/2.0)*np.cos(angle), center_pts[0][1] + (wg_width/2.0)*np.sin(angle)))
+        angle = (start_direction - np.pi/2.0)%(2*np.pi)
+        poly_list2.append((center_pts[0][0] + (wg_width/2.0)*np.cos(angle), center_pts[0][1] + (wg_width/2.0)*np.sin(angle)))
+        
+        for i in range(len(center_pts)-2): #compute the derivative for the points (except first & last points)
+            prev_pt, cur_pt, next_pt = center_pts[i], center_pts[i+1], center_pts[i+2]
+            d1, d2 = np.arctan2((cur_pt[1]-prev_pt[1]), (cur_pt[0]-prev_pt[0]))%(2*np.pi), np.arctan2((next_pt[1]-cur_pt[1]), (next_pt[0]-cur_pt[0]))%(2*np.pi)
+            
+            
+            angle = ((d1+d2)/2.0 + np.pi/2.0)%(2*np.pi)
+            poly_list1.append((cur_pt[0] + (wg_width/2.0)*np.cos(angle), cur_pt[1] + (wg_width/2.0)*np.sin(angle)))
+            angle = ((d1+d2)/2.0 - np.pi/2.0)%(2*np.pi)
+            poly_list2.append((cur_pt[0] + (wg_width/2.0)*np.cos(angle), cur_pt[1] + (wg_width/2.0)*np.sin(angle)))
+            
+        # Now add the final points
+        angle = (end_direction + np.pi + np.pi/2.0)%(2*np.pi) # Add an extra pi because end_direction points in the opposite way by convention (points 'into' the path)
+        poly_list1.append((center_pts[-1][0] + (wg_width/2.0)*np.cos(angle), center_pts[-1][1] + (wg_width/2.0)*np.sin(angle)))
+        angle = (end_direction + np.pi - np.pi/2.0)%(2*np.pi)
+        poly_list2.append((center_pts[-1][0] + (wg_width/2.0)*np.cos(angle), center_pts[-1][1] + (wg_width/2.0)*np.sin(angle)))
+        
+        return (poly_list1, poly_list2)
+
+    def check_path(path, grid):
+        """ Determines if a path has sufficiently low grid error (and if so, returns True, else False).
+        Does this by iterating through the points, and computing the area of the triangle formed by any
+        3 consecutive points on path.  If this area, divided by the length between the first & last point, is greater than 0.5*grid,
+        then the the error is too large!
+        """
+        for i in range(len(path)-2):
+            pt1, pt2, pt3 = path[i], path[i+1], path[i+2]
+            area = abs((pt1[0]*(pt2[1]-pt3[1]) + pt2[0]*(pt3[1]-pt1[1]) + pt3[0]*(pt1[1]-pt2[1]))/2.0)
+            length = np.sqrt((pt3[1] - pt1[1])**2 + (pt3[0] - pt1[0])**2)
+            if area/length > 0.5*grid:
+                return False
+        # If none of the segments give a large grid error, return True
+        return True
+        
+    num_pts = 16 # start with 4, increase by a factor of 2 each time
+    isPathOK = False
+    firstIter = True
+    cur_path1, cur_path2 = [], []
+    
+    while isPathOK==False:
+        if not firstIter: # do this all the other times (except first time)
+            prev_path1, prev_path2 = cur_path1, cur_path2
+        
+        cur_path1, cur_path2 = get_path_points(func, wg_width, num_pts, start_direction, end_direction, start_val=start_val, end_val=end_val)
+        if firstIter: # do this once (initialize prev_paths)
+            prev_path1, prev_path2 = cur_path1, cur_path2
+            firstIter=False
+            
+        isPathOK = check_path(cur_path1, grid) and check_path(cur_path2, grid) # returns False if either is False
+        num_pts = num_pts*2
+        
+    # Now the two paths are of sufficiently high resolution.  Return the sum list of points.
+    path_points = prev_path1 + prev_path2[::-1]
+    return path_points
     
 class Component():
     """ Super class for all objects created in PICwriter.  This class handles rotations, naming, etc. for all components,
