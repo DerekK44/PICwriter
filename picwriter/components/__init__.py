@@ -22,3 +22,4 @@ from .stripslotmmiconverter import StripSlotMMIConverter
 from .adiabaticcoupler import AdiabaticCoupler
 from .fullcoupler import FullCoupler
 from .zerolengthcavity import ZeroLengthCavity
+from .sbend import SBend

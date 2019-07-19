@@ -44,3 +44,11 @@ Example usage to generate a waveguide with waypoints::
 	wg = Waveguide(waypoints, wgt)
 	tk.add(top, wg)
 	gdspy.LayoutViewer()
+
+Bends
+------------
+
+.. automodule:: picwriter.components
+   :members: SBend
+   
+.. image:: imgs/sbend.png

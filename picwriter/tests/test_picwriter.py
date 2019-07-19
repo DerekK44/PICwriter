@@ -282,3 +282,21 @@ class TestPICwriter(TestCase):
 		print(len(top.references))
 		self.assertTrue(len(top.references)==2)
 		self.assertTrue(abs(top.area()-9346.514088150665) <= AREA_TOL)
+  
+	def test_sbend_creation(self):
+		top = gdspy.Cell("t-sbend")
+		wgt = WaveguideTemplate(wg_width=2.0, bend_radius=100, resist='+')
+		wg1=Waveguide([(0,0), (100,0)], wgt)
+		tk.add(top, wg1)
+  
+		sb1 = SBend(wgt, 100.0, 200.0, **wg1.portlist["output"])
+		tk.add(top, sb1)
+  
+		x,y = sb1.portlist["output"]["port"]
+		wg2 = Waveguide([(x,y), (x+100, y)], wgt)
+		tk.add(top, wg2)
+
+		print("SBend area = "+str(top.area()))
+		print(len(top.references))
+		self.assertTrue(len(top.references)==3)
+		self.assertTrue(abs(top.area()-10271.21589480641) <= AREA_TOL)
