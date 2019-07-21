@@ -60,7 +60,7 @@ class SBend(tk.Component):
 
         # Add waveguide s-bend        
         wg = gdspy.Path(self.wgt.wg_width, (0,0))
-        wg.parametric(self.__sine_function, tolerance=self.wgt.grid/2.0, max_points=1000, **self.wg_spec)
+        wg.parametric(self.__sine_function, tolerance=self.wgt.grid/2.0, max_points=199, **self.wg_spec)
         self.add(wg)
         
         # Add cladding s-bend
@@ -69,7 +69,7 @@ class SBend(tk.Component):
             cur_spec = {'layer': self.wgt.waveguide_stack[i+1][1][0], 'datatype': self.wgt.waveguide_stack[i+1][1][1]}
             
             clad = gdspy.Path(cur_width, (0,0))
-            clad.parametric(self.__sine_function, tolerance=self.wgt.grid/2.0, max_points=1000, **cur_spec)
+            clad.parametric(self.__sine_function, tolerance=self.wgt.grid/2.0, max_points=199, **cur_spec)
             self.add(clad)
 
     def __build_ports(self):
