@@ -16,7 +16,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="sbend.svg">
+   sodipodi:docname="sbend.svg"
+   inkscape:export-filename="C:\Users\dkita\Dropbox (MIT)\Research\PICwriter\picwriter-master\docs\source\components\imgs\sbend.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4">
     <marker
@@ -116,14 +119,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.66161843"
-     inkscape:cx="589.2701"
+     inkscape:cx="586.24721"
      inkscape:cy="336.63386"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      units="px"
-     inkscape:window-width="1536"
-     inkscape:window-height="801"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1" />

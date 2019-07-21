@@ -58,13 +58,19 @@ class SBend(tk.Component):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
 
-        # Add waveguide s-bend
-        wg_pts = tk.build_waveguide_polygon(self.__sine_function, self.wgt.wg_width, 0.0, np.pi)
-        self.add(gdspy.Polygon(wg_pts, **self.wg_spec))
+        # Add waveguide s-bend        
+        wg = gdspy.Path(self.wgt.wg_width, (0,0))
+        wg.parametric(self.__sine_function, tolerance=self.wgt.grid/2.0, max_points=1000, **self.wg_spec)
+        self.add(wg)
         
         # Add cladding s-bend
-        clad_pts = tk.build_waveguide_polygon(self.__sine_function, self.wgt.clad_width*2+self.wgt.wg_width, 0.0, np.pi)
-        self.add(gdspy.Polygon(clad_pts, **self.clad_spec))
+        for i in range(len(self.wgt.waveguide_stack)-1):
+            cur_width = self.wgt.waveguide_stack[i+1][0]
+            cur_spec = {'layer': self.wgt.waveguide_stack[i+1][1][0], 'datatype': self.wgt.waveguide_stack[i+1][1][1]}
+            
+            clad = gdspy.Path(cur_width, (0,0))
+            clad.parametric(self.__sine_function, tolerance=self.wgt.grid/2.0, max_points=1000, **cur_spec)
+            self.add(clad)
 
     def __build_ports(self):
         # Portlist format:
@@ -88,4 +94,4 @@ if __name__ == "__main__":
     tk.add(top, wg2)
 
     gdspy.LayoutViewer(cells=top, depth=3)
-    gdspy.write_gds('sbend.gds', unit=1.0e-6, precision=1.0e-9)
+#    gdspy.write_gds('sbend.gds', unit=1.0e-6, precision=1.0e-9)
