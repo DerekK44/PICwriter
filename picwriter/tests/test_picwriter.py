@@ -300,3 +300,21 @@ class TestPICwriter(TestCase):
 		print(len(top.references))
 		self.assertTrue(len(top.references)==3)
 		self.assertTrue(abs(top.area()-10271.21589480641) <= AREA_TOL)
+  
+	def test_ebend_creation(self):
+		top = gdspy.Cell("t-ebend")
+		wgt = WaveguideTemplate(bend_radius=25, resist='+')
+		wg1=Waveguide([(0,0), (25,0)], wgt)
+		tk.add(top, wg1)
+		
+		eb1 = EBend(wgt, turnby=np.pi/4.0, **wg1.portlist["output"])
+		tk.add(top, eb1)
+		
+		x,y = eb1.portlist["output"]["port"]
+		wg2 = Waveguide([(x,y), (x+25/np.sqrt(2), y+25/np.sqrt(2))], wgt)
+		tk.add(top, wg2)
+
+		print("EBend area = "+str(top.area()))
+		print(len(top.references))
+		self.assertTrue(len(top.references)==3)
+		self.assertTrue(abs(top.area()-2142.4695237593724) <= AREA_TOL)

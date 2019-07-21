@@ -23,3 +23,4 @@ from .adiabaticcoupler import AdiabaticCoupler
 from .fullcoupler import FullCoupler
 from .zerolengthcavity import ZeroLengthCavity
 from .sbend import SBend
+from .ebend import EBend

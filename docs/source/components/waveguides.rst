@@ -46,7 +46,18 @@ Example usage to generate a waveguide with waypoints::
 	gdspy.LayoutViewer()
 
 Bends
+++++++++++++++++++++++++++++++++
+
+Euler Bends
 ------------
+
+.. automodule:: picwriter.components
+   :members: EBend
+   
+.. image:: imgs/ebend.png
+
+Sinusoidal S-bends
+-------------------
 
 .. automodule:: picwriter.components
    :members: SBend
