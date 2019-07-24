@@ -78,6 +78,10 @@ class WaveguideTemplate:
         
         self.grid = grid
         self.euler = euler_bend
+        if self.euler:
+            self.scale_factor = self.bend_radius/0.45015815807855303 # Computed from the radius of curvature when the fresnel integrals are at 1/np.sqrt(2.0)
+            self.bend_length_90 = 2*(1.0/np.sqrt(2.0))*self.scale_factor
+            self.effective_bend_radius = 0.8418389017566366*self.scale_factor
 
         if self.wg_type =='swg':
             self.straight_period_cell = gdspy.Cell("swg_seg_"+str(self.wg_width)+"_"+str(self.period)+"_"+str(self.duty_cycle)+"_"+str(self.wg_layer)+"_"+str(self.clad_layer))
