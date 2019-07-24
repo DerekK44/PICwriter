@@ -63,3 +63,9 @@ Sinusoidal S-bends
    :members: SBend
    
 .. image:: imgs/sbend.png
+
+Bezier curves
+------------------
+
+.. automodule:: picwriter.components
+   :members: BBend
