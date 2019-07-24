@@ -35,6 +35,11 @@ def add(top_cell, component_cell, center=(0,0), x_reflection=False):
                                          x_reflection=x_reflection))
     elif isinstance(component_cell, Component):
         component_cell.addto(top_cell)
+    else:
+        try:
+            top_cell.add(component_cell)
+        except:
+            raise ValueError("Improper inputs given to add()")
     
 def getCellName(name):
     global CURRENT_CELL_NAMES
@@ -444,14 +449,57 @@ class Component():
             
             if self.direction=="EAST": #direction of the input port (which specifies whole component orientation)
                 angle = 0.0
+                # No angle change, don't rotate port directions    
             elif self.direction=="NORTH":
                 angle = np.pi/2.0
+                # Rotate by 
+                if self.portlist[key]['direction']=="NORTH":
+                    self.portlist[key]['direction'] = "WEST"
+                elif self.portlist[key]['direction']=="WEST":
+                    self.portlist[key]['direction'] = "SOUTH"
+                elif self.portlist[key]['direction']=="SOUTH":
+                    self.portlist[key]['direction'] = "EAST" 
+                elif self.portlist[key]['direction']=="EAST":
+                    self.portlist[key]['direction'] = "NORTH"   
             elif self.direction=="WEST":
                 angle = np.pi
+                # Rotate by 180 degrees
+                if self.portlist[key]['direction']=="NORTH":
+                    self.portlist[key]['direction'] = "SOUTH"
+                elif self.portlist[key]['direction']=="WEST":
+                    self.portlist[key]['direction'] = "EAST"
+                elif self.portlist[key]['direction']=="SOUTH":
+                    self.portlist[key]['direction'] = "NORTH" 
+                elif self.portlist[key]['direction']=="EAST":
+                    self.portlist[key]['direction'] = "WEST"   
             elif self.direction=="SOUTH":
                 angle = 3*np.pi/2.0
+                # Rotate by 270 degrees
+                if self.portlist[key]['direction']=="NORTH":
+                    self.portlist[key]['direction'] = "EAST"
+                elif self.portlist[key]['direction']=="EAST":
+                    self.portlist[key]['direction'] = "SOUTH"
+                elif self.portlist[key]['direction']=="SOUTH":
+                    self.portlist[key]['direction'] = "WEST" 
+                elif self.portlist[key]['direction']=="WEST":
+                    self.portlist[key]['direction'] = "NORTH"
             elif isinstance(self.direction, float) or isinstance(self.direction, int):
                 angle=float(self.direction)
+                
+                if isinstance(self.portlist[key]['direction'], float) or isinstance(self.portlist[key]['direction'], int):
+                    self.portlist[key]['direction'] = (self.portlist[key]['direction'] + angle)%(2*np.pi)
+                else:
+                    if self.portlist[key]['direction']=='EAST':
+                        self.portlist[key]['direction'] = (0.0 + angle)%(2*np.pi)
+                    elif self.portlist[key]['direction']=='NORTH':
+                        self.portlist[key]['direction'] = (np.pi/2 + angle)%(2*np.pi)
+                    elif self.portlist[key]['direction']=='WEST':
+                        self.portlist[key]['direction'] = (np.pi + angle)%(2*np.pi)
+                    elif self.portlist[key]['direction']=='SOUTH':
+                        self.portlist[key]['direction'] = (3*np.pi/2 + angle)%(2*np.pi)
+                    else:
+                        raise ValueError("One of the portlist directions has an invalid value.")
+                        
             dx = cur_port[0]*np.cos(angle) - cur_port[1]*np.sin(angle)
             dy = cur_port[0]*np.sin(angle) + cur_port[1]*np.cos(angle)
             
