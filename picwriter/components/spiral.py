@@ -44,10 +44,14 @@ class Spiral(tk.Component):
 
 
         self.wgt = wgt
-        self.bend_radius = wgt.bend_radius
+        if self.wgt.euler == True:
+            self.bend_radius = wgt.effective_bend_radius
+            self.corner_dl = 2*wgt.effective_bend_radius - wgt.bend_length_90
+        else:
+            self.bend_radius = wgt.bend_radius
+            self.corner_dl = 2*wgt.bend_radius - (0.5*np.pi*wgt.bend_radius)
+        
         self.direction = direction
-
-        self.corner_dl = 2*wgt.bend_radius - (0.5*np.pi*wgt.bend_radius)
 
         if width < self.spacing + 5*self.bend_radius:
             raise ValueError("Warning!  Given the WaveguideTemplate 'bend radius' and 'spacing' specified, no spiral can be fit within the requested 'width'.  Please increase the 'width'.")
@@ -149,7 +153,7 @@ class Spiral(tk.Component):
 
         w = self.width
         length = self.length
-        br = self.wgt.bend_radius
+        br = self.bend_radius
         s = self.spacing
 
         """ Double check all parameters
