@@ -164,7 +164,7 @@ def get_exact_angle(pt1, pt2):
 
     """
     dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
-    return math.atan2(dy,dx)
+    return math.atan2(dy,dx)%(2*np.pi)
 
 def dist(pt1, pt2):
     """
