@@ -15,6 +15,8 @@ class EBend(tk.Component):
            * **turnby** (float): Angle in radians, must be between +np.pi and -np.pi.  It's not recommended that you give a value of np.pi (for 180 bends) as this will result in divergent trig identities.  Instead, use two bends with turnby=Pi/2.
 
         Keyword Args:
+           * **start_width** (float): If a value is provided, overrides the initial waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
+           * **end_width** (float): If a value is provided, overrides the final waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
            * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
            * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
            * **vertex** (tuple): If a value for `vertex` is given (Cartesian x,y coordinate), then the Euler bend is placed at this location, bypassing the normal `port` value.  This is used in waypoint routing.
@@ -30,13 +32,22 @@ class EBend(tk.Component):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, turnby, port=(0,0), direction='EAST', vertex=None):
+    def __init__(self, wgt, turnby, start_width=None, end_width=None, port=(0,0), direction='EAST', vertex=None):
         tk.Component.__init__(self, "EBend", locals())
 
         """ Protected variables """
         self.portlist = {}
         self.direction = direction
         """ End protected variables """
+        
+        if start_width != None:
+            self.start_width = start_width
+        else:
+            self.start_width = wgt.wg_width
+        if end_width != None:
+            self.end_width = end_width
+        else:
+            self.end_width = wgt.wg_width
         
         self.wgt = wgt
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
@@ -170,11 +181,11 @@ class EBend(tk.Component):
 #        plt.show()
 
         if self.wgt.wg_type=="strip":
-            wg = gdspy.Path(self.wgt.wg_width, (0,0))
+            wg = gdspy.Path(self.start_width, (0,0))
         elif self.wgt.wg_type=="slot":
             wg = gdspy.Path(self.wgt.rail, (0,0), number_of_paths=2, distance=self.wgt.rail_dist)
             
-        wg.parametric(self.__euler_function, tolerance=self.wgt.grid/2.0, max_points=199, **self.wg_spec)
+        wg.parametric(self.__euler_function, final_width = self.end_width, tolerance=self.wgt.grid/2.0, max_points=199, **self.wg_spec)
         self.add(wg)
         
         # Add cladding
@@ -202,6 +213,8 @@ class EulerSBend(tk.Component):
            * **length** (float): Length of the Euler S-Bend
 
         Keyword Args:
+           * **start_width** (float): If a value is provided, overrides the initial waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
+           * **end_width** (float): If a value is provided, overrides the final waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
            * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
            * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
            
@@ -216,7 +229,7 @@ class EulerSBend(tk.Component):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, length, height, port=(0,0), direction='EAST'):
+    def __init__(self, wgt, length, height, start_width=None, end_width=None, port=(0,0), direction='EAST'):
         tk.Component.__init__(self, "EulerSBend", locals())
 
         """ Protected variables """
@@ -224,6 +237,14 @@ class EulerSBend(tk.Component):
         self.portlist = {}
         self.direction = direction
         """ End protected variables """
+        if start_width != None:
+            self.start_width = start_width
+        else:
+            self.start_width = wgt.wg_width
+        if end_width != None:
+            self.end_width = end_width
+        else:
+            self.end_width = wgt.wg_width
         
         if length<0:
             raise ValueError("Warning! The length argument must be positive")
@@ -315,11 +336,11 @@ class EulerSBend(tk.Component):
 #        plt.show()
 
         if self.wgt.wg_type=="strip":
-            wg = gdspy.Path(self.wgt.wg_width, (0,0))
+            wg = gdspy.Path(self.start_width, (0,0))
         elif self.wgt.wg_type=="slot":
             wg = gdspy.Path(self.wgt.rail, (0,0), number_of_paths=2, distance=self.wgt.rail_dist)
             
-        wg.parametric(self.__euler_s_function, tolerance=self.wgt.grid/2.0, max_points=199, **self.wg_spec)
+        wg.parametric(self.__euler_s_function, final_width=self.end_width, tolerance=self.wgt.grid/2.0, max_points=199, **self.wg_spec)
         self.add(wg)
         
         # Add cladding
