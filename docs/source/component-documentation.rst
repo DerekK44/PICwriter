@@ -14,6 +14,10 @@ Below is the set of supported components that come standard in the picwriter lib
    components/mmis.rst
    components/resonators.rst
    components/dbr.rst
-   components/mzi.rst
+   components/markers.rst
+   components/metalroutes.rst
+..
+ removed this line => components/mzi.rst
+ 
    components/markers.rst
    components/metalroutes.rst
