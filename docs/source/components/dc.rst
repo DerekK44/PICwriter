@@ -32,7 +32,7 @@ Adiabatic Full Coupler
 Sub-wavelength Grating Assisted Contra-Directional Coupler
 ------------------------------------------------------------
 
-For more details on the principles and operation behind this type of component, please see https://doi.org/10.1364/OE.25.025310. This component one regular waveguide (at top) and one sub-wavelength grating (at bottom) to selectively reflect a certain spectral band to the `intput_bot` port.  Apodization of the top waveguide is also supported.
+For more details on the principles and operation behind this type of component, please see https://doi.org/10.1364/OE.25.025310. This component uses one regular waveguide (at top) and one sub-wavelength grating (at bottom) to selectively reflect a certain spectral band to the `input_bot` port.  Apodization of the top waveguide is also supported.
 
 .. automodule:: picwriter.components
    :members: SWGContraDirectionalCoupler
