@@ -85,12 +85,12 @@ class TestPICwriter(TestCase):
 		wgt = WaveguideTemplate(bend_radius=50, resist='+')
 		wg1=Waveguide([(0,0), (250,0)], wgt)
 		tk.add(top, wg1)
-		mmi = MMI1x2(wgt, length=50, width=10, taper_width=2.0, wg_sep=3, **wg1.portlist["output"])
+		mmi = MMI1x2(wgt, length=20, width=7, taper_length=10.0, taper_width=2.0, wg_sep=7/2, output_wg_sep=10.0, output_length=20.0, output_width=2.0, **wg1.portlist["output"])
 		tk.add(top, mmi)
 		print("MMI1x2 area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-11623.153798646574) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-8846.848925208546) <= AREA_TOL)
 
 	def test_mmi2x2_creation(self):
 		top = gdspy.Cell("t6")
