@@ -13,7 +13,7 @@ class BBend(tk.Component):
     
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **poles** (list): List of (x,y) pole coordinates used for routing the waveguide
+           * **poles** (list): List of (x,y) pole coordinates used for routing the Bezier curve
 
         Keyword Args:
            * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
@@ -97,18 +97,18 @@ if __name__ == "__main__":
     top = gdspy.Cell("top")
     wgt = WaveguideTemplate(bend_radius=50, resist='+')
 
-    wg1=Waveguide([(0,0), (100,0)], wgt)
+    wg1=Waveguide([(0,0), (25,0)], wgt)
     tk.add(top, wg1)
 
-    bb1 = BBend(wgt, [(100,0),
-                      (200,0),
-                      (100,100),
-                      (200,100)])
+    bb1 = BBend(wgt, [(25,0),
+                      (125,0),
+                      (125,100),
+                      (225,100)])
     tk.add(top, bb1)
     
     x,y = bb1.portlist["output"]["port"]
-    wg2 = Waveguide([(x,y), (x+100, y)], wgt)
+    wg2 = Waveguide([(x,y), (x+25, y)], wgt)
     tk.add(top, wg2)
 
     gdspy.LayoutViewer(cells=top, depth=3)
-#    gdspy.write_gds('sbend.gds', unit=1.0e-6, precision=1.0e-9)
+#    gdspy.write_gds('bbend.gds', unit=1.0e-6, precision=1.0e-9)
