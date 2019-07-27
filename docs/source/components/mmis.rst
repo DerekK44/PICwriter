@@ -7,7 +7,7 @@ Multi-Mode Interferometers (MMI's)
 .. automodule:: picwriter.components
    :members: MMI1x2
    
-.. image:: imgs/mmi1x2.png
+.. image:: imgs/mmi1x2_v2.png
    
    
 2x2 MMI
