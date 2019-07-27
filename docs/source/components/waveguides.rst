@@ -56,6 +56,14 @@ Euler Bends
    
 .. image:: imgs/ebend.png
 
+Euler S-Bends
+---------------
+
+.. automodule:: picwriter.components
+   :members: EulerSBend
+   
+.. image:: imgs/esbend.png
+
 Sinusoidal S-bends
 -------------------
 
@@ -69,3 +77,5 @@ Bezier curves
 
 .. automodule:: picwriter.components
    :members: BBend
+   
+.. image:: imgs/bbend.png

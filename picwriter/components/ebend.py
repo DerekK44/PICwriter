@@ -50,8 +50,6 @@ class EBend(tk.Component):
 
         self.output_direction = self.turnby
         
-        self.input_port = (0,0)
-
         self.sign = np.sign(self.turnby)
         if abs(self.turnby) <= np.pi/2.0:
             # Obtuse angle
@@ -109,15 +107,18 @@ class EBend(tk.Component):
         self._auto_transform_()
         
     def __get_radius_of_curvature(self):
+        """ Returns the *normalized* radius of curvature for the Euler curve
+        """
         t = self.t
-        # Returns the radius of curvature for a normalized Euler curve at a position t
         xp = np.cos((np.pi*t**2)/2.0) # First derivative of x(t) (FresnelC)
         yp = np.sin((np.pi*t**2)/2.0) # First derivative of y(t) (FresnelS)
         xpp = -np.pi*t*np.sin((np.pi*t**2)/2.0) # Second derivative of x(t)
         ypp = np.pi*t*np.cos((np.pi*t**2)/2.0) # Second derivative of y(t)
-        return abs(((xp**2 + yp**2)**(3/2)) / (xp*ypp - yp*xpp)) # Arc length: https://en.wikipedia.org/wiki/Radius_of_curvature
+        return abs(((xp**2 + yp**2)**(3/2)) / (xp*ypp - yp*xpp)) # Radius of curvature: https://en.wikipedia.org/wiki/Radius_of_curvature
         
     def get_bend_length(self):
+        """ Returns the length of the Euler S-Bend
+        """
         # The length of a parametric curve x(t) y(t) is Integral[ sqrt( (dx/dt)^2 + (dy/dt)^2 ), {t,0,t0}], which for a Fresnel curve, simplifies to just t0
         if abs(self.turnby) <= np.pi/2.0:
             return 2*self.t*self.scale_factor
@@ -192,6 +193,150 @@ class EBend(tk.Component):
         self.portlist["input"] = {'port':self.input_port, 'direction':'WEST'}
         self.portlist["output"] = {'port':self.output_port, 'direction':self.output_direction}
 
+class EulerSBend(tk.Component):
+    """ Euler shaped S-Bend Cell class.  Creates an S-shaped Euler waveguide bend that can be used in waveguide routing (in place of the sinusoidal S-Bend).  The number of points is computed based on the waveguide template grid resolution to automatically minimize grid errors.
+
+        Args:
+           * **wgt** (WaveguideTemplate):  WaveguideTemplate object.  Bend radius is extracted from this object.
+           * **height** (float): Height of the Euler S-Bend
+           * **length** (float): Length of the Euler S-Bend
+
+        Keyword Args:
+           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+           
+        Members:
+           * **portlist** (dict): Dictionary with the relevant port information
+
+        Portlist format:
+           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+
+        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+        'Direction' points *towards* the waveguide that will connect to it.
+
+    """
+    def __init__(self, wgt, length, height, port=(0,0), direction='EAST'):
+        tk.Component.__init__(self, "EulerSBend", locals())
+
+        """ Protected variables """
+        self.port = port
+        self.portlist = {}
+        self.direction = direction
+        """ End protected variables """
+        
+        if length<0:
+            raise ValueError("Warning! The length argument must be positive")
+        if length<abs(height):
+            raise ValueError("Warning! The length of the S-bend must be greater than the height.")
+        
+        self.wgt = wgt
+        self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
+        self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
+        
+        self.input_port = (0,0)
+        self.input_direction = 'WEST'
+        self.output_port = (length, height)
+        self.output_direction = 'EAST'
+        self.sign = np.sign(height)
+        
+        self.ls = (height**2 + length**2)/(4*length)# Length between the origin and the vertex (horizontally)
+        
+        if abs(height)==length: #Edge case to avoid divergent tangent values
+            self.turnby = np.pi/2.0
+        else:
+            self.turnby = np.arctan(abs(height/2)/(length/2.0 - self.ls))
+        
+        """ Compute Euler parameters, based on an obtuse angle Euler bend """
+        self.t = np.sqrt( (2/np.pi) * abs(self.turnby/2.0) )
+        dy, dx = fresnel(self.t)
+
+        output_x_norm = dx + dx*np.cos(abs(self.turnby)) - (-dy)*np.sin(abs(self.turnby))
+        output_y_norm = dy + dx*np.sin(abs(self.turnby)) + (-dy)*np.cos(abs(self.turnby))
+        
+        self.scale_factor = abs(height/2.0)/(output_y_norm)
+        
+        self.__build_cell()
+        self.__build_ports()
+        
+        """ Translate & rotate the ports corresponding to this specific component object
+        """
+        self._auto_transform_()
+        
+    def get_radius_of_curvature(self):
+        """ Returns the minimum radius of curvature used to construct the Euler S-Bend
+        """
+        t = self.t
+        # Returns the radius of curvature for a normalized Euler curve at a position t
+        xp = np.cos((np.pi*t**2)/2.0) # First derivative of x(t) (FresnelC)
+        yp = np.sin((np.pi*t**2)/2.0) # First derivative of y(t) (FresnelS)
+        xpp = -np.pi*t*np.sin((np.pi*t**2)/2.0) # Second derivative of x(t)
+        ypp = np.pi*t*np.cos((np.pi*t**2)/2.0) # Second derivative of y(t)
+        return self.scale_factor * abs(((xp**2 + yp**2)**(3/2)) / (xp*ypp - yp*xpp)) # Radius of curvature: https://en.wikipedia.org/wiki/Radius_of_curvature
+        
+    def get_bend_length(self):
+        """ Returns the length of the Euler S-Bend
+        """
+        # The length of a parametric curve x(t) y(t) is Integral[ sqrt( (dx/dt)^2 + (dy/dt)^2 ), {t,0,t0}], which for a Fresnel curve, simplifies to just t0
+        return 4*self.t*self.scale_factor
+        
+    def __euler_s_function(self, t):
+        # input (t) goes from 0->1
+        # Returns an (x,y) tuple
+        if t>1.0 or t<0.0:
+            raise ValueError("Warning! A value was given to __euler_function not between 0 and 1")
+            
+        end_t = self.t #(end-point)
+        
+        if t<0.25:
+            y,x = fresnel(4*t*end_t)
+            return x*self.scale_factor, self.sign*y*self.scale_factor
+        elif t<0.5:
+            y,x = fresnel(4*(0.5-t)*end_t)
+            x,y = x*np.cos(-self.turnby) - y*np.sin(-self.turnby), x*np.sin(-self.turnby) + y*np.cos(-self.turnby)
+            return self.output_port[0]/2-x*self.scale_factor, self.output_port[1]/2 + self.sign*y*self.scale_factor
+        elif t<0.75:
+            y,x = fresnel(4*(t-0.5)*end_t)
+            x,y = x*np.cos(-self.turnby) - y*np.sin(-self.turnby), x*np.sin(-self.turnby) + y*np.cos(-self.turnby)
+            return self.output_port[0]/2+x*self.scale_factor, self.output_port[1]/2 - self.sign*y*self.scale_factor
+        else:
+            y,x = fresnel(4*(t-1)*end_t)
+            return self.output_port[0]+x*self.scale_factor, self.output_port[1]+self.sign*y*self.scale_factor
+        
+    def __build_cell(self):
+        # Sequentially build all the geometric shapes using gdspy path functions
+        # for waveguide, then add it to the Cell
+        
+        # Uncomment below to plot the function (useful for debugging)
+#        import matplotlib.pyplot as plt
+#        tvals = np.linspace(0,1,5000)
+#        xy = [self.__euler_s_function(tv) for tv in tvals]
+#        plt.scatter(*zip(*xy))
+#        plt.show()
+
+        if self.wgt.wg_type=="strip":
+            wg = gdspy.Path(self.wgt.wg_width, (0,0))
+        elif self.wgt.wg_type=="slot":
+            wg = gdspy.Path(self.wgt.rail, (0,0), number_of_paths=2, distance=self.wgt.rail_dist)
+            
+        wg.parametric(self.__euler_s_function, tolerance=self.wgt.grid/2.0, max_points=199, **self.wg_spec)
+        self.add(wg)
+        
+        # Add cladding
+        for i in range(len(self.wgt.waveguide_stack)-1):
+            cur_width = self.wgt.waveguide_stack[i+1][0]
+            cur_spec = {'layer': self.wgt.waveguide_stack[i+1][1][0], 'datatype': self.wgt.waveguide_stack[i+1][1][1]}
+        
+            clad = gdspy.Path(cur_width, (0,0))
+            clad.parametric(self.__euler_s_function, tolerance=self.wgt.grid/2.0, max_points=199, **cur_spec)
+            self.add(clad)
+
+    def __build_ports(self):
+        # Portlist format:
+        # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
+        self.portlist["input"] = {'port':self.input_port, 'direction':'WEST'}
+        self.portlist["output"] = {'port':self.output_port, 'direction':'EAST'}
+
 if __name__ == "__main__":
     from . import *
     top = gdspy.Cell("top")
@@ -199,13 +344,20 @@ if __name__ == "__main__":
 
     wg1=Waveguide([(0,0), (25,0)], wgt)
     tk.add(top, wg1)
+#
+#    eb1 = EBend(wgt, turnby=np.pi/4.0, **wg1.portlist["output"])
+#    tk.add(top, eb1)
+#    
+#    x,y = eb1.portlist["output"]["port"]
+#    wg2 = Waveguide([(x,y), (x+25/np.sqrt(2), y+25/np.sqrt(2))], wgt)
+#    tk.add(top, wg2)
 
-    eb1 = EBend(wgt, turnby=np.pi/4.0, **wg1.portlist["output"])
-    tk.add(top, eb1)
+    esb = EulerSBend(wgt, 200.0, 100.0, **wg1.portlist["output"])
+    tk.add(top, esb)
     
-    x,y = eb1.portlist["output"]["port"]
-    wg2 = Waveguide([(x,y), (x+25/np.sqrt(2), y+25/np.sqrt(2))], wgt)
+    x,y = esb.portlist["output"]["port"]
+    wg2 = Waveguide([(x,y), (x+25, y)], wgt)
     tk.add(top, wg2)
 
     gdspy.LayoutViewer(cells=top, depth=3)
-#    gdspy.write_gds('ebend2.gds', unit=1.0e-6, precision=1.0e-9)
+#    gdspy.write_gds('esbend.gds', unit=1.0e-6, precision=1.0e-9)
