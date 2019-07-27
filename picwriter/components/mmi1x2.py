@@ -209,4 +209,4 @@ if __name__ == "__main__":
 #    tk.add(top, mmi3)
 
     gdspy.LayoutViewer()
-    gdspy.write_gds('mmi1x2.gds', unit=1.0e-6, precision=1.0e-9)
+#    gdspy.write_gds('mmi1x2.gds', unit=1.0e-6, precision=1.0e-9)
