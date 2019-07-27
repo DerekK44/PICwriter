@@ -289,7 +289,7 @@ class TestPICwriter(TestCase):
 		wg1=Waveguide([(0,0), (100,0)], wgt)
 		tk.add(top, wg1)
   
-		sb1 = SBend(wgt, 100.0, 200.0, **wg1.portlist["output"])
+		sb1 = SBend(wgt, 200.0, 100.0, **wg1.portlist["output"])
 		tk.add(top, sb1)
   
 		x,y = sb1.portlist["output"]["port"]
@@ -318,6 +318,24 @@ class TestPICwriter(TestCase):
 		print(len(top.references))
 		self.assertTrue(len(top.references)==3)
 		self.assertTrue(abs(top.area()-2142.4695237593724) <= AREA_TOL)
+  
+	def test_eulersbend_creation(self):
+		top = gdspy.Cell("t-esbend")
+		wgt = WaveguideTemplate(bend_radius=25, resist='+')
+		wg1=Waveguide([(0,0), (25,0)], wgt)
+		tk.add(top, wg1)
+		
+		esb = EulerSBend(wgt, 200.0, 100.0, **wg1.portlist["output"])
+		tk.add(top, esb)
+		
+		x,y = esb.portlist["output"]["port"]
+		wg2 = Waveguide([(x,y), (x+25, y)], wgt)
+		tk.add(top, wg2)
+
+		print("EulerSBend area = "+str(top.area()))
+		print(len(top.references))
+		self.assertTrue(len(top.references)==3)
+		self.assertTrue(abs(top.area()-6888.198875373508) <= AREA_TOL)
   
 	def test_bbend_creation(self):
 		top = gdspy.Cell("t-bbend")
