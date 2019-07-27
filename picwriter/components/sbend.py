@@ -10,8 +10,8 @@ class SBend(tk.Component):
 
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **height** (float): Height of the S-bend
            * **length** (float): Length of the S-bend
+           * **height** (float): Height of the S-bend
 
         Keyword Args:
            * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
@@ -28,13 +28,12 @@ class SBend(tk.Component):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, height, length, port=(0,0), direction='EAST'):
+    def __init__(self, wgt, length, height, port=(0,0), direction='EAST'):
         tk.Component.__init__(self, "SBend", locals())
 
         self.portlist = {}
         self.direction = direction
 
-        self.port = port
         self.input_port = (0,0)
         self.output_port = (length, height)
         
@@ -86,7 +85,7 @@ if __name__ == "__main__":
     wg1=Waveguide([(0,0), (100,0)], wgt)
     tk.add(top, wg1)
 
-    sb1 = SBend(wgt, 100.0, 200.0, **wg1.portlist["output"])
+    sb1 = SBend(wgt, 200.0, 100.0, **wg1.portlist["output"])
     tk.add(top, sb1)
     
     x,y = sb1.portlist["output"]["port"]
