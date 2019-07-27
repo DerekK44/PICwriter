@@ -35,10 +35,10 @@ class EBend(tk.Component):
     def __init__(self, wgt, turnby, start_width=None, end_width=None, port=(0,0), direction='EAST', vertex=None):
         tk.Component.__init__(self, "EBend", locals())
 
-        """ Protected variables """
+        # Protected variables
         self.portlist = {}
         self.direction = direction
-        """ End protected variables """
+        # End protected variables
         
         if start_width != None:
             self.start_width = start_width
@@ -232,11 +232,12 @@ class EulerSBend(tk.Component):
     def __init__(self, wgt, length, height, start_width=None, end_width=None, port=(0,0), direction='EAST'):
         tk.Component.__init__(self, "EulerSBend", locals())
 
-        """ Protected variables """
+        #Protected variables
         self.port = port
         self.portlist = {}
         self.direction = direction
-        """ End protected variables """
+        #End protected variables
+        
         if start_width != None:
             self.start_width = start_width
         else:
