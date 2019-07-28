@@ -17,7 +17,7 @@ Adiabatic 3dB Coupler
 .. automodule:: picwriter.components
    :members: AdiabaticCoupler
 
-.. image:: imgs/ac2.png
+.. image:: imgs/ac_v2.png
 
 ------------------------------
 Adiabatic Full Coupler

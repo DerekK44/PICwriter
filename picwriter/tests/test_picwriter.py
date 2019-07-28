@@ -46,7 +46,7 @@ class TestPICwriter(TestCase):
 		tk.add(top, tp2)
 		print("Taper area = "+str(top.area()))
 		self.assertTrue(len(top.references)==3)
-		self.assertTrue(abs(top.area()-27005.859978484103) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-26199.859978484103) <= AREA_TOL)
 
 	def test_grating_coupler_creation(self):
 		top = gdspy.Cell("t3")
@@ -90,7 +90,7 @@ class TestPICwriter(TestCase):
 		print("MMI1x2 area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-8846.848925208546) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-8406.848925208546) <= AREA_TOL)
 
 	def test_mmi2x2_creation(self):
 		top = gdspy.Cell("t6")
@@ -254,19 +254,20 @@ class TestPICwriter(TestCase):
 		tk.add(top, wg1)
 
 		ac = AdiabaticCoupler(wgt, 
-                          length1=60.0, 
+                          length1=30.0, 
                           length2=50.0,
-                          gap=0.5, 
-                          fargap=6.0,
-                          dw=1.0, 
-                          angle=np.pi/16.0, 
+                          length3=20.0,
+                          wg_sep=1.0,
+                          input_wg_sep = 3.0,
+                          output_wg_sep = 3.0,
+                          dw=0.1,
                           **wg1.portlist["output"])
 		tk.add(top, ac)
 
 		print("AdiabaticCoupler area = "+str(top.area()))
 		print(len(top.references))
 		self.assertTrue(len(top.references)==2)
-		self.assertTrue(abs(top.area()-11449.803524547198) <= AREA_TOL)
+		self.assertTrue(abs(top.area()-7202.844941894362) <= AREA_TOL)
   
   
 	def test_fullcoupler_creation(self):
