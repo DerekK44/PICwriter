@@ -16,6 +16,8 @@ class BBend(tk.Component):
            * **poles** (list): List of (x,y) pole coordinates used for routing the Bezier curve
 
         Keyword Args:
+           * **start_width** (float): If a value is provided, overrides the initial waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
+           * **end_width** (float): If a value is provided, overrides the final waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
            * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
            * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
@@ -30,11 +32,20 @@ class BBend(tk.Component):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, poles):
+    def __init__(self, wgt, poles, start_width=None, end_width=None):
         tk.Component.__init__(self, "BBend", locals())
 
         self.portlist = {}
         self.port = (0,0)
+        
+        if start_width != None:
+            self.start_width = start_width
+        else:
+            self.start_width = wgt.wg_width
+        if end_width != None:
+            self.end_width = end_width
+        else:
+            self.end_width = wgt.wg_width
         
         self.input_port = (poles[0][0], poles[0][1])
         self.output_port = (poles[-1][0], poles[-1][1])
@@ -71,10 +82,8 @@ class BBend(tk.Component):
         # for waveguide, then add it to the Cell
 
         # Add waveguide s-bend        
-        wg = gdspy.Path(self.wgt.wg_width, (0,0))
-        wg.parametric(self._bezier_function, tolerance=self.wgt.grid/2.0, max_points=199, **self.wg_spec)
-        print(wg.x)
-        print(wg.y)
+        wg = gdspy.Path(self.start_width, (0,0))
+        wg.parametric(self._bezier_function, final_width = self.end_width, tolerance=self.wgt.grid/2.0, max_points=199, **self.wg_spec)
         self.add(wg)
         
         # Add cladding s-bend
