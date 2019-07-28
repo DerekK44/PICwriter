@@ -14,10 +14,11 @@ class Taper(tk.Component):
            * **end_width** (float): Final width of the taper (initial width received from WaveguieTemplate)
 
         Keyword Args:
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+           * **start_width** (float): Beginning width of the taper.  Defaults to the waveguide width provided by the WaveguideTemplate object.
            * **end_clad_width** (float): Clad width at the end of the taper.  Defaults to the regular clad width.
-           * **extra_clad_length** (float): Extra cladding beyond the end of the taper.  Defaults to 2*end_clad_width.
+           * **extra_clad_length** (float): Extra cladding beyond the end of the taper.  Defaults to 0.
+           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).
 
         Members:
            * **portlist** (dict): Dictionary with the relevant port information
@@ -30,7 +31,7 @@ class Taper(tk.Component):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, length, end_width, end_clad_width=None, extra_clad_length=None, port=(0,0), direction='EAST'):
+    def __init__(self, wgt, length, end_width, start_width=None, end_clad_width=None, extra_clad_length=0, port=(0,0), direction='EAST'):
         tk.Component.__init__(self, "Taper", locals())
         
         self.portlist = {}
@@ -40,8 +41,9 @@ class Taper(tk.Component):
         
         self.length = length
         self.end_width = end_width
+        self.start_width = wgt.wg_width if start_width==None else start_width
         self.end_clad_width = wgt.clad_width if end_clad_width==None else end_clad_width
-        self.extra_clad_length = 2*self.end_clad_width if extra_clad_length==None else extra_clad_length
+        self.extra_clad_length = extra_clad_length
         self.wgt = wgt
         self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
         self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
@@ -58,7 +60,7 @@ class Taper(tk.Component):
         # for waveguide, then add it to the Cell
 
         # Add waveguide taper
-        path = gdspy.Path(self.wgt.wg_width, (0,0))
+        path = gdspy.Path(self.start_width, (0,0))
         path.segment(self.length, direction=0.0, 
                      final_width=self.end_width, **self.wg_spec)
         # Cladding for waveguide taper
