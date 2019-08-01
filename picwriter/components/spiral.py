@@ -122,7 +122,7 @@ class Spiral(tk.Component):
 
         if n==0:
             if length_min > length_goal:
-                raise ValueError("Warning! No value of 'n' (number of spirals) could be determined, since the minimum spiral length ("+str(length_min)+") is already larger than the goal ("+str(length_goal)+").  Please decrease the spiral width.")
+                return None
             else:
                 return n
         else:
@@ -147,89 +147,132 @@ class Spiral(tk.Component):
         # Determine the number of spiral wraps
         n = self.__get_number_of_spirals()
 
-        """ Determine the corresponding spiral height
-        """
-        h = self.__get_spiral_height(n)
+        if n!= None:
+            """ Determine the corresponding spiral height
+            """
+            h = self.__get_spiral_height(n)
+    
+            w = self.width
+            length = self.length
+            br = self.bend_radius
+            s = self.spacing
+    
+            """ Double check all parameters
+            """
+            if abs(length - self.get_length(h, n)) > 1E-6:
+                raise ValueError("Warning! The computed length and desired length are not equal!")
+    
+            """ Now that the parameters are all determined, build the corresponding
+            waypoints """
+            wcent = (w-s-br)/2.0
+    
+            p = self.parity
+            x0, y0 = 0,0
+    
+            """ Start/end points corresponding to 'fixed_len' unit """
+            start_points = [(x0, y0),
+                            (x0 + 2*wcent, y0),
+                            (x0 + 2*wcent, y0 - p*(h - s))]
+            end_points = [(x0, y0 - p*s),
+                          (x0, y0 - p*h),
+                          (x0 + w - br, y0 - p*h),
+                          (x0 + w - br, y0),
+                          (x0 + w, y0)]
+    
+            """ Generate the spiral going inwards """
+            spiral_in_pts = []
+    
+            x_left_start, x_right_start = x0 + s, x0+2*wcent-2*s
+            y_top_start, y_bot_start = y0 - p*2*s, y0 - p*(h-s)
+    
+            for j in range(n):
+                i = j+1
+                if i%2==1: #ODD, so add a segment on the LEFT
+                    left_segment_index = (i-1)/2
+                    spiral_in_pts.append((x_left_start + 2*s*left_segment_index, y_bot_start + p*(2*s*left_segment_index)))
+                    spiral_in_pts.append((x_left_start + 2*s*left_segment_index, y_top_start - p*(2*s*left_segment_index)))
+                    if j+1==n: #This is the last one! Add the middle point now
+                        spiral_in_pts.append((x0+wcent, y_top_start - p*(2*s*left_segment_index)))
+                if i%2==0: #EVEN, so add a segment on the RIGHT
+                    right_segment_index = (i-2)/2
+                    spiral_in_pts.append((x_right_start - (2*s*right_segment_index), y_top_start - p*(2*s*right_segment_index)))
+                    spiral_in_pts.append((x_right_start - (2*s*right_segment_index), y_bot_start + p*(2*s*right_segment_index + 2*s)))
+                    if j+1==n: #This is the last one! Add the middle point now
+                        spiral_in_pts.append((x0+wcent, y_bot_start + p*(2*s*right_segment_index + 2*s)))
+    
+            if n==0:
+                spiral_in_pts.append((x0+wcent, y_bot_start))
+    
+            """ Generate the spiral going outwards """
+            spiral_out_pts = []
+    
+            x_left_start, x_right_start = x0 + 2*s, x0+2*wcent - s
+            y_top_start, y_bot_start = y0 - p*s, y0 - p*(h-2*s)
+    
+            for j in range(n):
+                i = j+1
+                if i%2==1: #ODD, so add a segment on the RIGHT
+                    right_segment_index = (i-1)/2
+                    spiral_out_pts.append((x_right_start - 2*s*right_segment_index, y_top_start - p*2*s*right_segment_index))
+                    spiral_out_pts.append((x_right_start - 2*s*right_segment_index, y_bot_start + p*(2*s*right_segment_index)))
+                    if j+1==n: #This is the last one! Add the middle point now
+                        spiral_out_pts.append((x0+wcent, y_bot_start + p*2*s*right_segment_index))
+    
+                elif i%2==0: #EVEN, add a segment on the LEFT
+                    left_segment_index = (i-2)/2
+                    spiral_out_pts.append((x_left_start + 2*s*left_segment_index, y_bot_start + p*2*s*left_segment_index))
+                    spiral_out_pts.append((x_left_start + 2*s*left_segment_index, y_top_start - p*(2*s*left_segment_index + 2*s)))
+                    if j+1==n: #This is the last one! Add the middle point now
+                        spiral_out_pts.append((x0+wcent, y_top_start - p*(2*s*left_segment_index + 2*s)))
+    
+            if n==0:
+                spiral_out_pts.append((x0+wcent, y_top_start))
+    
+            spiral_out_pts.reverse() #reverse order
+    
+            waypoints = start_points+spiral_in_pts+spiral_out_pts+end_points
+            
+        else:
+            """ Make the waveguide waypoints just a U-bend, since the waveguide length is not long enough to spiral in on itself """
+            
+            length = self.length
+            w = self.width
+            br = self.bend_radius
+            dl = self.corner_dl
+            
+            if length < w+4*br-4*dl:
+                raise ValueError("Warning!  The length "+str(self.length)+" is too short.  Not even a U-bend will fit given the width provided =>"+str(self.width))
+            
+            p = self.parity
+            x0, y0 = 0,0
+            
+            extra_height = (length - (w+4*br-4*dl))/2.0
+            
+            max_turns = (w - 4*br)//(4*br) # one 'turn' is a turn segment added to the waveguide "U" (to get the length required without making the bend very tall)
+            extra_length_per_turn = 8*br-4*dl - 4*br #Extra length incurred by adding a turn (compared to a straight section)
 
-        w = self.width
-        length = self.length
-        br = self.bend_radius
-        s = self.spacing
+            waypoints = [(x0, y0),
+                         (x0+br, y0)]
+            
+            number_of_turns = extra_height//extra_length_per_turn #Max number of turns that could be formed from the extra_height
+            
+            if number_of_turns > max_turns:
+                """ Add *all* of the turns, plus some extra for the height, else add only the smaller number of turns. """
+                number_of_turns = max_turns
+                
+            dh = (length - (w+4*br-4*dl) - number_of_turns*extra_length_per_turn)/(number_of_turns*2 + 2)
+        
+            waypoints.append((x0+br, y0+2*br+dh))
+            for i in range(int(number_of_turns)):
+                waypoints.append((x0+3*br+i*br*4, y0+2*br+dh))
+                waypoints.append((x0+3*br+i*br*4, y0))
+                waypoints.append((x0+5*br+i*br*4, y0))
+                waypoints.append((x0+5*br+i*br*4, y0+2*br+dh))
+                
+            waypoints.append((x0+w-br, y0+2*br+dh))
+            waypoints.append((x0+w-br, y0))
+            waypoints.append((x0+w, y0))
 
-        """ Double check all parameters
-        """
-        if abs(length - self.get_length(h, n)) > 1E-6:
-            raise ValueError("Warning! The computed length and desired length are not equal!")
-
-        """ Now that the parameters are all determined, build the corresponding
-        waypoints """
-        wcent = (w-s-br)/2.0
-
-        p = self.parity
-        x0, y0 = 0,0
-
-        """ Start/end points corresponding to 'fixed_len' unit """
-        start_points = [(x0, y0),
-                        (x0 + 2*wcent, y0),
-                        (x0 + 2*wcent, y0 - p*(h - s))]
-        end_points = [(x0, y0 - p*s),
-                      (x0, y0 - p*h),
-                      (x0 + w - br, y0 - p*h),
-                      (x0 + w - br, y0),
-                      (x0 + w, y0)]
-
-        """ Generate the spiral going inwards """
-        spiral_in_pts = []
-
-        x_left_start, x_right_start = x0 + s, x0+2*wcent-2*s
-        y_top_start, y_bot_start = y0 - p*2*s, y0 - p*(h-s)
-
-        for j in range(n):
-            i = j+1
-            if i%2==1: #ODD, so add a segment on the LEFT
-                left_segment_index = (i-1)/2
-                spiral_in_pts.append((x_left_start + 2*s*left_segment_index, y_bot_start + p*(2*s*left_segment_index)))
-                spiral_in_pts.append((x_left_start + 2*s*left_segment_index, y_top_start - p*(2*s*left_segment_index)))
-                if j+1==n: #This is the last one! Add the middle point now
-                    spiral_in_pts.append((x0+wcent, y_top_start - p*(2*s*left_segment_index)))
-            if i%2==0: #EVEN, so add a segment on the RIGHT
-                right_segment_index = (i-2)/2
-                spiral_in_pts.append((x_right_start - (2*s*right_segment_index), y_top_start - p*(2*s*right_segment_index)))
-                spiral_in_pts.append((x_right_start - (2*s*right_segment_index), y_bot_start + p*(2*s*right_segment_index + 2*s)))
-                if j+1==n: #This is the last one! Add the middle point now
-                    spiral_in_pts.append((x0+wcent, y_bot_start + p*(2*s*right_segment_index + 2*s)))
-
-        if n==0:
-            spiral_in_pts.append((x0+wcent, y_bot_start))
-
-        """ Generate the spiral going outwards """
-        spiral_out_pts = []
-
-        x_left_start, x_right_start = x0 + 2*s, x0+2*wcent - s
-        y_top_start, y_bot_start = y0 - p*s, y0 - p*(h-2*s)
-
-        for j in range(n):
-            i = j+1
-            if i%2==1: #ODD, so add a segment on the RIGHT
-                right_segment_index = (i-1)/2
-                spiral_out_pts.append((x_right_start - 2*s*right_segment_index, y_top_start - p*2*s*right_segment_index))
-                spiral_out_pts.append((x_right_start - 2*s*right_segment_index, y_bot_start + p*(2*s*right_segment_index)))
-                if j+1==n: #This is the last one! Add the middle point now
-                    spiral_out_pts.append((x0+wcent, y_bot_start + p*2*s*right_segment_index))
-
-            elif i%2==0: #EVEN, add a segment on the LEFT
-                left_segment_index = (i-2)/2
-                spiral_out_pts.append((x_left_start + 2*s*left_segment_index, y_bot_start + p*2*s*left_segment_index))
-                spiral_out_pts.append((x_left_start + 2*s*left_segment_index, y_top_start - p*(2*s*left_segment_index + 2*s)))
-                if j+1==n: #This is the last one! Add the middle point now
-                    spiral_out_pts.append((x0+wcent, y_top_start - p*(2*s*left_segment_index + 2*s)))
-
-        if n==0:
-            spiral_out_pts.append((x0+wcent, y_top_start))
-
-        spiral_out_pts.reverse() #reverse order
-
-        waypoints = start_points+spiral_in_pts+spiral_out_pts+end_points
 
         """ Independently verify that the length of the spiral structure generated is correct
         """
@@ -270,21 +313,22 @@ if __name__ == "__main__":
     from picwriter.components.waveguide import WaveguideTemplate
     gdspy.current_library = gdspy.GdsLibrary()
     top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(bend_radius=200,
+    wgt = WaveguideTemplate(bend_radius=50,
                             wg_width=1.0,
-                            clad_width=10.0)
+                            clad_width=10.0,
+                            euler_bend=True)
 
     sp1 = Spiral(wgt,
-                 width=1700.0,
-                 length=20000.0,
+                 width=2700.0,
+                 length=6000.0,
                  spacing=20.0,
                  parity=1,
                  port=(0,0),
-                 direction='WEST')
+                 direction='EAST')
     tk.add(top, sp1)
 
     print("length is "+str(sp1.get_spiral_length()))
     print("portlist = "+str(sp1.portlist))
 
-    gdspy.LayoutViewer()
+    gdspy.LayoutViewer(cells="top")
     # gdspy.write_gds('spiral.gds', unit=1.0e-6, precision=1.0e-9)
