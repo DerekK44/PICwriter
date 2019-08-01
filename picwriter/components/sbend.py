@@ -31,6 +31,7 @@ class SBend(tk.Component):
     def __init__(self, wgt, length, height, port=(0,0), direction='EAST'):
         tk.Component.__init__(self, "SBend", locals())
 
+        self.port = port
         self.portlist = {}
         self.direction = direction
 
