@@ -5,6 +5,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
+from picwriter.components.sbend import SBend
 
 class Spiral(tk.Component):
     """ Spiral Waveguide Cell class.  The desired length of the spiral is first set, along with the spacing between input and output (the 'width' paramter).  Then, the corresponding height of the spiral is automatically set.
@@ -54,6 +55,9 @@ class Spiral(tk.Component):
         self.direction = direction
 
         if width < self.spacing + 5*self.bend_radius:
+            print("width = "+str(width))
+            print("spacing = "+str(self.spacing))
+            print("bend_radius = "+str(self.bend_radius))
             raise ValueError("Warning!  Given the WaveguideTemplate 'bend radius' and 'spacing' specified, no spiral can be fit within the requested 'width'.  Please increase the 'width'.")
 
         self.nmax = int((self.width - self.spacing - 5*self.bend_radius)/(2*self.spacing))
@@ -145,6 +149,7 @@ class Spiral(tk.Component):
         # This is just one way of doing it... ¯\_(ツ)_/¯
 
         # Determine the number of spiral wraps
+        skip_length_check = False
         n = self.__get_number_of_spirals()
 
         if n!= None:
@@ -241,63 +246,92 @@ class Spiral(tk.Component):
             dl = self.corner_dl
             
             if length < w+4*br-4*dl:
-                raise ValueError("Warning!  The length "+str(self.length)+" is too short.  Not even a U-bend will fit given the width provided =>"+str(self.width))
-            
-            p = self.parity
-            x0, y0 = 0,0
-            
-            extra_height = (length - (w+4*br-4*dl))/2.0
-            
-            max_turns = (w - 4*br)//(4*br) # one 'turn' is a turn segment added to the waveguide "U" (to get the length required without making the bend very tall)
-            extra_length_per_turn = 8*br-4*dl - 4*br #Extra length incurred by adding a turn (compared to a straight section)
+                """ Route a sinusoidal s-bend waveguide with the desired length """
+                #Goal:  Find the height of the s-bend
+                
+                from scipy.optimize import fsolve
+                from scipy.special import ellipeinc
+                
+                # The equation below is the arc length of a sine curve, for a given height and width
+                func = lambda s_height : length - ellipeinc(2*np.pi, 1-1/(1+(s_height**2 * np.pi**2 / w**2)))/((2*np.pi/w) / np.sqrt(1 + (s_height**2 * np.pi**2 / w**2)))
+                
+                h_guess = np.sqrt((length/2.0)**2 - (w/2)**2)
+                
+                h_solution = fsolve(func, h_guess)
+                h = -self.parity*h_solution[0]
+                
+                sbend1 = SBend(self.wgt, w/2.0, h, port=(0,0), direction='EAST')
+                self.add(sbend1)
+                
+                sbend2 = SBend(self.wgt, w/2.0, -h, port=(w/2.0, h), direction='EAST')
+                self.add(sbend2)
+                
+#                print("Added an SBend")
+#                print("h = "+str(h))
+#                print("w = "+str(w))
+#                print("length = "+str(length))
+                
+                self.actual_length = ellipeinc(2*np.pi, 1-1/(1+(h**2 * np.pi**2 / w**2)))/((2*np.pi/w) / np.sqrt(1 + (h**2 * np.pi**2 / w**2)))
+                
+                skip_length_check = True
 
-            waypoints = [(x0, y0),
-                         (x0+br, y0)]
-            
-            number_of_turns = extra_height//extra_length_per_turn #Max number of turns that could be formed from the extra_height
-            
-            if number_of_turns > max_turns:
-                """ Add *all* of the turns, plus some extra for the height, else add only the smaller number of turns. """
-                number_of_turns = max_turns
+            else:
+                p = self.parity
+                x0, y0 = 0,0
                 
-            dh = (length - (w+4*br-4*dl) - number_of_turns*extra_length_per_turn)/(number_of_turns*2 + 2)
-        
-            waypoints.append((x0+br, y0+2*br+dh))
-            for i in range(int(number_of_turns)):
-                waypoints.append((x0+3*br+i*br*4, y0+2*br+dh))
-                waypoints.append((x0+3*br+i*br*4, y0))
-                waypoints.append((x0+5*br+i*br*4, y0))
-                waypoints.append((x0+5*br+i*br*4, y0+2*br+dh))
+                extra_height = (length - (w+4*br-4*dl))/2.0
                 
-            waypoints.append((x0+w-br, y0+2*br+dh))
-            waypoints.append((x0+w-br, y0))
-            waypoints.append((x0+w, y0))
+                max_turns = (w - 4*br)//(4*br) # one 'turn' is a turn segment added to the waveguide "U" (to get the length required without making the bend very tall)
+                extra_length_per_turn = 8*br-4*dl - 4*br #Extra length incurred by adding a turn (compared to a straight section)
+    
+                waypoints = [(x0, y0),
+                             (x0+br, y0)]
+                
+                number_of_turns = extra_height//extra_length_per_turn #Max number of turns that could be formed from the extra_height
+                
+                if number_of_turns > max_turns:
+                    """ Add *all* of the turns, plus some extra for the height, else add only the smaller number of turns. """
+                    number_of_turns = max_turns
+                    
+                dh = (length - (w+4*br-4*dl) - number_of_turns*extra_length_per_turn)/(number_of_turns*2 + 2)
+            
+                waypoints.append((x0+br, y0-p*(2*br+dh)))
+                for i in range(int(number_of_turns)):
+                    waypoints.append((x0+3*br+i*br*4, y0-p*(2*br+dh)))
+                    waypoints.append((x0+3*br+i*br*4, y0))
+                    waypoints.append((x0+5*br+i*br*4, y0))
+                    waypoints.append((x0+5*br+i*br*4, y0-p*(2*br+dh)))
+                    
+                waypoints.append((x0+w-br, y0-p*(2*br+dh)))
+                waypoints.append((x0+w-br, y0))
+                waypoints.append((x0+w, y0))
 
 
         """ Independently verify that the length of the spiral structure generated is correct
         """
-        l=0
-        for i in range(len(waypoints)-1):
-            dx, dy = waypoints[i+1][0]-waypoints[i][0], waypoints[i+1][1]-waypoints[i][1]
-            l += np.sqrt(dx**2 + dy**2)
-        num_corners = len(waypoints)-2
-        l -= num_corners*self.corner_dl
+        if not skip_length_check:
+            l=0
+            for i in range(len(waypoints)-1):
+                dx, dy = waypoints[i+1][0]-waypoints[i][0], waypoints[i+1][1]-waypoints[i][1]
+                l += np.sqrt(dx**2 + dy**2)
+            num_corners = len(waypoints)-2
+            l -= num_corners*self.corner_dl
+    
+            self.actual_length = l
+    
+            if abs(l - self.length) > 1E-6:
+                print("Actual computed length = "+str(l))
+                print("Expected length = "+str(self.length))
+                raise ValueError("Warning! Spiral generated is significantly different from what is expected.")
 
-        self.actual_length = l
-
-        if abs(l - self.length) > 1E-6:
-            print("Actual computed length = "+str(l))
-            print("Expected length = "+str(self.length))
-            raise ValueError("Warning! Spiral generated is significantly different from what is expected.")
-
-        """ Generate the waveguide """
-        wg = Waveguide(waypoints, self.wgt)
-
-        dist = self.width
-
-        self.add(wg)
+            """ Generate the waveguide """
+            wg = Waveguide(waypoints, self.wgt)
+        
+            self.add(wg)
+            
         self.portlist_input = (0, 0)
-        self.portlist_output = (dist, 0)
+        self.portlist_output = (self.width, 0)
+            
 
 
     def __build_ports(self):
@@ -320,7 +354,7 @@ if __name__ == "__main__":
 
     sp1 = Spiral(wgt,
                  width=2700.0,
-                 length=6000.0,
+                 length=2900.0,
                  spacing=20.0,
                  parity=1,
                  port=(0,0),
