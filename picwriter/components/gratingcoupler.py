@@ -104,10 +104,11 @@ class GratingCoupler(tk.Component):
             self.add(ridge_region)
         
         # Then the input waveguide stub
-        stub_length = (self.wgt.wg_width/2.0)/np.tan(self.theta/2.0)
-        stub = gdspy.Path(self.wgt.wg_width, (0,0))
-        stub.segment(stub_length+0.1, **self.wg_spec)
-        self.add(stub)
+        if self.taper_length > self.wgt.wg_width/2:
+            stub_length = (self.wgt.wg_width/2.0)/np.tan(self.theta/2.0)
+            stub = gdspy.Path(self.wgt.wg_width, (0,0))
+            stub.segment(stub_length+0.1, **self.wg_spec)
+            self.add(stub)
         
         if self.teeth_list == None:
             """ Fixed pitch grating coupler """
@@ -343,84 +344,6 @@ class GratingCouplerFocusing(tk.Component):
         self.add(path)
         self.add(clad_path)
 
-    def __build_ports(self):
-        # Portlist format:
-        #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["output"] = {'port':(0,0), 'direction':'WEST'}
-
-class GratingCouplerCircular(tk.Component):
-    """ Grating Couper Cell Class that allows efficient coupling in the farfield.
-        See also Zhu et al., (2017) https://doi.org/10.1364/OE.25.033297
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-
-        Keyword Args:
-           * **port** (tuple): Cartesian coordinate of the input port
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
-           * **radius** (float): radius of the grating region
-           * **period** (float): Grating period
-           * **dutycycle** (float): dutycycle, determines the size of the 'gap' by dutycycle=(period-gap)/period.
-
-        Members:
-           **portlist** (dict): Dictionary with the relevant port information
-
-        Portlist format:
-           portlist['output'] = {'port': (x1,y1), 'direction': 'dir1'}
-
-        Where in the above (x1,y1) is the same as the 'port' input, and 'dir1' is of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
-
-    """
-    def __init__(self, wgt, port=(0,0), direction='EAST',
-                 radius=5, period=0.5, dutycycle=0.5):
-        tk.Component.__init__(self, "GratingCouplerCircular", locals())
-
-        self.portlist = {}
-
-        self.port = port
-        self.direction = direction
-        self.wgt = wgt
-        self.resist = wgt.resist
-        self.radius = radius
-        self.period = period
-
-        if dutycycle>1.0 or dutycycle<0.0:
-            raise ValueError("Warning! Dutycycle *must* specify a valid number "
-                             "between 0 and 1.")
-        self.dc = dutycycle
-        self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
-        self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
-
-        self.__build_cell()
-        self.__build_ports()
-        
-        """ Translate & rotate the ports corresponding to this specific component object
-        """
-        self._auto_transform_()
-
-    def __build_cell(self):
-        # Sequentially build all the geometric shapes using gdspy path functions
-        # then add it to the Cell
-
-        num_teeth = int((self.radius-self.wgt.wg_width/2)//self.period)
-
-        max_points = 199
-        seed = gdspy.Round((0,0), radius=self.wgt.wg_width/2,
-                           final_angle=np.pi, max_points=max_points, **self.wg_spec)
-        
-        for q in range(1, num_teeth):
-            tooth = gdspy.Round((0,0), 
-                                radius=self.wgt.wg_width/2 + q*self.period,
-                                inner_radius=self.wgt.wg_width/2 + (q-self.dc)*self.period,
-                                final_angle=np.pi,
-                                max_points=max_points, **self.wg_spec)
-            tooth.rotate(-np.pi/2.0, (0,0))
-            self.add(tooth)
-        
-
-        seed.rotate(-np.pi/2.0, (0,0))
-        self.add(seed)
-       
     def __build_ports(self):
         # Portlist format:
         #    example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
