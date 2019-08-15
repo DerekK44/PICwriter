@@ -25,3 +25,4 @@ from .zerolengthcavity import ZeroLengthCavity
 from .sbend import SBend
 from .ebend import EBend, EulerSBend
 from .bbend import BBend
+from .ysplitter import SplineYSplitter
