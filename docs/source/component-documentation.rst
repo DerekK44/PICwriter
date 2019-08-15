@@ -12,6 +12,7 @@ Below is the set of supported components that come standard in the picwriter lib
    components/spirals.rst
    components/dc.rst
    components/mmis.rst
+   components/splitters.rst
    components/resonators.rst
    components/dbr.rst
    components/markers.rst
