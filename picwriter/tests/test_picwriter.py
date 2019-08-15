@@ -355,3 +355,20 @@ class TestPICwriter(TestCase):
 		print(len(top.references))
 		self.assertTrue(len(top.references)==3)
 		self.assertTrue(abs(top.area()-8823.676248339165) <= AREA_TOL)
+
+	def test_ysplitter_creation(self):
+		top = gdspy.Cell("t-ysplitter")
+		top = gdspy.Cell("top")
+		wgt = WaveguideTemplate(bend_radius=50, wg_width=0.5, resist='+')
+		
+		# Values from Publication
+		spline_widths = [0.5, 0.5, 0.6, 0.7, 0.9, 1.26, 1.4, 1.4, 1.4, 1.4, 1.31, 1.2, 1.2]
+		ysplitter = SplineYSplitter(wgt, length=2, widths=spline_widths, taper_width=None, taper_length=None, output_length=10, output_wg_sep=5, output_width=0.5, port=(0,0), direction='EAST')
+		wg1 = Waveguide([(-10,0), ysplitter.portlist['input']['port']], wgt)
+		ysplitter.addto(top)
+		wg1.addto(top)
+  
+		print("YSplitter area = "+str(top.area()))
+		print(len(top.references))
+		self.assertTrue(len(top.references)==2)
+		self.assertTrue(abs(top.area()-688.6206052162884) <= AREA_TOL)
