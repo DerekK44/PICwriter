@@ -14,7 +14,7 @@ class SplineYSplitter(tk.Component):
         Args:
            * **wgt** (WaveguideTemplate):  WaveguideTemplate object
            * **length** (float): Length of the splitter region (along direction of propagation)
-           * **widths** (array of floats): Widths of the Spline Curve Splitter region (perpendicular to direction of propagation)
+           * **widths** (array of floats): Widths of the Spline Curve Splitter region (perpendicular to direction of propagation).  Width values are evenly spaced along the length of the splitter.
 
         Keyword Args:
            * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to be flush with the last width in the splitter region). Defaults to None.
@@ -130,6 +130,12 @@ class SplineYSplitter(tk.Component):
                 
         (x,y) = (x+self.length, y)
         
+        clad_region = gdspy.Polygon([(x_positions[0], y_positions[0]/2.0+self.wgt.clad_width),
+                                     (x_positions[-1], y_positions[-1]/2.0+self.wgt.clad_width),
+                                     (x_positions[-1], -y_positions[-1]/2.0-self.wgt.clad_width),
+                                     (x_positions[0], -y_positions[0]/2.0-self.wgt.clad_width)], **self.clad_spec)
+        self.add(clad_region)
+        
         """ Add the output tapers """
         if self.draw_outputs:
             dy = (self.output_wg_sep-self.wg_sep)/2.0
@@ -159,15 +165,16 @@ class SplineYSplitter(tk.Component):
 
 
 if __name__ == "__main__":
-    from . import *
+#    from . import *
+    import picwriter.components as pc
     top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(bend_radius=50, wg_width=0.5, resist='+')
+    wgt = pc.WaveguideTemplate(bend_radius=50, wg_width=0.5, resist='+')
 
     # Values from Publication
     spline_widths = [0.5, 0.5, 0.6, 0.7, 0.9, 1.26, 1.4, 1.4, 1.4, 1.4, 1.31, 1.2, 1.2]
     ysplitter = SplineYSplitter(wgt, length=2, widths=spline_widths, taper_width=None, taper_length=None, 
                                 output_length=10, output_wg_sep=5, output_width=0.5, port=(0,0), direction='EAST')
-    wg1 = Waveguide([(-10,0),
+    wg1 = pc.Waveguide([(-10,0),
                     ysplitter.portlist['input']['port']], wgt)
     ysplitter.addto(top)
     wg1.addto(top)
