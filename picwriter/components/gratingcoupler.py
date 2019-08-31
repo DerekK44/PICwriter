@@ -104,10 +104,11 @@ class GratingCoupler(tk.Component):
             self.add(ridge_region)
         
         # Then the input waveguide stub
-        stub_length = (self.wgt.wg_width/2.0)/np.tan(self.theta/2.0)
-        stub = gdspy.Path(self.wgt.wg_width, (0,0))
-        stub.segment(stub_length+0.1, **self.wg_spec)
-        self.add(stub)
+        if self.taper_length > self.wgt.wg_width/2:
+            stub_length = (self.wgt.wg_width/2.0)/np.tan(self.theta/2.0)
+            stub = gdspy.Path(self.wgt.wg_width, (0,0))
+            stub.segment(stub_length+0.1, **self.wg_spec)
+            self.add(stub)
         
         if self.teeth_list == None:
             """ Fixed pitch grating coupler """
