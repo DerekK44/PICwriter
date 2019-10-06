@@ -5,6 +5,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
+
 class MetalTemplate:
     """ Template for electrical wires that contains some standard information about the fabrication process and metal wire.
 
@@ -20,24 +21,39 @@ class MetalTemplate:
            * **clad_datatype** (int): Data type used for cladding.  Defaults to 0.
 
     """
-    def __init__(self, bend_radius=0, width=20.0, clad_width=20.0,
-                 resist='+', fab='ETCH', metal_layer=11, metal_datatype=0, clad_layer=12, clad_datatype=0):
-        self.name = tk.getCellName("MetalTemplate") #Each MetalTemplate is given a unique name
+
+    def __init__(
+        self,
+        bend_radius=0,
+        width=20.0,
+        clad_width=20.0,
+        resist="+",
+        fab="ETCH",
+        metal_layer=11,
+        metal_datatype=0,
+        clad_layer=12,
+        clad_datatype=0,
+    ):
+        self.name = tk.getCellName(
+            "MetalTemplate"
+        )  # Each MetalTemplate is given a unique name
         self.width = width
         self.bend_radius = bend_radius
         self.clad_width = clad_width
-        if resist != '+' and resist != '-':
-            raise ValueError("Warning, invalid input for type resist in "
-                             "MetalTemplate")
-        if fab=='ETCH':
-            self.resist = resist #default state assumes 'etching'
-        else: #reverse resist type if liftoff or something else
-            self.resist = '+' if resist=='-' else '-'
+        if resist != "+" and resist != "-":
+            raise ValueError(
+                "Warning, invalid input for type resist in " "MetalTemplate"
+            )
+        if fab == "ETCH":
+            self.resist = resist  # default state assumes 'etching'
+        else:  # reverse resist type if liftoff or something else
+            self.resist = "+" if resist == "-" else "-"
 
         self.metal_layer = metal_layer
         self.metal_datatype = metal_datatype
         self.clad_layer = clad_layer
         self.clad_datatype = clad_datatype
+
 
 class MetalRoute(tk.Component):
     """ Standard MetalRoute Cell class.
@@ -56,6 +72,7 @@ class MetalRoute(tk.Component):
         Where in the above (x1,y1) are the first elements of 'trace', (x2, y2) are the last elements of 'trace', and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
 
     """
+
     def __init__(self, trace, mt):
         tk.Component.__init__(self, "MetalRoute", locals())
 
@@ -65,8 +82,11 @@ class MetalRoute(tk.Component):
         self.mt = mt
         self.resist = mt.resist
         self.bend_radius = mt.bend_radius
-        self.spec = {'layer': mt.metal_layer, 'datatype': mt.metal_datatype}
-        self.clad_spec = {'layer': mt.clad_layer, 'datatype': mt.clad_datatype} #Used for 'xor' operation
+        self.spec = {"layer": mt.metal_layer, "datatype": mt.metal_datatype}
+        self.clad_spec = {
+            "layer": mt.clad_layer,
+            "datatype": mt.clad_datatype,
+        }  # Used for 'xor' operation
 
         self.__type_check_trace()
         self.__build_cell()
@@ -86,22 +106,38 @@ class MetalRoute(tk.Component):
         Make sure all waypoints specify 90degree angles.  This might be
         updated in the future to allow for 45deg, or arbitrary bends
         """
-        prev_dx, prev_dy = 1,1 #initialize to safe value
-        for i in range(len(self.trace)-1):
-            dx = abs(self.trace[i+1][0]-self.trace[i][0])+1E-10
-            dy = abs(self.trace[i+1][1]-self.trace[i][1])+1E-10
-            if (dx < 2*self.mt.bend_radius and dy < 2*self.mt.bend_radius) and (i != 0) and (i!=len(self.trace)-2) and (self.bend_radius != 0):
-                raise ValueError("Warning!  All waypoints *must* be greater than "
-                                 "two bend radii apart.")
-            if ((i == 0) or (i==len(self.trace)-2)) and (dx < self.mt.bend_radius and dy < self.mt.bend_radius) and (self.bend_radius != 0):
-                raise ValueError("Warning! Start and end waypoints *must be greater "
-                                 "than one bend radius apart.")
-            if dx>=1e-6 and dy>=1e-6:
-                raise ValueError("Warning! All waypoints *must* specify turns "
-                                 "that are 90degrees")
-            if ((prev_dx <= 1e-6 and dx<=1e-6) or (prev_dy <= 1e-6 and dy<=1e-6)):
-                raise ValueError("Warning! Unnecessary waypoint specified.  All"
-                                 " waypoints must specify a valid 90deg bend")
+        prev_dx, prev_dy = 1, 1  # initialize to safe value
+        for i in range(len(self.trace) - 1):
+            dx = abs(self.trace[i + 1][0] - self.trace[i][0]) + 1e-10
+            dy = abs(self.trace[i + 1][1] - self.trace[i][1]) + 1e-10
+            if (
+                (dx < 2 * self.mt.bend_radius and dy < 2 * self.mt.bend_radius)
+                and (i != 0)
+                and (i != len(self.trace) - 2)
+                and (self.bend_radius != 0)
+            ):
+                raise ValueError(
+                    "Warning!  All waypoints *must* be greater than "
+                    "two bend radii apart."
+                )
+            if (
+                ((i == 0) or (i == len(self.trace) - 2))
+                and (dx < self.mt.bend_radius and dy < self.mt.bend_radius)
+                and (self.bend_radius != 0)
+            ):
+                raise ValueError(
+                    "Warning! Start and end waypoints *must be greater "
+                    "than one bend radius apart."
+                )
+            if dx >= 1e-6 and dy >= 1e-6:
+                raise ValueError(
+                    "Warning! All waypoints *must* specify turns " "that are 90degrees"
+                )
+            if (prev_dx <= 1e-6 and dx <= 1e-6) or (prev_dy <= 1e-6 and dy <= 1e-6):
+                raise ValueError(
+                    "Warning! Unnecessary waypoint specified.  All"
+                    " waypoints must specify a valid 90deg bend"
+                )
             prev_dx, prev_dy = dx, dy
 
     def __build_cell(self):
@@ -110,72 +146,171 @@ class MetalRoute(tk.Component):
         br = self.mt.bend_radius
 
         path = gdspy.Path(self.mt.width, self.trace[0])
-        path2 = gdspy.Path(self.mt.width+2*self.mt.clad_width, self.trace[0])
+        path2 = gdspy.Path(self.mt.width + 2 * self.mt.clad_width, self.trace[0])
 
         prior_direction = tk.get_direction(self.trace[0], self.trace[1])
 
         if br != 0:
             """ Path routing for curved bends.  Same as in waveguide class. """
-            path.segment(tk.dist(self.trace[0], self.trace[1])-br,
-                         direction=tk.get_angle(self.trace[0], self.trace[1]),
-                         **self.spec)
-            path2.segment(tk.dist(self.trace[0], self.trace[1])-br,
-                         direction=tk.get_angle(self.trace[0], self.trace[1]),
-                         **self.clad_spec)
-            for i in range(len(self.trace)-2):
-                direction = tk.get_direction(self.trace[i+1], self.trace[i+2])
+            path.segment(
+                tk.dist(self.trace[0], self.trace[1]) - br,
+                direction=tk.get_angle(self.trace[0], self.trace[1]),
+                **self.spec
+            )
+            path2.segment(
+                tk.dist(self.trace[0], self.trace[1]) - br,
+                direction=tk.get_angle(self.trace[0], self.trace[1]),
+                **self.clad_spec
+            )
+            for i in range(len(self.trace) - 2):
+                direction = tk.get_direction(self.trace[i + 1], self.trace[i + 2])
                 turn = tk.get_turn(prior_direction, direction)
                 path.turn(br, turn, number_of_points=0.1, **self.spec)
                 path2.turn(br, turn, number_of_points=0.1, **self.clad_spec)
-                if tk.dist(self.trace[i+1], self.trace[i+2])-2*br > 0: #ONLY False for last points if spaced br < distance < 2br
-                    path.segment(tk.dist(self.trace[i+1], self.trace[i+2])-2*br, **self.spec)
-                    path2.segment(tk.dist(self.trace[i+1], self.trace[i+2])-2*br, **self.clad_spec)
+                if (
+                    tk.dist(self.trace[i + 1], self.trace[i + 2]) - 2 * br > 0
+                ):  # ONLY False for last points if spaced br < distance < 2br
+                    path.segment(
+                        tk.dist(self.trace[i + 1], self.trace[i + 2]) - 2 * br,
+                        **self.spec
+                    )
+                    path2.segment(
+                        tk.dist(self.trace[i + 1], self.trace[i + 2]) - 2 * br,
+                        **self.clad_spec
+                    )
                 prior_direction = direction
-            if tk.dist(self.trace[-2],self.trace[-1]) < 2*br:
-                path.segment(tk.dist(self.trace[-2],self.trace[-1])-br, **self.spec)
-                path2.segment(tk.dist(self.trace[-2],self.trace[-1])-br, **self.clad_spec)
+            if tk.dist(self.trace[-2], self.trace[-1]) < 2 * br:
+                path.segment(tk.dist(self.trace[-2], self.trace[-1]) - br, **self.spec)
+                path2.segment(
+                    tk.dist(self.trace[-2], self.trace[-1]) - br, **self.clad_spec
+                )
             else:
                 path.segment(br, **self.spec)
                 path2.segment(br, **self.clad_spec)
 
-            if len(self.trace)==2 and tk.dist(self.trace[1], self.trace[0])<=self.mt.bend_radius:
+            if (
+                len(self.trace) == 2
+                and tk.dist(self.trace[1], self.trace[0]) <= self.mt.bend_radius
+            ):
                 path = gdspy.Path(self.mt.width, self.trace[0])
-                path.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_angle(self.trace[0], self.trace[1]), **self.spec)
-                path2 = gdspy.Path(self.mt.width+2*self.mt.clad_width, self.trace[0])
-                path2.segment(tk.dist(self.trace[0], self.trace[1]), direction=tk.get_angle(self.trace[0], self.trace[1]), **self.clad_spec)
+                path.segment(
+                    tk.dist(self.trace[0], self.trace[1]),
+                    direction=tk.get_angle(self.trace[0], self.trace[1]),
+                    **self.spec
+                )
+                path2 = gdspy.Path(
+                    self.mt.width + 2 * self.mt.clad_width, self.trace[0]
+                )
+                path2.segment(
+                    tk.dist(self.trace[0], self.trace[1]),
+                    direction=tk.get_angle(self.trace[0], self.trace[1]),
+                    **self.clad_spec
+                )
         elif br == 0:
             """ Do path routing for sharp 90 degree trace bends """
-            path.segment(tk.dist(self.trace[0], self.trace[1]),
-                         direction=tk.get_angle(self.trace[0], self.trace[1]),
-                         **self.spec)
-            path2.segment(tk.dist(self.trace[0], self.trace[1]),
-                         direction=tk.get_angle(self.trace[0], self.trace[1]),
-                         **self.clad_spec)
-            for i in range(len(self.trace)-2):
+            path.segment(
+                tk.dist(self.trace[0], self.trace[1]),
+                direction=tk.get_angle(self.trace[0], self.trace[1]),
+                **self.spec
+            )
+            path2.segment(
+                tk.dist(self.trace[0], self.trace[1]),
+                direction=tk.get_angle(self.trace[0], self.trace[1]),
+                **self.clad_spec
+            )
+            for i in range(len(self.trace) - 2):
                 """ Add a square to fill in the corner """
-                self.add(gdspy.Rectangle((self.trace[i+1][0]-self.mt.width/2.0, self.trace[i+1][1]-self.mt.width/2.0),
-                                         (self.trace[i+1][0]+self.mt.width/2.0, self.trace[i+1][1]+self.mt.width/2.0), **self.spec))
-                self.add(gdspy.Rectangle((self.trace[i+1][0]-self.mt.width/2.0-self.mt.clad_width, self.trace[i+1][1]-self.mt.width/2.0-self.mt.clad_width),
-                                         (self.trace[i+1][0]+self.mt.width/2.0+self.mt.clad_width, self.trace[i+1][1]+self.mt.width/2.0+self.mt.clad_width), **self.clad_spec))
-                angle = tk.get_angle(self.trace[i+1], self.trace[i+2])
-                path.segment(tk.dist(self.trace[i+1], self.trace[i+2]), direction=angle, **self.spec)
-                path2.segment(tk.dist(self.trace[i+1], self.trace[i+2]), direction=angle, **self.clad_spec)
+                self.add(
+                    gdspy.Rectangle(
+                        (
+                            self.trace[i + 1][0] - self.mt.width / 2.0,
+                            self.trace[i + 1][1] - self.mt.width / 2.0,
+                        ),
+                        (
+                            self.trace[i + 1][0] + self.mt.width / 2.0,
+                            self.trace[i + 1][1] + self.mt.width / 2.0,
+                        ),
+                        **self.spec
+                    )
+                )
+                self.add(
+                    gdspy.Rectangle(
+                        (
+                            self.trace[i + 1][0]
+                            - self.mt.width / 2.0
+                            - self.mt.clad_width,
+                            self.trace[i + 1][1]
+                            - self.mt.width / 2.0
+                            - self.mt.clad_width,
+                        ),
+                        (
+                            self.trace[i + 1][0]
+                            + self.mt.width / 2.0
+                            + self.mt.clad_width,
+                            self.trace[i + 1][1]
+                            + self.mt.width / 2.0
+                            + self.mt.clad_width,
+                        ),
+                        **self.clad_spec
+                    )
+                )
+                angle = tk.get_angle(self.trace[i + 1], self.trace[i + 2])
+                path.segment(
+                    tk.dist(self.trace[i + 1], self.trace[i + 2]),
+                    direction=angle,
+                    **self.spec
+                )
+                path2.segment(
+                    tk.dist(self.trace[i + 1], self.trace[i + 2]),
+                    direction=angle,
+                    **self.clad_spec
+                )
 
         """ Extra padding """
-        if tk.get_direction(self.trace[0], self.trace[1])=='EAST' or tk.get_direction(self.trace[0], self.trace[1])=='WEST':
-            pad_ll = (self.trace[0][0]-self.mt.clad_width, self.trace[0][1]-self.mt.width/2.0-self.mt.clad_width)
-            pad_ul = (self.trace[0][0]+self.mt.clad_width, self.trace[0][1]+self.mt.width/2.0+self.mt.clad_width)
+        if (
+            tk.get_direction(self.trace[0], self.trace[1]) == "EAST"
+            or tk.get_direction(self.trace[0], self.trace[1]) == "WEST"
+        ):
+            pad_ll = (
+                self.trace[0][0] - self.mt.clad_width,
+                self.trace[0][1] - self.mt.width / 2.0 - self.mt.clad_width,
+            )
+            pad_ul = (
+                self.trace[0][0] + self.mt.clad_width,
+                self.trace[0][1] + self.mt.width / 2.0 + self.mt.clad_width,
+            )
         else:
-            pad_ll = (self.trace[0][0]-self.mt.width/2.0-self.mt.clad_width, self.trace[0][1]-self.mt.clad_width)
-            pad_ul = (self.trace[0][0]+self.mt.width/2.0+self.mt.clad_width, self.trace[0][1]+self.mt.clad_width)
+            pad_ll = (
+                self.trace[0][0] - self.mt.width / 2.0 - self.mt.clad_width,
+                self.trace[0][1] - self.mt.clad_width,
+            )
+            pad_ul = (
+                self.trace[0][0] + self.mt.width / 2.0 + self.mt.clad_width,
+                self.trace[0][1] + self.mt.clad_width,
+            )
         self.add(gdspy.Rectangle(pad_ll, pad_ul, **self.clad_spec))
 
-        if tk.get_direction(self.trace[-2], self.trace[-1])=='EAST' or tk.get_direction(self.trace[-2], self.trace[-1])=='WEST':
-            pad_ll = (self.trace[-1][0]-self.mt.clad_width, self.trace[-1][1]-self.mt.width/2.0-self.mt.clad_width)
-            pad_ul = (self.trace[-1][0]+self.mt.clad_width, self.trace[-1][1]+self.mt.width/2.0+self.mt.clad_width)
+        if (
+            tk.get_direction(self.trace[-2], self.trace[-1]) == "EAST"
+            or tk.get_direction(self.trace[-2], self.trace[-1]) == "WEST"
+        ):
+            pad_ll = (
+                self.trace[-1][0] - self.mt.clad_width,
+                self.trace[-1][1] - self.mt.width / 2.0 - self.mt.clad_width,
+            )
+            pad_ul = (
+                self.trace[-1][0] + self.mt.clad_width,
+                self.trace[-1][1] + self.mt.width / 2.0 + self.mt.clad_width,
+            )
         else:
-            pad_ll = (self.trace[-1][0]-self.mt.width/2.0-self.mt.clad_width, self.trace[-1][1]-self.mt.clad_width)
-            pad_ul = (self.trace[-1][0]+self.mt.width/2.0+self.mt.clad_width, self.trace[-1][1]+self.mt.clad_width)
+            pad_ll = (
+                self.trace[-1][0] - self.mt.width / 2.0 - self.mt.clad_width,
+                self.trace[-1][1] - self.mt.clad_width,
+            )
+            pad_ul = (
+                self.trace[-1][0] + self.mt.width / 2.0 + self.mt.clad_width,
+                self.trace[-1][1] + self.mt.clad_width,
+            )
         self.add(gdspy.Rectangle(pad_ll, pad_ul, **self.clad_spec))
 
         self.add(path)
@@ -184,10 +319,15 @@ class MetalRoute(tk.Component):
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':(self.trace[0][0], self.trace[0][1]),
-                                  'direction': tk.get_direction(self.trace[1], self.trace[0])}
-        self.portlist["output"] = {'port':(self.trace[-1][0], self.trace[-1][1]),
-                                   'direction':tk.get_direction(self.trace[-2], self.trace[-1])}
+        self.portlist["input"] = {
+            "port": (self.trace[0][0], self.trace[0][1]),
+            "direction": tk.get_direction(self.trace[1], self.trace[0]),
+        }
+        self.portlist["output"] = {
+            "port": (self.trace[-1][0], self.trace[-1][1]),
+            "direction": tk.get_direction(self.trace[-2], self.trace[-1]),
+        }
+
 
 class Bondpad(tk.Component):
     """ Standard Bondpad Cell class.
@@ -210,7 +350,8 @@ class Bondpad(tk.Component):
         Where in the above (x1,y1) is the same as the 'port' input, and 'dir' is the same as 'direction' input of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
 
     """
-    def __init__(self, mt, length=150, width=100, port=(0,0), direction='EAST'):
+
+    def __init__(self, mt, length=150, width=100, port=(0, 0), direction="EAST"):
         tk.Component.__init__(self, "Bondpad", locals())
 
         self.portlist = {}
@@ -221,12 +362,12 @@ class Bondpad(tk.Component):
         self.direction = direction
         self.mt = mt
 
-        self.spec = {'layer': mt.metal_layer, 'datatype': mt.metal_datatype}
-        self.clad_spec = {'layer': mt.clad_layer, 'datatype': mt.clad_datatype}
+        self.spec = {"layer": mt.metal_layer, "datatype": mt.metal_datatype}
+        self.clad_spec = {"layer": mt.clad_layer, "datatype": mt.clad_datatype}
 
         self.__build_cell()
         self.__build_ports()
-        
+
         """ Translate & rotate the ports corresponding to this specific component object
         """
         self._auto_transform_()
@@ -235,19 +376,22 @@ class Bondpad(tk.Component):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         w, l, c = self.width, self.length, self.mt.clad_width
-        self.add(gdspy.Rectangle((0, -w/2.0), (l, w/2.0), **self.spec))
-        self.add(gdspy.Rectangle((-c, -w/2.0-c), (l+c, w/2.0+c), **self.clad_spec))
+        self.add(gdspy.Rectangle((0, -w / 2.0), (l, w / 2.0), **self.spec))
+        self.add(
+            gdspy.Rectangle((-c, -w / 2.0 - c), (l + c, w / 2.0 + c), **self.clad_spec)
+        )
 
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["output"] = {'port':(0,0), 'direction':'EAST'}
+        self.portlist["output"] = {"port": (0, 0), "direction": "EAST"}
+
 
 if __name__ == "__main__":
     top = gdspy.Cell("top")
-    mt = MetalTemplate(bend_radius=0, resist='+', fab="ETCH")
+    mt = MetalTemplate(bend_radius=0, resist="+", fab="ETCH")
 
-    mt1=MetalRoute([(0,0), (0,250), (100,250), (100,500), (400,500)], mt)
+    mt1 = MetalRoute([(0, 0), (0, 250), (100, 250), (100, 500), (400, 500)], mt)
 
     bp1 = Bondpad(mt, **mt1.portlist["output"])
     bp2 = Bondpad(mt, **mt1.portlist["input"])

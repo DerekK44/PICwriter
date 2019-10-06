@@ -5,6 +5,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
+
 class Taper(tk.Component):
     """ Taper Cell class.
 
@@ -31,26 +32,39 @@ class Taper(tk.Component):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, length, end_width, start_width=None, end_clad_width=None, extra_clad_length=0, port=(0,0), direction='EAST'):
+
+    def __init__(
+        self,
+        wgt,
+        length,
+        end_width,
+        start_width=None,
+        end_clad_width=None,
+        extra_clad_length=0,
+        port=(0, 0),
+        direction="EAST",
+    ):
         tk.Component.__init__(self, "Taper", locals())
-        
+
         self.portlist = {}
 
         self.port = port
         self.direction = direction
-        
+
         self.length = length
         self.end_width = end_width
-        self.start_width = wgt.wg_width if start_width==None else start_width
-        self.end_clad_width = wgt.clad_width if end_clad_width==None else end_clad_width
+        self.start_width = wgt.wg_width if start_width == None else start_width
+        self.end_clad_width = (
+            wgt.clad_width if end_clad_width == None else end_clad_width
+        )
         self.extra_clad_length = extra_clad_length
         self.wgt = wgt
-        self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
-        self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
+        self.wg_spec = {"layer": wgt.wg_layer, "datatype": wgt.wg_datatype}
+        self.clad_spec = {"layer": wgt.clad_layer, "datatype": wgt.clad_datatype}
 
         self.__build_cell()
         self.__build_ports()
-        
+
         """ Translate & rotate the ports corresponding to this specific component object
         """
         self._auto_transform_()
@@ -60,13 +74,18 @@ class Taper(tk.Component):
         # for waveguide, then add it to the Cell
 
         # Add waveguide taper
-        path = gdspy.Path(self.start_width, (0,0))
-        path.segment(self.length, direction=0.0, 
-                     final_width=self.end_width, **self.wg_spec)
+        path = gdspy.Path(self.start_width, (0, 0))
+        path.segment(
+            self.length, direction=0.0, final_width=self.end_width, **self.wg_spec
+        )
         # Cladding for waveguide taper
-        path2 = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (0,0))
-        path2.segment(self.length, direction=0.0, 
-                      final_width=2*self.end_clad_width+self.end_width, **self.clad_spec)
+        path2 = gdspy.Path(2 * self.wgt.clad_width + self.wgt.wg_width, (0, 0))
+        path2.segment(
+            self.length,
+            direction=0.0,
+            final_width=2 * self.end_clad_width + self.end_width,
+            **self.clad_spec
+        )
         path2.segment(self.extra_clad_length, **self.clad_spec)
 
         self.add(path)
@@ -75,15 +94,17 @@ class Taper(tk.Component):
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':(0,0), 'direction':'WEST'}
-        self.portlist["output"] = {'port':(self.length,0), 'direction':'EAST'}
+        self.portlist["input"] = {"port": (0, 0), "direction": "WEST"}
+        self.portlist["output"] = {"port": (self.length, 0), "direction": "EAST"}
+
 
 if __name__ == "__main__":
     from . import *
-    top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(bend_radius=50, resist='+')
 
-    wg1=Waveguide([(0,0), (100,40)], wgt)
+    top = gdspy.Cell("top")
+    wgt = WaveguideTemplate(bend_radius=50, resist="+")
+
+    wg1 = Waveguide([(0, 0), (100, 40)], wgt)
     tk.add(top, wg1)
 
     tp1 = Taper(wgt, 100.0, 0.3, end_clad_width=50, **wg1.portlist["input"])

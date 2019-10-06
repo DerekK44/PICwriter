@@ -6,6 +6,7 @@ import gdspy
 import picwriter.toolkit as tk
 import math
 
+
 class BBend(tk.Component):
     """ Bezier Cell class.  Creates a Bezier waveguide bend that can be used in waveguide routing.  The number of points is computed based on the waveguide template grid resolution to automatically minimize grid errors.
         
@@ -32,12 +33,13 @@ class BBend(tk.Component):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
+
     def __init__(self, wgt, poles, start_width=None, end_width=None):
         tk.Component.__init__(self, "BBend", locals())
 
         self.portlist = {}
-        self.port = (0,0)
-        
+        self.port = (0, 0)
+
         if start_width != None:
             self.start_width = start_width
         else:
@@ -46,77 +48,97 @@ class BBend(tk.Component):
             self.end_width = end_width
         else:
             self.end_width = wgt.wg_width
-        
+
         self.input_port = (poles[0][0], poles[0][1])
         self.output_port = (poles[-1][0], poles[-1][1])
-        
+
         self.poles = poles
-        
+
         self.input_direction = tk.get_exact_angle(poles[1], poles[0])
         self.output_direction = tk.get_exact_angle(poles[-2], poles[-1])
-        
+
         self.wgt = wgt
-        self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
-        self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
+        self.wg_spec = {"layer": wgt.wg_layer, "datatype": wgt.wg_datatype}
+        self.clad_spec = {"layer": wgt.clad_layer, "datatype": wgt.clad_datatype}
 
         self.__build_cell()
         self.__build_ports()
-        
+
         """ Translate & rotate the ports corresponding to this specific component object
         """
-#        self._auto_transform_()
-        
+
+    #        self._auto_transform_()
+
     def _bezier_function(self, t):
         # input (t) goes from 0->1
         # Returns an (x,y) tuple
-        n = len(self.poles)-1
-        x, y = 0,0
-        for i in range(n+1):
-            coeff = math.factorial(n)/(math.factorial(i)*math.factorial(n-i))
-            x += coeff*((1-t)**(n-i)) * (t**i) * self.poles[i][0]
-            y += coeff*((1-t)**(n-i)) * (t**i) * self.poles[i][1]
-        return (x,y)
+        n = len(self.poles) - 1
+        x, y = 0, 0
+        for i in range(n + 1):
+            coeff = math.factorial(n) / (math.factorial(i) * math.factorial(n - i))
+            x += coeff * ((1 - t) ** (n - i)) * (t ** i) * self.poles[i][0]
+            y += coeff * ((1 - t) ** (n - i)) * (t ** i) * self.poles[i][1]
+        return (x, y)
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
 
-        # Add waveguide s-bend        
-        wg = gdspy.Path(self.start_width, (0,0))
-        wg.parametric(self._bezier_function, final_width = self.end_width, tolerance=self.wgt.grid/2.0, max_points=199, **self.wg_spec)
+        # Add waveguide s-bend
+        wg = gdspy.Path(self.start_width, (0, 0))
+        wg.parametric(
+            self._bezier_function,
+            final_width=self.end_width,
+            tolerance=self.wgt.grid / 2.0,
+            max_points=199,
+            **self.wg_spec
+        )
         self.add(wg)
-        
+
         # Add cladding s-bend
-        for i in range(len(self.wgt.waveguide_stack)-1):
-            cur_width = self.wgt.waveguide_stack[i+1][0]
-            cur_spec = {'layer': self.wgt.waveguide_stack[i+1][1][0], 'datatype': self.wgt.waveguide_stack[i+1][1][1]}
-            
-            clad = gdspy.Path(cur_width, (0,0))
-            clad.parametric(self._bezier_function, tolerance=self.wgt.grid/2.0, max_points=199, **cur_spec)
+        for i in range(len(self.wgt.waveguide_stack) - 1):
+            cur_width = self.wgt.waveguide_stack[i + 1][0]
+            cur_spec = {
+                "layer": self.wgt.waveguide_stack[i + 1][1][0],
+                "datatype": self.wgt.waveguide_stack[i + 1][1][1],
+            }
+
+            clad = gdspy.Path(cur_width, (0, 0))
+            clad.parametric(
+                self._bezier_function,
+                tolerance=self.wgt.grid / 2.0,
+                max_points=199,
+                **cur_spec
+            )
             self.add(clad)
 
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':self.input_port, 'direction':self.input_direction}
-        self.portlist["output"] = {'port':self.output_port, 'direction':self.output_direction}
+        self.portlist["input"] = {
+            "port": self.input_port,
+            "direction": self.input_direction,
+        }
+        self.portlist["output"] = {
+            "port": self.output_port,
+            "direction": self.output_direction,
+        }
+
 
 if __name__ == "__main__":
     from . import *
-    top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(bend_radius=50, resist='+')
 
-    wg1=Waveguide([(0,0), (25,0)], wgt)
+    top = gdspy.Cell("top")
+    wgt = WaveguideTemplate(bend_radius=50, resist="+")
+
+    wg1 = Waveguide([(0, 0), (25, 0)], wgt)
     tk.add(top, wg1)
 
-    bb1 = BBend(wgt, [(25,0),
-                      (125,0),
-                      (125,100),
-                      (225,100)])
+    bb1 = BBend(wgt, [(25, 0), (125, 0), (125, 100), (225, 100)])
     tk.add(top, bb1)
-    
-    x,y = bb1.portlist["output"]["port"]
-    wg2 = Waveguide([(x,y), (x+25, y)], wgt)
+
+    x, y = bb1.portlist["output"]["port"]
+    wg2 = Waveguide([(x, y), (x + 25, y)], wgt)
     tk.add(top, wg2)
 
     gdspy.LayoutViewer(cells=top, depth=3)

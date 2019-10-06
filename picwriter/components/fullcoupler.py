@@ -6,6 +6,7 @@ import gdspy
 import picwriter.toolkit as tk
 from picwriter.components.waveguide import Waveguide
 
+
 class FullCoupler(tk.Component):
     """ Adiabatic Full Cell class.  Design based on asymmetric adiabatic full coupler designs, such as the one reported in 'Integrated Optic Adiabatic Devices on Silicon' by Y. Shani, et al (IEEE Journal of Quantum Electronics, Vol. 27, No. 3 March 1991).
 
@@ -36,7 +37,18 @@ class FullCoupler(tk.Component):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, length, gap, dw, angle=np.pi/6.0, parity=1, port=(0,0), direction='EAST'):
+
+    def __init__(
+        self,
+        wgt,
+        length,
+        gap,
+        dw,
+        angle=np.pi / 6.0,
+        parity=1,
+        port=(0, 0),
+        direction="EAST",
+    ):
         tk.Component.__init__(self, "FullCoupler", locals())
 
         self.portlist = {}
@@ -44,22 +56,30 @@ class FullCoupler(tk.Component):
         self.port = port
         self.direction = direction
 
-        if angle > np.pi/2.0 or angle < 0:
-            raise ValueError("Warning! Improper angle specified ("+str(angle)+").  Must be between 0 and pi/2.0.")
+        if angle > np.pi / 2.0 or angle < 0:
+            raise ValueError(
+                "Warning! Improper angle specified ("
+                + str(angle)
+                + ").  Must be between 0 and pi/2.0."
+            )
         self.angle = angle
-        if parity != 1 and parity!=-1:
-            raise ValueError("Warning!  Parity input *must* be 1 or -1.  Received parity="+str(parity)+" instead.")
+        if parity != 1 and parity != -1:
+            raise ValueError(
+                "Warning!  Parity input *must* be 1 or -1.  Received parity="
+                + str(parity)
+                + " instead."
+            )
         self.parity = parity
         self.length = length
         self.gap = gap
         self.dw = dw
         self.wgt = wgt
-        self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
-        self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
+        self.wg_spec = {"layer": wgt.wg_layer, "datatype": wgt.wg_datatype}
+        self.clad_spec = {"layer": wgt.clad_layer, "datatype": wgt.clad_datatype}
 
         self.__build_cell()
         self.__build_ports()
-        
+
         """ Translate & rotate the ports corresponding to this specific component object
         """
         self._auto_transform_()
@@ -68,47 +88,139 @@ class FullCoupler(tk.Component):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         p = self.parity
-        angle_x_dist = 2*self.wgt.bend_radius*np.sin(self.angle)
+        angle_x_dist = 2 * self.wgt.bend_radius * np.sin(self.angle)
 
-        angle_y_dist = 2*self.wgt.bend_radius*(1-np.cos(self.angle))
-        distx = 2*angle_x_dist + self.length
-        disty = p*(2*abs(angle_y_dist) + self.gap + self.wgt.wg_width)
+        angle_y_dist = 2 * self.wgt.bend_radius * (1 - np.cos(self.angle))
+        distx = 2 * angle_x_dist + self.length
+        disty = p * (2 * abs(angle_y_dist) + self.gap + self.wgt.wg_width)
 
-        x0, y0 = 0,0 #shift to port location after rotation later
+        x0, y0 = 0, 0  # shift to port location after rotation later
 
         """ Build the adiabatic DC from gdspy Path derivatives """
         """ First the top waveguide """
         wg_top = gdspy.Path(self.wgt.wg_width, (x0, y0))
-        wg_top.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width+self.dw, **self.wg_spec)
-        wg_top.turn(self.wgt.bend_radius, p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.wg_spec)
-        wg_top.segment(self.length, final_width=self.wgt.wg_width-self.dw, **self.wg_spec)
-        wg_top.turn(self.wgt.bend_radius, p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.wg_spec)
-        wg_top.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width, **self.wg_spec)
+        wg_top.turn(
+            self.wgt.bend_radius,
+            -p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            final_width=self.wgt.wg_width + self.dw,
+            **self.wg_spec
+        )
+        wg_top.turn(
+            self.wgt.bend_radius,
+            p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            **self.wg_spec
+        )
+        wg_top.segment(
+            self.length, final_width=self.wgt.wg_width - self.dw, **self.wg_spec
+        )
+        wg_top.turn(
+            self.wgt.bend_radius,
+            p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            **self.wg_spec
+        )
+        wg_top.turn(
+            self.wgt.bend_radius,
+            -p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            final_width=self.wgt.wg_width,
+            **self.wg_spec
+        )
 
-        wg_top_clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (x0, y0))
-        wg_top_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.clad_spec)
-        wg_top_clad.turn(self.wgt.bend_radius, p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_top_clad = gdspy.Path(2 * self.wgt.clad_width + self.wgt.wg_width, (x0, y0))
+        wg_top_clad.turn(
+            self.wgt.bend_radius,
+            -p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            **self.clad_spec
+        )
+        wg_top_clad.turn(
+            self.wgt.bend_radius,
+            p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            final_width=self.wgt.wg_width + 2 * self.wgt.clad_width,
+            **self.clad_spec
+        )
         wg_top_clad.segment(self.length, **self.clad_spec)
-        wg_top_clad.turn(self.wgt.bend_radius, p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
-        wg_top_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.clad_spec)
+        wg_top_clad.turn(
+            self.wgt.bend_radius,
+            p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            final_width=self.wgt.wg_width + 2 * self.wgt.clad_width,
+            **self.clad_spec
+        )
+        wg_top_clad.turn(
+            self.wgt.bend_radius,
+            -p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            **self.clad_spec
+        )
 
         """ Next, the bottom waveguide """
         x1, y1 = 0, -disty
         wg_bot = gdspy.Path(self.wgt.wg_width, (x1, y1))
-        wg_bot.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width-self.dw, **self.wg_spec)
-        wg_bot.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.wg_spec)
-        wg_bot.segment(self.length, final_width=self.wgt.wg_width+self.dw, **self.wg_spec)
-        wg_bot.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.wg_spec)
-        wg_bot.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width, **self.wg_spec)
+        wg_bot.turn(
+            self.wgt.bend_radius,
+            +p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            final_width=self.wgt.wg_width - self.dw,
+            **self.wg_spec
+        )
+        wg_bot.turn(
+            self.wgt.bend_radius,
+            -p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            **self.wg_spec
+        )
+        wg_bot.segment(
+            self.length, final_width=self.wgt.wg_width + self.dw, **self.wg_spec
+        )
+        wg_bot.turn(
+            self.wgt.bend_radius,
+            -p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            **self.wg_spec
+        )
+        wg_bot.turn(
+            self.wgt.bend_radius,
+            +p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            final_width=self.wgt.wg_width,
+            **self.wg_spec
+        )
 
-        wg_bot_clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (x1, y1))
-        wg_bot_clad.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.clad_spec)
-        wg_bot_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
+        wg_bot_clad = gdspy.Path(2 * self.wgt.clad_width + self.wgt.wg_width, (x1, y1))
+        wg_bot_clad.turn(
+            self.wgt.bend_radius,
+            +p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            **self.clad_spec
+        )
+        wg_bot_clad.turn(
+            self.wgt.bend_radius,
+            -p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            final_width=self.wgt.wg_width + 2 * self.wgt.clad_width,
+            **self.clad_spec
+        )
         wg_bot_clad.segment(self.length, **self.clad_spec)
-        wg_bot_clad.turn(self.wgt.bend_radius, -p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), final_width=self.wgt.wg_width+2*self.wgt.clad_width, **self.clad_spec)
-        wg_bot_clad.turn(self.wgt.bend_radius, +p*self.angle, number_of_points=self.wgt.get_num_points_wg(self.angle), **self.clad_spec)
+        wg_bot_clad.turn(
+            self.wgt.bend_radius,
+            -p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            final_width=self.wgt.wg_width + 2 * self.wgt.clad_width,
+            **self.clad_spec
+        )
+        wg_bot_clad.turn(
+            self.wgt.bend_radius,
+            +p * self.angle,
+            number_of_points=self.wgt.get_num_points_wg(self.angle),
+            **self.clad_spec
+        )
 
-        self.portlist_input_straight = (0,0)
+        self.portlist_input_straight = (0, 0)
         self.portlist_output_straight = (distx, 0)
         self.portlist_output_cross = (distx, -disty)
         self.portlist_input_cross = (0, -disty)
@@ -121,30 +233,58 @@ class FullCoupler(tk.Component):
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        if self.parity==1:
-            self.portlist["input_top"] = {'port':self.portlist_input_straight, 'direction': 'WEST'}
-            self.portlist["input_bot"] = {'port':self.portlist_input_cross, 'direction': 'WEST'}
-            self.portlist["output_top"] = {'port':self.portlist_output_straight, 'direction': 'EAST'}
-            self.portlist["output_bot"] = {'port':self.portlist_output_cross, 'direction': 'EAST'}
-        elif self.parity==-1:
-            self.portlist["input_top"] = {'port':self.portlist_input_cross, 'direction': 'WEST'}
-            self.portlist["input_bot"] = {'port':self.portlist_input_straight, 'direction': 'WEST'}
-            self.portlist["output_top"] = {'port':self.portlist_output_cross, 'direction': 'EAST'}
-            self.portlist["output_bot"] = {'port':self.portlist_output_straight, 'direction': 'EAST'}
+        if self.parity == 1:
+            self.portlist["input_top"] = {
+                "port": self.portlist_input_straight,
+                "direction": "WEST",
+            }
+            self.portlist["input_bot"] = {
+                "port": self.portlist_input_cross,
+                "direction": "WEST",
+            }
+            self.portlist["output_top"] = {
+                "port": self.portlist_output_straight,
+                "direction": "EAST",
+            }
+            self.portlist["output_bot"] = {
+                "port": self.portlist_output_cross,
+                "direction": "EAST",
+            }
+        elif self.parity == -1:
+            self.portlist["input_top"] = {
+                "port": self.portlist_input_cross,
+                "direction": "WEST",
+            }
+            self.portlist["input_bot"] = {
+                "port": self.portlist_input_straight,
+                "direction": "WEST",
+            }
+            self.portlist["output_top"] = {
+                "port": self.portlist_output_cross,
+                "direction": "EAST",
+            }
+            self.portlist["output_bot"] = {
+                "port": self.portlist_output_straight,
+                "direction": "EAST",
+            }
+
 
 if __name__ == "__main__":
     from . import *
     from picwriter.components.waveguide import WaveguideTemplate
-    top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(wg_width=2.0, bend_radius=100, resist='+')
 
-    wg1=Waveguide([(0,0), (100,40)], wgt)
+    top = gdspy.Cell("top")
+    wgt = WaveguideTemplate(wg_width=2.0, bend_radius=100, resist="+")
+
+    wg1 = Waveguide([(0, 0), (100, 40)], wgt)
     tk.add(top, wg1)
 
-    fc = FullCoupler(wgt, 40.0, 0.5, 1.0, angle=np.pi/12.0, parity=1, **wg1.portlist["output"])
+    fc = FullCoupler(
+        wgt, 40.0, 0.5, 1.0, angle=np.pi / 12.0, parity=1, **wg1.portlist["output"]
+    )
     tk.add(top, fc)
     for p in fc.portlist.keys():
-        print(str(p)+": "+str(fc.portlist[p]['port']))
+        print(str(p) + ": " + str(fc.portlist[p]["port"]))
 
     gdspy.LayoutViewer()
 #    gdspy.write_gds('fc.gds', unit=1.0e-6, precision=1.0e-9)

@@ -5,6 +5,7 @@ import numpy as np
 import gdspy
 import picwriter.toolkit as tk
 
+
 class DBR(tk.Component):
     """ Distributed Bragg Reflector Cell class.  Tapers the input waveguide to a periodic waveguide structure with varying width (1-D photonic crystal).
 
@@ -34,7 +35,21 @@ class DBR(tk.Component):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, wgt, length, period, dc, w_phc, taper_length=20.0, fins=False, fin_size = (0.2,0.05), dbr_wgt=None, port=(0,0), direction='EAST'):
+
+    def __init__(
+        self,
+        wgt,
+        length,
+        period,
+        dc,
+        w_phc,
+        taper_length=20.0,
+        fins=False,
+        fin_size=(0.2, 0.05),
+        dbr_wgt=None,
+        port=(0, 0),
+        direction="EAST",
+    ):
         tk.Component.__init__(self, "DBR", locals())
 
         self.portlist = {}
@@ -52,23 +67,30 @@ class DBR(tk.Component):
         if fins:
             self.wgt = dbr_wgt
             self.side_wgt = wgt
-            self.wg_spec = {'layer': dbr_wgt.wg_layer, 'datatype': dbr_wgt.wg_datatype}
-            self.clad_spec = {'layer': dbr_wgt.clad_layer, 'datatype': dbr_wgt.clad_datatype}
-            self.fin_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
+            self.wg_spec = {"layer": dbr_wgt.wg_layer, "datatype": dbr_wgt.wg_datatype}
+            self.clad_spec = {
+                "layer": dbr_wgt.clad_layer,
+                "datatype": dbr_wgt.clad_datatype,
+            }
+            self.fin_spec = {"layer": wgt.wg_layer, "datatype": wgt.wg_datatype}
             if dbr_wgt is None:
-                raise ValueError("Warning! A waveguide template for the DBR (dbr_wgt) must be specified.")
+                raise ValueError(
+                    "Warning! A waveguide template for the DBR (dbr_wgt) must be specified."
+                )
         else:
             self.wgt = wgt
-            self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
-            self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
+            self.wg_spec = {"layer": wgt.wg_layer, "datatype": wgt.wg_datatype}
+            self.clad_spec = {"layer": wgt.clad_layer, "datatype": wgt.clad_datatype}
 
         """ Make sure the photonic crystal waveguide width is smaller than the waveguide width """
         if self.w_phc > self.wgt.wg_width:
-            raise ValueError("Warning! The w_phc parameter must be smaller than the waveguide template wg_width.")
-            
+            raise ValueError(
+                "Warning! The w_phc parameter must be smaller than the waveguide template wg_width."
+            )
+
         self.__build_cell()
         self.__build_ports()
-        
+
         """ Translate & rotate the ports corresponding to this specific component object
         """
         self._auto_transform_()
@@ -77,69 +99,108 @@ class DBR(tk.Component):
         # Sequentially build all the geometric shapes using gdspy path functions
         # for waveguide, then add it to the Cell
         # Add waveguide tapers leading to DBR region
-        taper = gdspy.Path(self.wgt.wg_width, (0,0))
-        taper.segment(self.taper_length, direction=0.0, final_width=self.w_phc, **self.wg_spec)
+        taper = gdspy.Path(self.wgt.wg_width, (0, 0))
+        taper.segment(
+            self.taper_length, direction=0.0, final_width=self.w_phc, **self.wg_spec
+        )
         taper.segment(self.length, **self.wg_spec)
         taper.segment(self.taper_length, final_width=self.wgt.wg_width, **self.wg_spec)
         # Cladding for DBR region
-        clad = gdspy.Path(2*self.wgt.clad_width+self.wgt.wg_width, (0,0))
-        clad.segment(self.length + 2*self.taper_length, direction=0.0, **self.clad_spec)
+        clad = gdspy.Path(2 * self.wgt.clad_width + self.wgt.wg_width, (0, 0))
+        clad.segment(
+            self.length + 2 * self.taper_length, direction=0.0, **self.clad_spec
+        )
 
         self.add(taper)
         self.add(clad)
 
         """ Now add the periodic PhC components """
-        num_blocks = (2*self.taper_length + self.length)//self.period
-        blockx = self.period*self.dc
-        startx = self.taper_length + self.length/2.0 -(num_blocks-1)*self.period/2.0 - blockx/2.0
+        num_blocks = (2 * self.taper_length + self.length) // self.period
+        blockx = self.period * self.dc
+        startx = (
+            self.taper_length
+            + self.length / 2.0
+            - (num_blocks - 1) * self.period / 2.0
+            - blockx / 2.0
+        )
         y0 = 0
         block_list = []
         for i in range(int(num_blocks)):
-            x = startx + i*self.period
-            block_list.append(gdspy.Rectangle((x, y0-self.wgt.wg_width/2.0), (x+blockx, y0+self.wgt.wg_width/2.0), **self.wg_spec))
+            x = startx + i * self.period
+            block_list.append(
+                gdspy.Rectangle(
+                    (x, y0 - self.wgt.wg_width / 2.0),
+                    (x + blockx, y0 + self.wgt.wg_width / 2.0),
+                    **self.wg_spec
+                )
+            )
 
         """ And add the 'fins' if self.fins==True """
         if self.fins:
-            num_fins = self.wgt.wg_width//(2*self.fin_size[1])
-            x0, y0 = 0, - num_fins*(2*self.fin_size[1])/2.0 + self.fin_size[1]/2.0
-            xend = 2*self.taper_length + self.length
+            num_fins = self.wgt.wg_width // (2 * self.fin_size[1])
+            x0, y0 = (
+                0,
+                -num_fins * (2 * self.fin_size[1]) / 2.0 + self.fin_size[1] / 2.0,
+            )
+            xend = 2 * self.taper_length + self.length
             for i in range(int(num_fins)):
-                y = y0 + i*2*self.fin_size[1]
-                block_list.append(gdspy.Rectangle((x0, y), (x0+self.fin_size[0], y+self.fin_size[1]), **self.fin_spec))
-                block_list.append(gdspy.Rectangle((xend-self.fin_size[0], y), (xend, y+self.fin_size[1]), **self.fin_spec))
-                
+                y = y0 + i * 2 * self.fin_size[1]
+                block_list.append(
+                    gdspy.Rectangle(
+                        (x0, y),
+                        (x0 + self.fin_size[0], y + self.fin_size[1]),
+                        **self.fin_spec
+                    )
+                )
+                block_list.append(
+                    gdspy.Rectangle(
+                        (xend - self.fin_size[0], y),
+                        (xend, y + self.fin_size[1]),
+                        **self.fin_spec
+                    )
+                )
+
         for block in block_list:
             self.add(block)
 
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input"] = {'port':(0,0), 'direction':'WEST'}
-        self.portlist["output"] = {'port':(self.length + 2*self.taper_length, 0), 'direction':'EAST'}
+        self.portlist["input"] = {"port": (0, 0), "direction": "WEST"}
+        self.portlist["output"] = {
+            "port": (self.length + 2 * self.taper_length, 0),
+            "direction": "EAST",
+        }
+
 
 if __name__ == "__main__":
     from . import *
-    top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(bend_radius=50, resist='+')
-    dbr_wgt = WaveguideTemplate(bend_radius=50, resist='+', wg_layer=3, wg_datatype=0)
 
-    wg1=Waveguide([(0,0), (100,0)], wgt)
+    top = gdspy.Cell("top")
+    wgt = WaveguideTemplate(bend_radius=50, resist="+")
+    dbr_wgt = WaveguideTemplate(bend_radius=50, resist="+", wg_layer=3, wg_datatype=0)
+
+    wg1 = Waveguide([(0, 0), (100, 0)], wgt)
     tk.add(top, wg1)
 
-    dbr1 = DBR(wgt, 10.0, 0.85, 0.5, 0.4, fins=True, dbr_wgt=dbr_wgt, **wg1.portlist["output"])
+    dbr1 = DBR(
+        wgt, 10.0, 0.85, 0.5, 0.4, fins=True, dbr_wgt=dbr_wgt, **wg1.portlist["output"]
+    )
     tk.add(top, dbr1)
 
     (x1, y1) = dbr1.portlist["output"]["port"]
-    wg2=Waveguide([(x1,y1),
-                   (x1+100,y1),
-                   (x1+100,y1+100)], wgt)
+    wg2 = Waveguide([(x1, y1), (x1 + 100, y1), (x1 + 100, y1 + 100)], wgt)
     tk.add(top, wg2)
 
-    dbr2 = DBR(wgt, 10.0, 0.85, 0.5, 0.6, fins=True, dbr_wgt=dbr_wgt, **wg2.portlist["output"])
+    dbr2 = DBR(
+        wgt, 10.0, 0.85, 0.5, 0.6, fins=True, dbr_wgt=dbr_wgt, **wg2.portlist["output"]
+    )
     tk.add(top, dbr2)
 
     (x2, y2) = dbr2.portlist["output"]["port"]
-    wg3=Waveguide([(x2,y2), (x2, y2+100.0),(x2+100,y2+200),(x2+100,y2+300)], wgt)
+    wg3 = Waveguide(
+        [(x2, y2), (x2, y2 + 100.0), (x2 + 100, y2 + 200), (x2 + 100, y2 + 300)], wgt
+    )
     tk.add(top, wg3)
 
     gdspy.LayoutViewer()

@@ -10,11 +10,12 @@ import numpy as np
 import math
 import gdspy
 
-TOL=1e-6
+TOL = 1e-6
 CURRENT_CELLS = {}
 CURRENT_CELL_NAMES = {}
 
-def add(top_cell, component_cell, center=(0,0), x_reflection=False):
+
+def add(top_cell, component_cell, center=(0, 0), x_reflection=False):
     """ First creates a CellReference to subcell, then adds this to topcell at location center.
 
         Args:
@@ -28,11 +29,13 @@ def add(top_cell, component_cell, center=(0,0), x_reflection=False):
         Returns:
            None
     """
-    
+
     if isinstance(component_cell, gdspy.Cell):
-        top_cell.add(gdspy.CellReference(component_cell, 
-                                         origin = center,
-                                         x_reflection=x_reflection))
+        top_cell.add(
+            gdspy.CellReference(
+                component_cell, origin=center, x_reflection=x_reflection
+            )
+        )
     elif isinstance(component_cell, Component):
         component_cell.addto(top_cell)
     else:
@@ -40,14 +43,16 @@ def add(top_cell, component_cell, center=(0,0), x_reflection=False):
             top_cell.add(component_cell)
         except:
             raise ValueError("Improper inputs given to add()")
-    
+
+
 def getCellName(name):
     global CURRENT_CELL_NAMES
     if name not in CURRENT_CELL_NAMES.keys():
         CURRENT_CELL_NAMES[name] = 1
     else:
         CURRENT_CELL_NAMES[name] += 1
-    return str(name)+"_"+str(CURRENT_CELL_NAMES[name])
+    return str(name) + "_" + str(CURRENT_CELL_NAMES[name])
+
 
 def build_mask(cell, wgt, final_layer=None, final_datatype=None):
     """ Builds the appropriate mask according to the resist specifications and fabrication type.  Does this by applying a boolean 'XOR' or 'AND' operation on the waveguide and clad masks.
@@ -64,19 +69,42 @@ def build_mask(cell, wgt, final_layer=None, final_datatype=None):
            None
 
     """
-    fl = wgt.clad_layer+1 if final_layer==None else final_layer
-    fd = 0 if final_datatype==None else final_datatype
+    fl = wgt.clad_layer + 1 if final_layer == None else final_layer
+    fd = 0 if final_datatype == None else final_datatype
 
     polygons = cell.get_polygons(by_spec=True)
     try:
         pWG = polygons[(wgt.wg_layer, wgt.wg_datatype)]
         pCLAD = polygons[(wgt.clad_layer, wgt.clad_datatype)]
     except KeyError:
-        print("Warning! No objects written to layer/datatype specified by WaveguideTemplate")
-    if wgt.resist=='+':
-        cell.add(gdspy.fast_boolean(pWG, pCLAD, 'xor', precision=0.001, max_points=199, layer=fl, datatype=fd))
-    elif wgt.resist=='-':
-        cell.add(gdspy.fast_boolean(pWG, pCLAD, 'and', precision=0.001, max_points=199, layer=fl, datatype=fd))
+        print(
+            "Warning! No objects written to layer/datatype specified by WaveguideTemplate"
+        )
+    if wgt.resist == "+":
+        cell.add(
+            gdspy.fast_boolean(
+                pWG,
+                pCLAD,
+                "xor",
+                precision=0.001,
+                max_points=199,
+                layer=fl,
+                datatype=fd,
+            )
+        )
+    elif wgt.resist == "-":
+        cell.add(
+            gdspy.fast_boolean(
+                pWG,
+                pCLAD,
+                "and",
+                precision=0.001,
+                max_points=199,
+                layer=fl,
+                datatype=fd,
+            )
+        )
+
 
 def get_trace_length(trace, wgt):
     """ Returns the total length of a curved waveguide trace.
@@ -90,12 +118,13 @@ def get_trace_length(trace, wgt):
 
     """
     length = 0.0
-    dbr = 2*wgt.bend_radius - 0.5*np.pi*wgt.bend_radius
-    for i in range(len(trace)-1):
-        pt2, pt1 = trace[i+1], trace[i]
-        length += np.sqrt((pt2[0]-pt1[0])**2 + (pt2[1]-pt1[1])**2)
-    length = length - (dbr*(len(trace)-1))
+    dbr = 2 * wgt.bend_radius - 0.5 * np.pi * wgt.bend_radius
+    for i in range(len(trace) - 1):
+        pt2, pt1 = trace[i + 1], trace[i]
+        length += np.sqrt((pt2[0] - pt1[0]) ** 2 + (pt2[1] - pt1[1]) ** 2)
+    length = length - (dbr * (len(trace) - 1))
     return length
+
 
 def get_keys(cell):
     """ Returns a list of the keys available in a portlist, such as 'input', 'output', 'top_output', etc.  Only works for picwriter components.
@@ -108,6 +137,7 @@ def get_keys(cell):
 
     """
     return list(cell.portlist.keys())
+
 
 def get_angle(pt1, pt2):
     """
@@ -129,19 +159,22 @@ def get_angle(pt1, pt2):
     The above prints 1.5707963267948966
 
     """
-    dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
-    if abs(dx)<=TOL and dy>0:
-        angle=0.5*np.pi
-    elif abs(dy)<=TOL and dx<0:
-        angle=np.pi
-    elif abs(dx)<=TOL and dy<0:
-        angle=1.5*np.pi
-    elif abs(dy)<=TOL and dx>0:
-        angle=0.0
+    dx, dy = pt2[0] - pt1[0], pt2[1] - pt1[1]
+    if abs(dx) <= TOL and dy > 0:
+        angle = 0.5 * np.pi
+    elif abs(dy) <= TOL and dx < 0:
+        angle = np.pi
+    elif abs(dx) <= TOL and dy < 0:
+        angle = 1.5 * np.pi
+    elif abs(dy) <= TOL and dx > 0:
+        angle = 0.0
     else:
-        raise ValueError("Warning! The angle between the two points must be an "
-                         "integer multiples of 90deg from each other")
+        raise ValueError(
+            "Warning! The angle between the two points must be an "
+            "integer multiples of 90deg from each other"
+        )
     return angle
+
 
 def get_exact_angle(pt1, pt2):
     """
@@ -163,8 +196,9 @@ def get_exact_angle(pt1, pt2):
     The above prints 0.785398163
 
     """
-    dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
-    return math.atan2(dy,dx)%(2*np.pi)
+    dx, dy = pt2[0] - pt1[0], pt2[1] - pt1[1]
+    return math.atan2(dy, dx) % (2 * np.pi)
+
 
 def dist(pt1, pt2):
     """
@@ -185,7 +219,8 @@ def dist(pt1, pt2):
     The above prints 141.42135623730951
 
     """
-    return np.sqrt((pt2[0]-pt1[0])**2 + (pt2[1]-pt1[1])**2)
+    return np.sqrt((pt2[0] - pt1[0]) ** 2 + (pt2[1] - pt1[1]) ** 2)
+
 
 def get_direction(pt1, pt2):
     """  Returns a cardinal direction (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, and ``'EAST'``)
@@ -207,15 +242,16 @@ def get_direction(pt1, pt2):
         The above prints 'WEST'
 
     """
-    dx, dy = pt2[0]-pt1[0], pt2[1]-pt1[1]
-    if abs(dx)<=TOL and dy>0:
+    dx, dy = pt2[0] - pt1[0], pt2[1] - pt1[1]
+    if abs(dx) <= TOL and dy > 0:
         return "NORTH"
-    elif abs(dy)<=TOL and dx<0:
+    elif abs(dy) <= TOL and dx < 0:
         return "WEST"
-    elif abs(dx)<=TOL and dy<0:
+    elif abs(dx) <= TOL and dy < 0:
         return "SOUTH"
     else:
         return "EAST"
+
 
 def get_turn(dir1, dir2):
     """  Returns an angle (+pi/2 or -pi/2) corresponding to the CW or CCW turns that takes you from direction `dir1` to `dir2`, where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
@@ -228,10 +264,21 @@ def get_turn(dir1, dir2):
            float  (+pi/2 or -pi/2)
 
     """
-    if (dir1=="NORTH" and dir2=="WEST") or (dir1=="WEST" and dir2=="SOUTH") or (dir1=="SOUTH" and dir2=="EAST") or (dir1=="EAST" and dir2=="NORTH"):
-        return np.pi/2.0
-    elif (dir1=="NORTH" and dir2=="EAST") or (dir1=="EAST" and dir2=="SOUTH") or (dir1=="SOUTH" and dir2=="WEST") or (dir1=="WEST" and dir2=="NORTH"):
-        return -np.pi/2.0
+    if (
+        (dir1 == "NORTH" and dir2 == "WEST")
+        or (dir1 == "WEST" and dir2 == "SOUTH")
+        or (dir1 == "SOUTH" and dir2 == "EAST")
+        or (dir1 == "EAST" and dir2 == "NORTH")
+    ):
+        return np.pi / 2.0
+    elif (
+        (dir1 == "NORTH" and dir2 == "EAST")
+        or (dir1 == "EAST" and dir2 == "SOUTH")
+        or (dir1 == "SOUTH" and dir2 == "WEST")
+        or (dir1 == "WEST" and dir2 == "NORTH")
+    ):
+        return -np.pi / 2.0
+
 
 def flip_direction(direction):
     """  Returns the opposite of `direction`, where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
@@ -244,12 +291,17 @@ def flip_direction(direction):
            direction (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``)
 
     """
-    if direction=="NORTH": return "SOUTH"
-    if direction=="SOUTH": return "NORTH"
-    if direction=="WEST": return "EAST"
-    if direction=="EAST": return "WEST"
+    if direction == "NORTH":
+        return "SOUTH"
+    if direction == "SOUTH":
+        return "NORTH"
+    if direction == "WEST":
+        return "EAST"
+    if direction == "EAST":
+        return "WEST"
     elif isinstance(direction, float):
-        return (direction + np.pi)%(2*np.pi)
+        return (direction + np.pi) % (2 * np.pi)
+
 
 def translate_point(pt, length, direction, height=0.0):
     """  Returns the point (tuple) corresponding to `pt` translated by distance `length` in direction `direction` where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
@@ -266,17 +318,21 @@ def translate_point(pt, length, direction, height=0.0):
            point, tuple (x, y)
 
     """
-    if isinstance(direction,float):
+    if isinstance(direction, float):
         # direction is a float (in radians)
-        return (pt[0]+length*np.cos(direction)-height*np.sin(direction), pt[1]+length*np.sin(direction)+height*np.cos(direction))
-    elif str(direction)=="NORTH":
-        return (pt[0]-height, pt[1]+length)
-    elif str(direction)=="SOUTH":
-        return (pt[0]+height, pt[1]-length)
-    elif str(direction)=="WEST":
-        return (pt[0]-length, pt[1]-height)
-    elif str(direction)=="EAST":
-        return (pt[0]+length, pt[1]+height)
+        return (
+            pt[0] + length * np.cos(direction) - height * np.sin(direction),
+            pt[1] + length * np.sin(direction) + height * np.cos(direction),
+        )
+    elif str(direction) == "NORTH":
+        return (pt[0] - height, pt[1] + length)
+    elif str(direction) == "SOUTH":
+        return (pt[0] + height, pt[1] - length)
+    elif str(direction) == "WEST":
+        return (pt[0] - length, pt[1] - height)
+    elif str(direction) == "EAST":
+        return (pt[0] + length, pt[1] + height)
+
 
 def normalize_angle(angle):
     """  Returns the angle (in radians) between -pi and +pi that corresponds to the input angle
@@ -288,11 +344,12 @@ def normalize_angle(angle):
            float  Angle
 
     """
-    angle = angle % (2*np.pi)
+    angle = angle % (2 * np.pi)
     if angle > np.pi:
-        angle -= 2*np.pi
+        angle -= 2 * np.pi
     return angle
-    
+
+
 def get_curve_length(func, start, end, grid=0.001):
     """  Returns the length (in microns) of a curve defined by the function `func` on the interval [start, end]
 
@@ -308,33 +365,37 @@ def get_curve_length(func, start, end, grid=0.001):
            float  Length
 
     """
+
     def get_cur_length(pt_list):
         # list of tuples [(x1,y1), (x2,y2), ...]
-        length=0
-        for i in range(len(pt_list)-1):
-            pt1, pt2 = pt_list[i], pt_list[i+1]
-            length += np.sqrt((pt2[1]-pt1[1])**2 + (pt2[0]-pt1[0])**2)
+        length = 0
+        for i in range(len(pt_list) - 1):
+            pt1, pt2 = pt_list[i], pt_list[i + 1]
+            length += np.sqrt((pt2[1] - pt1[1]) ** 2 + (pt2[0] - pt1[0]) ** 2)
         return length
-    
-    num_pts = 2 # start with 2 points
-    error = 2*grid  #start high
+
+    num_pts = 2  # start with 2 points
+    error = 2 * grid  # start high
     pts = [func(i) for i in np.linspace(start, end, num_pts)]
     prev_length = get_cur_length(pts)
-    
-    while error > grid: #Don't exit loop until length has converged
-        print("num_pts = "+str(num_pts))
-        print("prev_length = "+str(prev_length))
-        num_pts = num_pts*2 # Increase pt resolution exponentially
+
+    while error > grid:  # Don't exit loop until length has converged
+        print("num_pts = " + str(num_pts))
+        print("prev_length = " + str(prev_length))
+        num_pts = num_pts * 2  # Increase pt resolution exponentially
         pts = [func(i) for i in np.linspace(start, end, num_pts)]
         cur_length = get_cur_length(pts)
         error = abs(cur_length - prev_length)
         prev_length = cur_length
-       
-    print("num_pts = "+str(num_pts))
-    print("Final length! = "+str(prev_length))
+
+    print("num_pts = " + str(num_pts))
+    print("Final length! = " + str(prev_length))
     return cur_length
-    
-def build_waveguide_polygon(func, wg_width, start_direction, end_direction, start_val=0, end_val=1, grid=0.001):
+
+
+def build_waveguide_polygon(
+    func, wg_width, start_direction, end_direction, start_val=0, end_val=1, grid=0.001
+):
     """
         Args:
            * **func** (function):  Function that takes a single (floating point) argument, and returns a (x,y) tuple.
@@ -352,33 +413,78 @@ def build_waveguide_polygon(func, wg_width, start_direction, end_direction, star
            Two lists, one for each edge of the waveguide.
     
     """
-    def get_path_points(func, wg_width, num_pts, start_direction, end_direction, start_val=0, end_val=1):
+
+    def get_path_points(
+        func, wg_width, num_pts, start_direction, end_direction, start_val=0, end_val=1
+    ):
         poly_list1, poly_list2 = [], []
 
         center_pts = [func(i) for i in np.linspace(start_val, end_val, num_pts)]
-        
+
         # Add the first points
-        angle = (start_direction + np.pi/2.0)%(2*np.pi)
-        poly_list1.append((center_pts[0][0] + (wg_width/2.0)*np.cos(angle), center_pts[0][1] + (wg_width/2.0)*np.sin(angle)))
-        angle = (start_direction - np.pi/2.0)%(2*np.pi)
-        poly_list2.append((center_pts[0][0] + (wg_width/2.0)*np.cos(angle), center_pts[0][1] + (wg_width/2.0)*np.sin(angle)))
-        
-        for i in range(len(center_pts)-2): #compute the derivative for the points (except first & last points)
-            prev_pt, cur_pt, next_pt = center_pts[i], center_pts[i+1], center_pts[i+2]
-            d1, d2 = np.arctan2((cur_pt[1]-prev_pt[1]), (cur_pt[0]-prev_pt[0]))%(2*np.pi), np.arctan2((next_pt[1]-cur_pt[1]), (next_pt[0]-cur_pt[0]))%(2*np.pi)
-            
-            
-            angle = ((d1+d2)/2.0 + np.pi/2.0)%(2*np.pi)
-            poly_list1.append((cur_pt[0] + (wg_width/2.0)*np.cos(angle), cur_pt[1] + (wg_width/2.0)*np.sin(angle)))
-            angle = ((d1+d2)/2.0 - np.pi/2.0)%(2*np.pi)
-            poly_list2.append((cur_pt[0] + (wg_width/2.0)*np.cos(angle), cur_pt[1] + (wg_width/2.0)*np.sin(angle)))
-            
+        angle = (start_direction + np.pi / 2.0) % (2 * np.pi)
+        poly_list1.append(
+            (
+                center_pts[0][0] + (wg_width / 2.0) * np.cos(angle),
+                center_pts[0][1] + (wg_width / 2.0) * np.sin(angle),
+            )
+        )
+        angle = (start_direction - np.pi / 2.0) % (2 * np.pi)
+        poly_list2.append(
+            (
+                center_pts[0][0] + (wg_width / 2.0) * np.cos(angle),
+                center_pts[0][1] + (wg_width / 2.0) * np.sin(angle),
+            )
+        )
+
+        for i in range(
+            len(center_pts) - 2
+        ):  # compute the derivative for the points (except first & last points)
+            prev_pt, cur_pt, next_pt = (
+                center_pts[i],
+                center_pts[i + 1],
+                center_pts[i + 2],
+            )
+            d1, d2 = (
+                np.arctan2((cur_pt[1] - prev_pt[1]), (cur_pt[0] - prev_pt[0]))
+                % (2 * np.pi),
+                np.arctan2((next_pt[1] - cur_pt[1]), (next_pt[0] - cur_pt[0]))
+                % (2 * np.pi),
+            )
+
+            angle = ((d1 + d2) / 2.0 + np.pi / 2.0) % (2 * np.pi)
+            poly_list1.append(
+                (
+                    cur_pt[0] + (wg_width / 2.0) * np.cos(angle),
+                    cur_pt[1] + (wg_width / 2.0) * np.sin(angle),
+                )
+            )
+            angle = ((d1 + d2) / 2.0 - np.pi / 2.0) % (2 * np.pi)
+            poly_list2.append(
+                (
+                    cur_pt[0] + (wg_width / 2.0) * np.cos(angle),
+                    cur_pt[1] + (wg_width / 2.0) * np.sin(angle),
+                )
+            )
+
         # Now add the final points
-        angle = (end_direction + np.pi + np.pi/2.0)%(2*np.pi) # Add an extra pi because end_direction points in the opposite way by convention (points 'into' the path)
-        poly_list1.append((center_pts[-1][0] + (wg_width/2.0)*np.cos(angle), center_pts[-1][1] + (wg_width/2.0)*np.sin(angle)))
-        angle = (end_direction + np.pi - np.pi/2.0)%(2*np.pi)
-        poly_list2.append((center_pts[-1][0] + (wg_width/2.0)*np.cos(angle), center_pts[-1][1] + (wg_width/2.0)*np.sin(angle)))
-        
+        angle = (end_direction + np.pi + np.pi / 2.0) % (
+            2 * np.pi
+        )  # Add an extra pi because end_direction points in the opposite way by convention (points 'into' the path)
+        poly_list1.append(
+            (
+                center_pts[-1][0] + (wg_width / 2.0) * np.cos(angle),
+                center_pts[-1][1] + (wg_width / 2.0) * np.sin(angle),
+            )
+        )
+        angle = (end_direction + np.pi - np.pi / 2.0) % (2 * np.pi)
+        poly_list2.append(
+            (
+                center_pts[-1][0] + (wg_width / 2.0) * np.cos(angle),
+                center_pts[-1][1] + (wg_width / 2.0) * np.sin(angle),
+            )
+        )
+
         return (poly_list1, poly_list2)
 
     def check_path(path, grid):
@@ -387,37 +493,55 @@ def build_waveguide_polygon(func, wg_width, start_direction, end_direction, star
         3 consecutive points on path.  If this area, divided by the length between the first & last point, is greater than 0.5*grid,
         then the the error is too large!
         """
-        for i in range(len(path)-2):
-            pt1, pt2, pt3 = path[i], path[i+1], path[i+2]
-            area = abs((pt1[0]*(pt2[1]-pt3[1]) + pt2[0]*(pt3[1]-pt1[1]) + pt3[0]*(pt1[1]-pt2[1]))/2.0)
-            length = np.sqrt((pt3[1] - pt1[1])**2 + (pt3[0] - pt1[0])**2)
-            if area/length > 0.5*grid:
+        for i in range(len(path) - 2):
+            pt1, pt2, pt3 = path[i], path[i + 1], path[i + 2]
+            area = abs(
+                (
+                    pt1[0] * (pt2[1] - pt3[1])
+                    + pt2[0] * (pt3[1] - pt1[1])
+                    + pt3[0] * (pt1[1] - pt2[1])
+                )
+                / 2.0
+            )
+            length = np.sqrt((pt3[1] - pt1[1]) ** 2 + (pt3[0] - pt1[0]) ** 2)
+            if area / length > 0.5 * grid:
                 return False
         # If none of the segments give a large grid error, return True
         return True
-        
-    num_pts = 16 # start with 4, increase by a factor of 2 each time
+
+    num_pts = 16  # start with 4, increase by a factor of 2 each time
     isPathOK = False
     firstIter = True
     cur_path1, cur_path2 = [], []
-    
-    while isPathOK==False:
-        if not firstIter: # do this all the other times (except first time)
+
+    while isPathOK == False:
+        if not firstIter:  # do this all the other times (except first time)
             prev_path1, prev_path2 = cur_path1, cur_path2
-        
-        cur_path1, cur_path2 = get_path_points(func, wg_width, num_pts, start_direction, end_direction, start_val=start_val, end_val=end_val)
-        if firstIter: # do this once (initialize prev_paths)
+
+        cur_path1, cur_path2 = get_path_points(
+            func,
+            wg_width,
+            num_pts,
+            start_direction,
+            end_direction,
+            start_val=start_val,
+            end_val=end_val,
+        )
+        if firstIter:  # do this once (initialize prev_paths)
             prev_path1, prev_path2 = cur_path1, cur_path2
-            firstIter=False
-            
-        isPathOK = check_path(cur_path1, grid) and check_path(cur_path2, grid) # returns False if either is False
-        num_pts = num_pts*2
-        
+            firstIter = False
+
+        isPathOK = check_path(cur_path1, grid) and check_path(
+            cur_path2, grid
+        )  # returns False if either is False
+        num_pts = num_pts * 2
+
     # Now the two paths are of sufficiently high resolution.  Return the sum list of points.
     path_points = prev_path1 + prev_path2[::-1]
     return path_points
-    
-class Component():
+
+
+class Component:
     """ Super class for all objects created in PICwriter.  This class handles rotations, naming, etc. for all components,
         so that writing python code for new cells requires less overhead.  Component is a wrapper around gdspy Cell objects.
 
@@ -428,134 +552,150 @@ class Component():
            * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
 
     """
-    
+
     def __init__(self, name, *args):
         self.name_prefix = name
-        
+
         # Add default values below.
         self.portlist = {}
-        self.port = (0,0)
+        self.port = (0, 0)
         self.direction = 0.0
-        
+
         self._hash_cell_(args[0])
-        
+
     def _auto_transform_(self):
         """ 
         Go through all the ports and do the appropriate 
         rotations and translations corresponding to the specified 'port' and 'direction'
         """
         for key in self.portlist.keys():
-            cur_port = self.portlist[key]['port']
-            
-            if self.direction=="EAST": #direction of the input port (which specifies whole component orientation)
+            cur_port = self.portlist[key]["port"]
+
+            if (
+                self.direction == "EAST"
+            ):  # direction of the input port (which specifies whole component orientation)
                 angle = 0.0
-                # No angle change, don't rotate port directions    
-            elif self.direction=="NORTH":
-                angle = np.pi/2.0
-                # Rotate by 
-                if self.portlist[key]['direction']=="NORTH":
-                    self.portlist[key]['direction'] = "WEST"
-                elif self.portlist[key]['direction']=="WEST":
-                    self.portlist[key]['direction'] = "SOUTH"
-                elif self.portlist[key]['direction']=="SOUTH":
-                    self.portlist[key]['direction'] = "EAST" 
-                elif self.portlist[key]['direction']=="EAST":
-                    self.portlist[key]['direction'] = "NORTH"   
-            elif self.direction=="WEST":
+                # No angle change, don't rotate port directions
+            elif self.direction == "NORTH":
+                angle = np.pi / 2.0
+                # Rotate by
+                if self.portlist[key]["direction"] == "NORTH":
+                    self.portlist[key]["direction"] = "WEST"
+                elif self.portlist[key]["direction"] == "WEST":
+                    self.portlist[key]["direction"] = "SOUTH"
+                elif self.portlist[key]["direction"] == "SOUTH":
+                    self.portlist[key]["direction"] = "EAST"
+                elif self.portlist[key]["direction"] == "EAST":
+                    self.portlist[key]["direction"] = "NORTH"
+            elif self.direction == "WEST":
                 angle = np.pi
                 # Rotate by 180 degrees
-                if self.portlist[key]['direction']=="NORTH":
-                    self.portlist[key]['direction'] = "SOUTH"
-                elif self.portlist[key]['direction']=="WEST":
-                    self.portlist[key]['direction'] = "EAST"
-                elif self.portlist[key]['direction']=="SOUTH":
-                    self.portlist[key]['direction'] = "NORTH" 
-                elif self.portlist[key]['direction']=="EAST":
-                    self.portlist[key]['direction'] = "WEST"   
-            elif self.direction=="SOUTH":
-                angle = 3*np.pi/2.0
+                if self.portlist[key]["direction"] == "NORTH":
+                    self.portlist[key]["direction"] = "SOUTH"
+                elif self.portlist[key]["direction"] == "WEST":
+                    self.portlist[key]["direction"] = "EAST"
+                elif self.portlist[key]["direction"] == "SOUTH":
+                    self.portlist[key]["direction"] = "NORTH"
+                elif self.portlist[key]["direction"] == "EAST":
+                    self.portlist[key]["direction"] = "WEST"
+            elif self.direction == "SOUTH":
+                angle = 3 * np.pi / 2.0
                 # Rotate by 270 degrees
-                if self.portlist[key]['direction']=="NORTH":
-                    self.portlist[key]['direction'] = "EAST"
-                elif self.portlist[key]['direction']=="EAST":
-                    self.portlist[key]['direction'] = "SOUTH"
-                elif self.portlist[key]['direction']=="SOUTH":
-                    self.portlist[key]['direction'] = "WEST" 
-                elif self.portlist[key]['direction']=="WEST":
-                    self.portlist[key]['direction'] = "NORTH"
+                if self.portlist[key]["direction"] == "NORTH":
+                    self.portlist[key]["direction"] = "EAST"
+                elif self.portlist[key]["direction"] == "EAST":
+                    self.portlist[key]["direction"] = "SOUTH"
+                elif self.portlist[key]["direction"] == "SOUTH":
+                    self.portlist[key]["direction"] = "WEST"
+                elif self.portlist[key]["direction"] == "WEST":
+                    self.portlist[key]["direction"] = "NORTH"
             elif isinstance(self.direction, float) or isinstance(self.direction, int):
-                angle=float(self.direction)
-                
-                if isinstance(self.portlist[key]['direction'], float) or isinstance(self.portlist[key]['direction'], int):
-                    self.portlist[key]['direction'] = (self.portlist[key]['direction'] + angle)%(2*np.pi)
+                angle = float(self.direction)
+
+                if isinstance(self.portlist[key]["direction"], float) or isinstance(
+                    self.portlist[key]["direction"], int
+                ):
+                    self.portlist[key]["direction"] = (
+                        self.portlist[key]["direction"] + angle
+                    ) % (2 * np.pi)
                 else:
-                    if self.portlist[key]['direction']=='EAST':
-                        self.portlist[key]['direction'] = (0.0 + angle)%(2*np.pi)
-                    elif self.portlist[key]['direction']=='NORTH':
-                        self.portlist[key]['direction'] = (np.pi/2 + angle)%(2*np.pi)
-                    elif self.portlist[key]['direction']=='WEST':
-                        self.portlist[key]['direction'] = (np.pi + angle)%(2*np.pi)
-                    elif self.portlist[key]['direction']=='SOUTH':
-                        self.portlist[key]['direction'] = (3*np.pi/2 + angle)%(2*np.pi)
+                    if self.portlist[key]["direction"] == "EAST":
+                        self.portlist[key]["direction"] = (0.0 + angle) % (2 * np.pi)
+                    elif self.portlist[key]["direction"] == "NORTH":
+                        self.portlist[key]["direction"] = (np.pi / 2 + angle) % (
+                            2 * np.pi
+                        )
+                    elif self.portlist[key]["direction"] == "WEST":
+                        self.portlist[key]["direction"] = (np.pi + angle) % (2 * np.pi)
+                    elif self.portlist[key]["direction"] == "SOUTH":
+                        self.portlist[key]["direction"] = (3 * np.pi / 2 + angle) % (
+                            2 * np.pi
+                        )
                     else:
-                        raise ValueError("One of the portlist directions has an invalid value.")
-                        
-            dx = cur_port[0]*np.cos(angle) - cur_port[1]*np.sin(angle)
-            dy = cur_port[0]*np.sin(angle) + cur_port[1]*np.cos(angle)
-            
-            self.portlist[key]['port'] = (self.port[0] + dx,
-                                          self.port[1] + dy)
-            
+                        raise ValueError(
+                            "One of the portlist directions has an invalid value."
+                        )
+
+            dx = cur_port[0] * np.cos(angle) - cur_port[1] * np.sin(angle)
+            dy = cur_port[0] * np.sin(angle) + cur_port[1] * np.cos(angle)
+
+            self.portlist[key]["port"] = (self.port[0] + dx, self.port[1] + dy)
+
     def _hash_cell_(self, *args):
         """ Check to see if the same exact cell has been created already (with the same parameters).
         If not, add the cell to the global CURRENT_CELLS dictionary.
         If so, point to the identical cell in the CURRENT_CELLS dictionary.
         """
-        dont_hash = ['port', 'direction', 'self'] #list of keys not to be hashed
+        dont_hash = ["port", "direction", "self"]  # list of keys not to be hashed
         args = args[0]
         new_args = []
         for k in args.keys():
             if k not in dont_hash:
                 try:
-                    if ("WaveguideTemplate" in args[k].name) or ("MetalTemplate" in args[k].name):
-                        new_args.append(args[k].name) # WaveguideTemplates each have a unique name
+                    if ("WaveguideTemplate" in args[k].name) or (
+                        "MetalTemplate" in args[k].name
+                    ):
+                        new_args.append(
+                            args[k].name
+                        )  # WaveguideTemplates each have a unique name
                 except:
                     new_args.append(args[k])
 
         global CURRENT_CELLS
-        properties = self.name_prefix+''.join([str(p) for p in new_args])
+        properties = self.name_prefix + "".join([str(p) for p in new_args])
         self.cell_hash = properties
         if self.cell_hash not in CURRENT_CELLS.keys():
-            #Create the cell if it does not exist anywhere else
+            # Create the cell if it does not exist anywhere else
             CURRENT_CELLS[self.cell_hash] = gdspy.Cell(getCellName(self.name_prefix))
             self.first_cell = True
         else:
             self.first_cell = False
 
         # Now delete the cell completely to save memory (since this info is now stored globally in CURRENT_CELLS)
-#        del self.cell
-        
+
+    #        del self.cell
+
     def __get_cell(self):
         return CURRENT_CELLS[self.cell_hash]
 
     def __direction_to_rotation(self, direction):
         # Returns a rotation (in degrees) given a 'direction' which can be a cardinal direction or an angle in radians
-        if isinstance(direction,float):
+        if isinstance(direction, float):
             # direction is a float in radians, but rotation should be a float in degrees
-            return direction*180.0/np.pi
-        elif str(direction)=="EAST":
+            return direction * 180.0 / np.pi
+        elif str(direction) == "EAST":
             return 0.0
-        elif str(direction)=="NORTH":
+        elif str(direction) == "NORTH":
             return 90.0
-        elif str(direction)=="WEST":
+        elif str(direction) == "WEST":
             return 180.0
-        elif str(direction)=="SOUTH":
+        elif str(direction) == "SOUTH":
             return 270.0
 
-    def add(self, element, origin=(0,0), rotation=0.0, x_reflection=False):
+    def add(self, element, origin=(0, 0), rotation=0.0, x_reflection=False):
         """ Add a reference to an element or list of elements to the cell associated with this component """
         this_cell = CURRENT_CELLS[self.cell_hash]
-        
+
         if self.first_cell == True:
             """ Only add elements if this is the first cell made. 
             Otherwise, duplicate elements will be added 
@@ -563,28 +703,47 @@ class Component():
             if isinstance(element, Component):
                 element_cell = CURRENT_CELLS[element.cell_hash]
                 rot = self.__direction_to_rotation(element.direction)
-                this_cell.add(gdspy.CellReference(element_cell, 
-                                                  origin=element.port, 
-                                                  rotation=rot, 
-                                                  x_reflection=x_reflection))
+                this_cell.add(
+                    gdspy.CellReference(
+                        element_cell,
+                        origin=element.port,
+                        rotation=rot,
+                        x_reflection=x_reflection,
+                    )
+                )
             elif isinstance(element, gdspy.Cell):
-                this_cell.add(gdspy.CellReference(element, origin=origin, rotation=rotation, x_reflection=x_reflection))
+                this_cell.add(
+                    gdspy.CellReference(
+                        element,
+                        origin=origin,
+                        rotation=rotation,
+                        x_reflection=x_reflection,
+                    )
+                )
             else:
                 this_cell.add(element)
 
     def addto(self, top_cell, x_reflection=False):
-        
+
         rot = self.__direction_to_rotation(self.direction)
-            
+
         if isinstance(top_cell, gdspy.Cell):
-            top_cell.add(gdspy.CellReference(CURRENT_CELLS[self.cell_hash], 
-                                             origin=self.port, 
-                                             rotation=rot, 
-                                             x_reflection=x_reflection))
-            
+            top_cell.add(
+                gdspy.CellReference(
+                    CURRENT_CELLS[self.cell_hash],
+                    origin=self.port,
+                    rotation=rot,
+                    x_reflection=x_reflection,
+                )
+            )
+
         elif isinstance(top_cell, Component):
             tc = CURRENT_CELLS[top_cell.cell_hash]
-            tc.add(gdspy.CellReference(CURRENT_CELLS[self.cell_hash], 
-                                                     origin=self.port, 
-                                                     rotation=rot, 
-                                                     x_reflection=x_reflection))
+            tc.add(
+                gdspy.CellReference(
+                    CURRENT_CELLS[self.cell_hash],
+                    origin=self.port,
+                    rotation=rot,
+                    x_reflection=x_reflection,
+                )
+            )

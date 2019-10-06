@@ -11,6 +11,7 @@ import numpy as np
 import gdspy
 import h5py
 
+
 class MaterialStack:
     """ Standard template for generating a material stack
 
@@ -25,6 +26,7 @@ class MaterialStack:
            * **name** (string): Identifier (optional) for the material stack
 
     """
+
     def __init__(self, vsize, default_stack, name="mstack"):
         self.name = name
         self.vsize = vsize
@@ -44,24 +46,30 @@ class MaterialStack:
            * **stack** (list): Vstack list with the following format: [(eps1, t1), (eps2, t2), (eps3, t3), ...] where eps1, eps2, .. are the permittivity (float), and t1, t2, .. are the thicknesses (float) from bottom to top. Note: if t1+t2+... must add up to vsize.
 
         """
-        #First, typecheck the stack
+        # First, typecheck the stack
         t = 0
         for s in stack:
             t += s[1]
-        if abs(t-self.vsize) >= 1E-6:
-            raise ValueError("Warning! Stack thicknesses ("+str(t)+") do not add up to vsize ("+str(self.vsize)+").")
+        if abs(t - self.vsize) >= 1e-6:
+            raise ValueError(
+                "Warning! Stack thicknesses ("
+                + str(t)
+                + ") do not add up to vsize ("
+                + str(self.vsize)
+                + ")."
+            )
 
         self.stacklist[(layer, datatype)] = stack
 
     def interpolate_points(self, key, num_points):
         layer_ranges = []
-        curz = 0.0 # "Current z"
+        curz = 0.0  # "Current z"
         for layer in self.stacklist[key]:
-            layer_ranges.append([layer[0], curz, curz+layer[1]])
-            curz = curz+layer[1]
+            layer_ranges.append([layer[0], curz, curz + layer[1]])
+            curz = curz + layer[1]
 
         points = []
-        for i in np.linspace(1E-8, self.vsize, num_points):
+        for i in np.linspace(1e-8, self.vsize, num_points):
             for layer in layer_ranges:
                 if i > layer[1] and i <= layer[2]:
                     points.append(layer[0])
@@ -79,28 +87,30 @@ class MaterialStack:
             * **height** (float): Vertical position of the desired epsilon value (must be between -vsize/2.0, vsize/2.0)
 
         """
-        cur_vmax = -self.vsize/2.0
+        cur_vmax = -self.vsize / 2.0
         for layer in self.stacklist[key]:
             cur_vmax += layer[1]
             if height <= cur_vmax:
                 return layer[0]
         return self.stacklist[key][-1][0]
 
-def point_inside_polygon(x,y,poly):
+
+def point_inside_polygon(x, y, poly):
     n = len(poly)
-    inside =False
-    p1x,p1y = poly[0]
-    for i in range(n+1):
-        p2x,p2y = poly[i % n]
-        if y > min(p1y,p2y):
-            if y <= max(p1y,p2y):
-                if x <= max(p1x,p2x):
+    inside = False
+    p1x, p1y = poly[0]
+    for i in range(n + 1):
+        p2x, p2y = poly[i % n]
+        if y > min(p1y, p2y):
+            if y <= max(p1y, p2y):
+                if x <= max(p1x, p2x):
                     if p1y != p2y:
-                        xinters = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+                        xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
                     if p1x == p2x or x <= xinters:
                         inside = not inside
-        p1x,p1y = p2x,p2y
+        p1x, p1y = p2x, p2y
     return inside
+
 
 def export_component_to_hdf5(filename, component, mstack, boolean_operations):
     """ Outputs the polygons corresponding to the desired component and MaterialStack.
@@ -144,42 +154,60 @@ def export_component_to_hdf5(filename, component, mstack, boolean_operations):
     polygon_dict = flatcell.get_polygons(by_spec=True)
 
     bb = flatcell.get_bounding_box()
-    sx, sy, sz = bb[1][0]-bb[0][0], mstack.vsize, bb[1][1]-bb[0][1]
-    center_x, center_y, center_z = (bb[1][0]+bb[0][0])/2.0, 0.0, (bb[1][1]+bb[0][1])/2.0
+    sx, sy, sz = bb[1][0] - bb[0][0], mstack.vsize, bb[1][1] - bb[0][1]
+    center_x, center_y, center_z = (
+        (bb[1][0] + bb[0][0]) / 2.0,
+        0.0,
+        (bb[1][1] + bb[0][1]) / 2.0,
+    )
 
     ll_list, dd_list, nn_list, vv_list, xx_list, zz_list = [], [], [], [], [], []
     height_list, eps_list, ycenter_list = [], [], []
 
     """ Add the default layer set """
-    polygon_dict[(-1, -1)] = [np.array([[bb[0][0], bb[0][1]],
-                                       [bb[1][0], bb[0][1]],
-                                       [bb[1][0], bb[1][1]],
-                                       [bb[0][0], bb[1][1]]])]
+    polygon_dict[(-1, -1)] = [
+        np.array(
+            [
+                [bb[0][0], bb[0][1]],
+                [bb[1][0], bb[0][1]],
+                [bb[1][0], bb[1][1]],
+                [bb[0][0], bb[1][1]],
+            ]
+        )
+    ]
 
-#    print("boolean operations: ")
-#    print(boolean_operations)
-#
-#    print('key (default): (-1,-1)')
-#    print(polygon_dict[(-1,-1)])
+    #    print("boolean operations: ")
+    #    print(boolean_operations)
+    #
+    #    print('key (default): (-1,-1)')
+    #    print(polygon_dict[(-1,-1)])
 
     for key in polygon_dict.keys():
         """ Merge the polygons
             This prevents weird edge effects in MEEP with subpixel averaging between adjacent objects
         """
         polygons = polygon_dict[key]
-        polygons_union = gdspy.fast_boolean(polygons, polygons, 'or', max_points=99999, layer=key[0], datatype=key[1])
+        polygons_union = gdspy.fast_boolean(
+            polygons, polygons, "or", max_points=99999, layer=key[0], datatype=key[1]
+        )
         polygon_dict[key] = polygons_union.polygons
 
     for bo in boolean_operations:
-        polygons_bool = gdspy.fast_boolean(polygon_dict[bo[0]], polygon_dict[bo[1]], bo[2], layer=bo[0][0], datatype=bo[0][1])
-        if polygons_bool==None:
+        polygons_bool = gdspy.fast_boolean(
+            polygon_dict[bo[0]],
+            polygon_dict[bo[1]],
+            bo[2],
+            layer=bo[0][0],
+            datatype=bo[0][1],
+        )
+        if polygons_bool == None:
             del polygon_dict[bo[0]]
         else:
             polygon_dict[bo[0]] = polygons_bool.polygons
 
-#    for key in polygon_dict.keys():
-#        print('key: '+str(key))
-#        print(polygon_dict[key])
+    #    for key in polygon_dict.keys():
+    #        print('key: '+str(key))
+    #        print(polygon_dict[key])
 
     for key in polygon_dict.keys():
         ll, dd, = key[0], key[1]
@@ -187,30 +215,32 @@ def export_component_to_hdf5(filename, component, mstack, boolean_operations):
             stacklist = np.array(mstack.stacklist[key])
 
             # Put together a list of the centers of each layer
-            zlength = sum(stacklist[:,1])
-            z0 = -zlength/2.0
-            centers = [z0+stacklist[0][1]/2.0]
-            for i in range(len(stacklist)-1):
+            zlength = sum(stacklist[:, 1])
+            z0 = -zlength / 2.0
+            centers = [z0 + stacklist[0][1] / 2.0]
+            for i in range(len(stacklist) - 1):
                 prev_value = centers[-1]
-                centers.append(prev_value+stacklist[i][1]/2.0 + stacklist[i+1][1]/2.0)
+                centers.append(
+                    prev_value + stacklist[i][1] / 2.0 + stacklist[i + 1][1] / 2.0
+                )
 
             for i in range(len(stacklist)):
                 for nn in range(len(polygon_dict[key])):
-#                    print("Polygon: ")
-#                    print("layer=("+str(ll)+"/"+str(dd)+"), height="+str(stacklist[i][1])+" eps="+str(stacklist[i][0])+" ycent="+str(centers[i]))
+                    #                    print("Polygon: ")
+                    #                    print("layer=("+str(ll)+"/"+str(dd)+"), height="+str(stacklist[i][1])+" eps="+str(stacklist[i][0])+" ycent="+str(centers[i]))
                     for vv in range(len(polygon_dict[key][nn])):
                         xx, zz = polygon_dict[key][nn][vv]
                         ll_list.append(ll)
                         dd_list.append(dd)
                         nn_list.append(nn)
                         vv_list.append(vv)
-                        xx_list.append(xx-center_x)
-                        zz_list.append(zz-center_z)
+                        xx_list.append(xx - center_x)
+                        zz_list.append(zz - center_z)
                         height_list.append(stacklist[i][1])
                         eps_list.append(stacklist[i][0])
                         ycenter_list.append(centers[i])
 
-    with h5py.File(filename,'w') as hf:
+    with h5py.File(filename, "w") as hf:
         hf.create_dataset("LL", data=np.array(ll_list))
         hf.create_dataset("DD", data=np.array(dd_list))
         hf.create_dataset("NN", data=np.array(nn_list))
@@ -220,6 +250,7 @@ def export_component_to_hdf5(filename, component, mstack, boolean_operations):
         hf.create_dataset("height", data=np.array(height_list))
         hf.create_dataset("eps", data=np.array(eps_list))
         hf.create_dataset("ycenter", data=np.array(ycenter_list))
+
 
 def export_wgt_to_hdf5(filename, wgt, mstack, sx):
     """ Outputs the polygons corresponding to the desired waveguide template and MaterialStack.
@@ -242,7 +273,7 @@ def export_wgt_to_hdf5(filename, wgt, mstack, sx):
 
     """
     CX, CY, width_list, height_list, eps_list = [], [], [], [], []
-    if wgt.wg_type=='strip':
+    if wgt.wg_type == "strip":
         """
         check wg (layer/datatype) and clad (layer/datatype)
         check if these are in the mstack.  If so, create the blocks that would correspond to each
@@ -250,26 +281,26 @@ def export_wgt_to_hdf5(filename, wgt, mstack, sx):
         still need to add support for full material functions (i.e. built-in silicon, SiN, etc...)
         """
         for key in mstack.stacklist.keys():
-            if key==(wgt.wg_layer, wgt.wg_datatype):
+            if key == (wgt.wg_layer, wgt.wg_datatype):
                 width = wgt.wg_width
                 center_x = 0.0
                 total_y = sum([layer[1] for layer in mstack.stacklist[key]])
-                cur_y = -total_y/2.0
+                cur_y = -total_y / 2.0
                 for layer in mstack.stacklist[key]:
-                    center_y = cur_y + layer[1]/2.0
+                    center_y = cur_y + layer[1] / 2.0
                     cur_y = cur_y + layer[1]
                     CX.append(center_x)
                     CY.append(center_y)
                     width_list.append(width)
                     height_list.append(layer[1])
                     eps_list.append(layer[0])
-            if key==(wgt.clad_layer, wgt.clad_datatype):
+            if key == (wgt.clad_layer, wgt.clad_datatype):
                 width = wgt.clad_width
-                center_x = (wgt.wg_width + wgt.clad_width)/2.0
+                center_x = (wgt.wg_width + wgt.clad_width) / 2.0
                 total_y = sum([layer[1] for layer in mstack.stacklist[key]])
-                cur_y = -total_y/2.0
+                cur_y = -total_y / 2.0
                 for layer in mstack.stacklist[key]:
-                    center_y = cur_y + layer[1]/2.0
+                    center_y = cur_y + layer[1] / 2.0
                     cur_y = cur_y + layer[1]
                     # Add cladding on +x side
                     CX.append(center_x)
@@ -284,19 +315,19 @@ def export_wgt_to_hdf5(filename, wgt, mstack, sx):
                     height_list.append(layer[1])
                     eps_list.append(layer[0])
 
-    elif wgt.wg_type=='slot':
+    elif wgt.wg_type == "slot":
         """ Same thing as above but for slot waveguides
         """
         slot = wgt.slot
         for key in mstack.stacklist.keys():
-            if key==(wgt.wg_layer, wgt.wg_datatype):
+            if key == (wgt.wg_layer, wgt.wg_datatype):
                 """ Add waveguide blocks """
-                rail_width = (wgt.wg_width - slot)/2.0
-                center_x = (slot + rail_width)/2.0
+                rail_width = (wgt.wg_width - slot) / 2.0
+                center_x = (slot + rail_width) / 2.0
                 total_y = sum([layer[1] for layer in mstack.stacklist[key]])
-                cur_y = -total_y/2.0
+                cur_y = -total_y / 2.0
                 for layer in mstack.stacklist[key]:
-                    center_y = cur_y + layer[1]/2.0
+                    center_y = cur_y + layer[1] / 2.0
                     cur_y = cur_y + layer[1]
                     # Add left waveguide component
                     CX.append(center_x)
@@ -310,14 +341,14 @@ def export_wgt_to_hdf5(filename, wgt, mstack, sx):
                     width_list.append(rail_width)
                     height_list.append(layer[1])
                     eps_list.append(layer[0])
-            if key==(wgt.clad_layer, wgt.clad_datatype):
+            if key == (wgt.clad_layer, wgt.clad_datatype):
                 """ Add cladding blocks """
                 width = wgt.clad_width
-                center_x = (wgt.wg_width + wgt.clad_width)/2.0
+                center_x = (wgt.wg_width + wgt.clad_width) / 2.0
                 total_y = sum([layer[1] for layer in mstack.stacklist[key]])
-                cur_y = -total_y/2.0
+                cur_y = -total_y / 2.0
                 for layer in mstack.stacklist[key]:
-                    center_y = cur_y + layer[1]/2.0
+                    center_y = cur_y + layer[1] / 2.0
                     cur_y = cur_y + layer[1]
                     # Add cladding on +x side
                     CX.append(center_x)
@@ -338,15 +369,15 @@ def export_wgt_to_hdf5(filename, wgt, mstack, sx):
                     height_list.append(layer[1])
                     eps_list.append(layer[0])
 
-    if (wgt.wg_width + 2*wgt.clad_width) < sx:
+    if (wgt.wg_width + 2 * wgt.clad_width) < sx:
         """ If True, need to add additional region next to cladding (default material) """
-        default_key = (-1,-1)
-        center_x = sx/2.0
-        width = sx - (wgt.wg_width + 2*wgt.clad_width)
+        default_key = (-1, -1)
+        center_x = sx / 2.0
+        width = sx - (wgt.wg_width + 2 * wgt.clad_width)
         total_y = sum([layer[1] for layer in mstack.stacklist[default_key]])
-        cur_y = -total_y/2.0
+        cur_y = -total_y / 2.0
         for layer in mstack.stacklist[default_key]:
-            center_y = cur_y + layer[1]/2.0
+            center_y = cur_y + layer[1] / 2.0
             cur_y = cur_y + layer[1]
             # Add default material blocks on +x side
             CX.append(center_x)
@@ -361,35 +392,87 @@ def export_wgt_to_hdf5(filename, wgt, mstack, sx):
             height_list.append(layer[1])
             eps_list.append(layer[0])
 
-    with h5py.File(filename,'w') as hf:
+    with h5py.File(filename, "w") as hf:
         hf.create_dataset("CX", data=np.array(CX))
         hf.create_dataset("CY", data=np.array(CY))
         hf.create_dataset("width_list", data=np.array(width_list))
         hf.create_dataset("height_list", data=np.array(height_list))
         hf.create_dataset("eps_list", data=np.array(eps_list))
 
+
 def export_timestep_fields_to_png(directory):
     from subprocess import call
-    filename = 'mcts'
+
+    filename = "mcts"
 
     """ Export the epsilon slices to images """
-    call("h5topng -S3 -m1 -M4 "+str(directory)+"/topview-"+str(filename)+"-eps-000000.00.h5", shell=True)
-    call("h5topng -S3 -m1 -M4 "+str(directory)+"/sideview-"+str(filename)+"-eps-000000.00.h5", shell=True)
+    call(
+        "h5topng -S3 -m1 -M4 "
+        + str(directory)
+        + "/topview-"
+        + str(filename)
+        + "-eps-000000.00.h5",
+        shell=True,
+    )
+    call(
+        "h5topng -S3 -m1 -M4 "
+        + str(directory)
+        + "/sideview-"
+        + str(filename)
+        + "-eps-000000.00.h5",
+        shell=True,
+    )
 
     """ Export the slice of data with epsilon overlayed """
-    simulation_time = np.array(h5py.File(str(directory)+"/"+str(filename)+"-ez-topview.h5", 'r')['ez']).shape[2]
-    simulation_time = simulation_time-1 #since time starts at t=0
+    simulation_time = np.array(
+        h5py.File(str(directory) + "/" + str(filename) + "-ez-topview.h5", "r")["ez"]
+    ).shape[2]
+    simulation_time = simulation_time - 1  # since time starts at t=0
 
     """ Convert h5 slices to png with dielectric overlayed """
-    exec_str = "h5topng -t 0:"+str(simulation_time)+" -R -Zc dkbluered -a yarg -A "+str(directory)+"/topview-"+str(filename)+"-eps-000000.00.h5 "+str(directory)+"/"+str(filename)+"-ez-topview.h5"
+    exec_str = (
+        "h5topng -t 0:"
+        + str(simulation_time)
+        + " -R -Zc dkbluered -a yarg -A "
+        + str(directory)
+        + "/topview-"
+        + str(filename)
+        + "-eps-000000.00.h5 "
+        + str(directory)
+        + "/"
+        + str(filename)
+        + "-ez-topview.h5"
+    )
     call(exec_str, shell=True)
-    exec_str = "h5topng -t 0:"+str(simulation_time)+" -R -Zc dkbluered -a yarg -A "+str(directory)+"/sideview-"+str(filename)+"-eps-000000.00.h5 "+str(directory)+"/"+str(filename)+"-ez-sideview.h5"
+    exec_str = (
+        "h5topng -t 0:"
+        + str(simulation_time)
+        + " -R -Zc dkbluered -a yarg -A "
+        + str(directory)
+        + "/sideview-"
+        + str(filename)
+        + "-eps-000000.00.h5 "
+        + str(directory)
+        + "/"
+        + str(filename)
+        + "-ez-sideview.h5"
+    )
     call(exec_str, shell=True)
 
-def compute_mode(wgt, mstack, res, wavelength,
-                 sx, sy, plot_mode_number = 1,
-                 polarization="TE", output_directory='mpb-sim',
-                 save_mode_data=True, suppress_window=False):
+
+def compute_mode(
+    wgt,
+    mstack,
+    res,
+    wavelength,
+    sx,
+    sy,
+    plot_mode_number=1,
+    polarization="TE",
+    output_directory="mpb-sim",
+    save_mode_data=True,
+    suppress_window=False,
+):
 
     """ Launches a MPB simulation to quickly compute and visualize a waveguide's electromagnetic eigenmodes
 
@@ -414,38 +497,75 @@ def compute_mode(wgt, mstack, res, wavelength,
     import os
     import time
 
-    eps_input_file = str('epsilon.h5')
+    eps_input_file = str("epsilon.h5")
     export_wgt_to_hdf5(eps_input_file, wgt, mstack, sx)
 
-    exec_str = ("python mcm.py"
-                " -res %d"
-                " -wavelength %0.3f"
-                " -sx %0.3f"
-                " -sy %0.3f"
-                " -plot_mode_number %d"
-                " -polarization %s"
-                " -epsilon_file '%s/%s'"
-                " -output_directory '%s/%s'"
-                " -save_mode_data %r"
-                " -suppress_window %r"
-                " > '%s/%s-res%d.out'") % (res, wavelength, sx, sy, plot_mode_number,
-                polarization, str(os.getcwd()), str(eps_input_file),
-                str(os.getcwd()), str(output_directory),
-                save_mode_data, suppress_window, str(os.getcwd()), str(output_directory), res)
+    exec_str = (
+        "python mcm.py"
+        " -res %d"
+        " -wavelength %0.3f"
+        " -sx %0.3f"
+        " -sy %0.3f"
+        " -plot_mode_number %d"
+        " -polarization %s"
+        " -epsilon_file '%s/%s'"
+        " -output_directory '%s/%s'"
+        " -save_mode_data %r"
+        " -suppress_window %r"
+        " > '%s/%s-res%d.out'"
+    ) % (
+        res,
+        wavelength,
+        sx,
+        sy,
+        plot_mode_number,
+        polarization,
+        str(os.getcwd()),
+        str(eps_input_file),
+        str(os.getcwd()),
+        str(output_directory),
+        save_mode_data,
+        suppress_window,
+        str(os.getcwd()),
+        str(output_directory),
+        res,
+    )
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    print("dir_path = "+str(dir_path))
+    print("dir_path = " + str(dir_path))
 
     print("Running MPB simulation... (check .out file for current status)")
     start = time.time()
     call(exec_str, shell=True, cwd=dir_path)
-    print("Time to run MPB simulation = "+str(time.time()-start)+" seconds")
+    print("Time to run MPB simulation = " + str(time.time() - start) + " seconds")
     return None
 
 
-def compute_transmission_spectra(pic_component, mstack, wgt, ports, port_vcenter, port_height, port_width, res, wl_center, wl_span, boolean_operations=None,
-                                 norm=False, input_pol="TE", nfreq=100, dpml=0.5, fields=False, plot_window=False, source_offset=0.1, symmetry=None,
-                                 skip_sim=False, output_directory='meep-sim', parallel=False, n_p=2):
+def compute_transmission_spectra(
+    pic_component,
+    mstack,
+    wgt,
+    ports,
+    port_vcenter,
+    port_height,
+    port_width,
+    res,
+    wl_center,
+    wl_span,
+    boolean_operations=None,
+    norm=False,
+    input_pol="TE",
+    nfreq=100,
+    dpml=0.5,
+    fields=False,
+    plot_window=False,
+    source_offset=0.1,
+    symmetry=None,
+    skip_sim=False,
+    output_directory="meep-sim",
+    parallel=False,
+    n_p=2,
+):
 
     """ Launches a MEEP simulation to compute the transmission/reflection spectra from each of the component's ports when light enters at the input `port`.
 
@@ -493,245 +613,398 @@ def compute_transmission_spectra(pic_component, mstack, wgt, ports, port_vcenter
     import time
 
     if boolean_operations == None:
-        boolean_operations = [((-1,-1), (wgt.clad_layer, wgt.clad_datatype), 'xor'),
-                              ((wgt.clad_layer, wgt.clad_datatype), (wgt.wg_layer, wgt.wg_datatype), 'xor')]
+        boolean_operations = [
+            ((-1, -1), (wgt.clad_layer, wgt.clad_datatype), "xor"),
+            (
+                (wgt.clad_layer, wgt.clad_datatype),
+                (wgt.wg_layer, wgt.wg_datatype),
+                "xor",
+            ),
+        ]
 
     """ For each port determine input_direction (useful for computing the sign of the power flux) """
     input_directions = []
     for port in ports:
         if isinstance(port["direction"], float):
-            if abs(port["direction"])<1E-6:
+            if abs(port["direction"]) < 1e-6:
                 input_directions.append(-1)
-            elif abs(port["direction"]-np.pi)<1E-6:
+            elif abs(port["direction"] - np.pi) < 1e-6:
                 input_directions.append(1)
             else:
-                raise ValueError("Warning! An invalid float port direction ("+str(port["direction"])+") was provided.  Must be 0 or pi.")
+                raise ValueError(
+                    "Warning! An invalid float port direction ("
+                    + str(port["direction"])
+                    + ") was provided.  Must be 0 or pi."
+                )
         elif isinstance(port["direction"], (str, bytes)):
-            if port["direction"]=='EAST':
+            if port["direction"] == "EAST":
                 input_directions.append(-1)
-            elif port["direction"]=='WEST':
+            elif port["direction"] == "WEST":
                 input_directions.append(1)
             else:
-                raise ValueError("Warning! An invalid string port direction ("+str(port["direction"])+") was provided.  Must be `EAST` or `WEST`.")
+                raise ValueError(
+                    "Warning! An invalid string port direction ("
+                    + str(port["direction"])
+                    + ") was provided.  Must be `EAST` or `WEST`."
+                )
         else:
-            raise ValueError("Warning! A port was given in `ports` that is not a valid type!")
+            raise ValueError(
+                "Warning! A port was given in `ports` that is not a valid type!"
+            )
 
-    if norm and wgt==None:
-        raise ValueError("Warning! A normalization run was called, but no WaveguideTemplate (wgt) was provided.")
+    if norm and wgt == None:
+        raise ValueError(
+            "Warning! A normalization run was called, but no WaveguideTemplate (wgt) was provided."
+        )
 
     """ If a normalization run is specified, create short waveguide component, then simulate
     """
     if norm:
         import picwriter.toolkit as tk
         import picwriter.components as pc
+
         norm_component = gdspy.Cell(tk.getCellName("norm_straightwg"))
-        wg1 = pc.Waveguide([(0,0), (1,0)], wgt)
-        wg2 = pc.Waveguide([(1,0), (2,0)], wgt)
-        wg3 = pc.Waveguide([(2,0), (3,0)], wgt)
+        wg1 = pc.Waveguide([(0, 0), (1, 0)], wgt)
+        wg2 = pc.Waveguide([(1, 0), (2, 0)], wgt)
+        wg3 = pc.Waveguide([(2, 0), (3, 0)], wgt)
         tk.add(norm_component, wg1)
         tk.add(norm_component, wg2)
         tk.add(norm_component, wg3)
 
         flatcell = norm_component.flatten()
         bb = flatcell.get_bounding_box()
-        sx, sy, sz = bb[1][0]-bb[0][0], mstack.vsize, bb[1][1]-bb[0][1]
-        center = ((bb[1][0]+bb[0][0])/2.0, 0, (bb[1][1]+bb[0][1])/2.0)
+        sx, sy, sz = bb[1][0] - bb[0][0], mstack.vsize, bb[1][1] - bb[0][1]
+        center = ((bb[1][0] + bb[0][0]) / 2.0, 0, (bb[1][1] + bb[0][1]) / 2.0)
 
         norm_ports = [wg2.portlist["input"], wg2.portlist["output"]]
 
-        eps_norm_input_file = str('epsilon-norm.h5')
-        export_component_to_hdf5(eps_norm_input_file, norm_component, mstack, boolean_operations)
-#        convert_to_hdf5(eps_norm_input_file, norm_component, mstack, sx, sz, 1.5*res)
+        eps_norm_input_file = str("epsilon-norm.h5")
+        export_component_to_hdf5(
+            eps_norm_input_file, norm_component, mstack, boolean_operations
+        )
+        #        convert_to_hdf5(eps_norm_input_file, norm_component, mstack, sx, sz, 1.5*res)
 
         # Launch MEEP simulation using correct inputs
         port_string = ""
         for port in norm_ports:
-            port_string += str(port["port"][0])+" "+str(port["port"][1])+" "
+            port_string += str(port["port"][0]) + " " + str(port["port"][1]) + " "
         port_string = str(port_string[:-1])
 
         if parallel:
-            exec_str = ("mpirun -np %d"
-                        " python mcts.py"
-                        " -fields %r"
-                        " -input_pol %s"
-                        " -output_directory '%s/%s'"
-                        " -eps_input_file '%s/%s'"
-                        " -res %d"
-                        " -nfreq %d"
-                        " -input_direction %d"
-                        " -dpml %0.3f"
-                        " -wl_center %0.3f"
-                        " -wl_span %0.3f"
-                        " -port_vcenter %0.3f"
-                        " -port_height %0.3f"
-                        " -port_width %0.3f"
-                        " -source_offset %0.3f"
-                        " -center_x %0.3f"
-                        " -center_y %0.3f"
-                        " -center_z %0.3f"
-                        " -sx %0.3f"
-                        " -sy %0.3f"
-                        " -sz %0.3f"
-                        " -port_coords %r"
-                        " > '%s/%s-norm-res%d.out'") % (int(n_p), False, input_pol, str(os.getcwd()), str(output_directory), str(os.getcwd()),
-                        eps_norm_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
-                        float(wl_span), float(port_vcenter), float(port_height), float(port_width),
-                        float(source_offset), float(center[0]), float(center[1]), float(center[2]),
-                        float(sx), float(sy), float(sz), port_string, str(os.getcwd()), str(output_directory), res)
+            exec_str = (
+                "mpirun -np %d"
+                " python mcts.py"
+                " -fields %r"
+                " -input_pol %s"
+                " -output_directory '%s/%s'"
+                " -eps_input_file '%s/%s'"
+                " -res %d"
+                " -nfreq %d"
+                " -input_direction %d"
+                " -dpml %0.3f"
+                " -wl_center %0.3f"
+                " -wl_span %0.3f"
+                " -port_vcenter %0.3f"
+                " -port_height %0.3f"
+                " -port_width %0.3f"
+                " -source_offset %0.3f"
+                " -center_x %0.3f"
+                " -center_y %0.3f"
+                " -center_z %0.3f"
+                " -sx %0.3f"
+                " -sy %0.3f"
+                " -sz %0.3f"
+                " -port_coords %r"
+                " > '%s/%s-norm-res%d.out'"
+            ) % (
+                int(n_p),
+                False,
+                input_pol,
+                str(os.getcwd()),
+                str(output_directory),
+                str(os.getcwd()),
+                eps_norm_input_file,
+                res,
+                nfreq,
+                input_directions[0],
+                float(dpml),
+                float(wl_center),
+                float(wl_span),
+                float(port_vcenter),
+                float(port_height),
+                float(port_width),
+                float(source_offset),
+                float(center[0]),
+                float(center[1]),
+                float(center[2]),
+                float(sx),
+                float(sy),
+                float(sz),
+                port_string,
+                str(os.getcwd()),
+                str(output_directory),
+                res,
+            )
         else:
-            exec_str = ("python mcts.py"
-                        " -fields %r"
-                        " -input_pol %s"
-                        " -output_directory '%s/%s'"
-                        " -eps_input_file '%s/%s'"
-                        " -res %d"
-                        " -nfreq %d"
-                        " -input_direction %d"
-                        " -dpml %0.3f"
-                        " -wl_center %0.3f"
-                        " -wl_span %0.3f"
-                        " -port_vcenter %0.3f"
-                        " -port_height %0.3f"
-                        " -port_width %0.3f"
-                        " -source_offset %0.3f"
-                        " -center_x %0.3f"
-                        " -center_y %0.3f"
-                        " -center_z %0.3f"
-                        " -sx %0.3f"
-                        " -sy %0.3f"
-                        " -sz %0.3f"
-                        " -port_coords %r"
-                        " > '%s/%s-norm-res%d.out'") % (False, input_pol, str(os.getcwd()), str(output_directory), str(os.getcwd()),
-                        eps_norm_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
-                        float(wl_span), float(port_vcenter), float(port_height), float(port_width),
-                        float(source_offset), float(center[0]), float(center[1]), float(center[2]),
-                        float(sx), float(sy), float(sz), port_string, str(os.getcwd()), str(output_directory), res)
+            exec_str = (
+                "python mcts.py"
+                " -fields %r"
+                " -input_pol %s"
+                " -output_directory '%s/%s'"
+                " -eps_input_file '%s/%s'"
+                " -res %d"
+                " -nfreq %d"
+                " -input_direction %d"
+                " -dpml %0.3f"
+                " -wl_center %0.3f"
+                " -wl_span %0.3f"
+                " -port_vcenter %0.3f"
+                " -port_height %0.3f"
+                " -port_width %0.3f"
+                " -source_offset %0.3f"
+                " -center_x %0.3f"
+                " -center_y %0.3f"
+                " -center_z %0.3f"
+                " -sx %0.3f"
+                " -sy %0.3f"
+                " -sz %0.3f"
+                " -port_coords %r"
+                " > '%s/%s-norm-res%d.out'"
+            ) % (
+                False,
+                input_pol,
+                str(os.getcwd()),
+                str(output_directory),
+                str(os.getcwd()),
+                eps_norm_input_file,
+                res,
+                nfreq,
+                input_directions[0],
+                float(dpml),
+                float(wl_center),
+                float(wl_span),
+                float(port_vcenter),
+                float(port_height),
+                float(port_width),
+                float(source_offset),
+                float(center[0]),
+                float(center[1]),
+                float(center[2]),
+                float(sx),
+                float(sy),
+                float(sz),
+                port_string,
+                str(os.getcwd()),
+                str(output_directory),
+                res,
+            )
         dir_path = os.path.dirname(os.path.realpath(__file__))
         print("Running MEEP normalization... (straight waveguide)")
         start = time.time()
         call(exec_str, shell=True, cwd=dir_path)
-        print("Time to run MEEP normalization = "+str(time.time()-start)+" seconds")
+        print(
+            "Time to run MEEP normalization = " + str(time.time() - start) + " seconds"
+        )
 
-        grep_str = "grep flux1: '%s/%s-norm-res%d.out' > '%s/%s-norm-res%d.dat'"%(str(os.getcwd()), str(output_directory), res,
-                                                                                  str(os.getcwd()), str(output_directory), res)
+        grep_str = "grep flux1: '%s/%s-norm-res%d.out' > '%s/%s-norm-res%d.dat'" % (
+            str(os.getcwd()),
+            str(output_directory),
+            res,
+            str(os.getcwd()),
+            str(output_directory),
+            res,
+        )
         call(grep_str, shell="True")
 
     # Get size, center of simulation window
     flatcell = pic_component.flatten()
     bb = flatcell.get_bounding_box()
-    sx, sy, sz = bb[1][0]-bb[0][0], mstack.vsize, bb[1][1]-bb[0][1]
-    center = ((bb[1][0]+bb[0][0])/2.0, 0, (bb[1][1]+bb[0][1])/2.0)
+    sx, sy, sz = bb[1][0] - bb[0][0], mstack.vsize, bb[1][1] - bb[0][1]
+    center = ((bb[1][0] + bb[0][0]) / 2.0, 0, (bb[1][1] + bb[0][1]) / 2.0)
 
     # Convert the structure to an hdf5 file
-    eps_input_file = str('epsilon-component.h5')
+    eps_input_file = str("epsilon-component.h5")
     export_component_to_hdf5(eps_input_file, pic_component, mstack, boolean_operations)
 
     # Launch MEEP simulation using correct inputs
     port_string = ""
     for port in ports:
-        port_string += str(port["port"][0])+" "+str(port["port"][1])+" "
+        port_string += str(port["port"][0]) + " " + str(port["port"][1]) + " "
     port_string = str(port_string[:-1])
 
     if parallel:
-        exec_str = ("mpirun -np %d"
-                    " python mcts.py"
-                    " -fields %r"
-                    " -input_pol %s"
-                    " -output_directory '%s/%s'"
-                    " -eps_input_file '%s/%s'"
-                    " -res %d"
-                    " -nfreq %d"
-                    " -input_direction %d"
-                    " -dpml %0.3f"
-                    " -wl_center %0.3f"
-                    " -wl_span %0.3f"
-                    " -port_vcenter %0.3f"
-                    " -port_height %0.3f"
-                    " -port_width %0.3f"
-                    " -source_offset %0.3f"
-                    " -center_x %0.3f"
-                    " -center_y %0.3f"
-                    " -center_z %0.3f"
-                    " -sx %0.3f"
-                    " -sy %0.3f"
-                    " -sz %0.3f"
-                    " -port_coords %r"
-                    " > '%s/%s-res%d.out'") % (int(n_p), fields, input_pol, str(os.getcwd()), str(output_directory), str(os.getcwd()),
-                    eps_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
-                    float(wl_span), float(port_vcenter), float(port_height), float(port_width),
-                    float(source_offset), float(center[0]), float(center[1]), float(center[2]),
-                    float(sx), float(sy), float(sz), port_string, str(os.getcwd()), str(output_directory), res)
+        exec_str = (
+            "mpirun -np %d"
+            " python mcts.py"
+            " -fields %r"
+            " -input_pol %s"
+            " -output_directory '%s/%s'"
+            " -eps_input_file '%s/%s'"
+            " -res %d"
+            " -nfreq %d"
+            " -input_direction %d"
+            " -dpml %0.3f"
+            " -wl_center %0.3f"
+            " -wl_span %0.3f"
+            " -port_vcenter %0.3f"
+            " -port_height %0.3f"
+            " -port_width %0.3f"
+            " -source_offset %0.3f"
+            " -center_x %0.3f"
+            " -center_y %0.3f"
+            " -center_z %0.3f"
+            " -sx %0.3f"
+            " -sy %0.3f"
+            " -sz %0.3f"
+            " -port_coords %r"
+            " > '%s/%s-res%d.out'"
+        ) % (
+            int(n_p),
+            fields,
+            input_pol,
+            str(os.getcwd()),
+            str(output_directory),
+            str(os.getcwd()),
+            eps_input_file,
+            res,
+            nfreq,
+            input_directions[0],
+            float(dpml),
+            float(wl_center),
+            float(wl_span),
+            float(port_vcenter),
+            float(port_height),
+            float(port_width),
+            float(source_offset),
+            float(center[0]),
+            float(center[1]),
+            float(center[2]),
+            float(sx),
+            float(sy),
+            float(sz),
+            port_string,
+            str(os.getcwd()),
+            str(output_directory),
+            res,
+        )
     else:
-        exec_str = ("python mcts.py"
-                    " -fields %r"
-                    " -input_pol %s"
-                    " -output_directory '%s/%s'"
-                    " -eps_input_file '%s/%s'"
-                    " -res %d"
-                    " -nfreq %d"
-                    " -input_direction %d"
-                    " -dpml %0.3f"
-                    " -wl_center %0.3f"
-                    " -wl_span %0.3f"
-                    " -port_vcenter %0.3f"
-                    " -port_height %0.3f"
-                    " -port_width %0.3f"
-                    " -source_offset %0.3f"
-                    " -center_x %0.3f"
-                    " -center_y %0.3f"
-                    " -center_z %0.3f"
-                    " -sx %0.3f"
-                    " -sy %0.3f"
-                    " -sz %0.3f"
-                    " -port_coords %r"
-                    " > '%s/%s-res%d.out'") % (fields, input_pol, str(os.getcwd()), str(output_directory), str(os.getcwd()),
-                    eps_input_file, res, nfreq, input_directions[0], float(dpml), float(wl_center),
-                    float(wl_span), float(port_vcenter), float(port_height), float(port_width),
-                    float(source_offset), float(center[0]), float(center[1]), float(center[2]),
-                    float(sx), float(sy), float(sz), port_string, str(os.getcwd()), str(output_directory), res)
+        exec_str = (
+            "python mcts.py"
+            " -fields %r"
+            " -input_pol %s"
+            " -output_directory '%s/%s'"
+            " -eps_input_file '%s/%s'"
+            " -res %d"
+            " -nfreq %d"
+            " -input_direction %d"
+            " -dpml %0.3f"
+            " -wl_center %0.3f"
+            " -wl_span %0.3f"
+            " -port_vcenter %0.3f"
+            " -port_height %0.3f"
+            " -port_width %0.3f"
+            " -source_offset %0.3f"
+            " -center_x %0.3f"
+            " -center_y %0.3f"
+            " -center_z %0.3f"
+            " -sx %0.3f"
+            " -sy %0.3f"
+            " -sz %0.3f"
+            " -port_coords %r"
+            " > '%s/%s-res%d.out'"
+        ) % (
+            fields,
+            input_pol,
+            str(os.getcwd()),
+            str(output_directory),
+            str(os.getcwd()),
+            eps_input_file,
+            res,
+            nfreq,
+            input_directions[0],
+            float(dpml),
+            float(wl_center),
+            float(wl_span),
+            float(port_vcenter),
+            float(port_height),
+            float(port_width),
+            float(source_offset),
+            float(center[0]),
+            float(center[1]),
+            float(center[2]),
+            float(sx),
+            float(sy),
+            float(sz),
+            port_string,
+            str(os.getcwd()),
+            str(output_directory),
+            res,
+        )
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    if skip_sim==False:
+    if skip_sim == False:
         print("Running MEEP simulation... (check .out file for current status)")
         start = time.time()
         call(exec_str, shell=True, cwd=dir_path)
-        print("Time to run MEEP simulation = "+str(time.time()-start)+" seconds")
+        print("Time to run MEEP simulation = " + str(time.time() - start) + " seconds")
 
-    grep_str = "grep flux1: '%s/%s-res%d.out' > '%s/%s-res%d.dat'"%(str(os.getcwd()), str(output_directory), res,
-                                                                    str(os.getcwd()), str(output_directory), res)
+    grep_str = "grep flux1: '%s/%s-res%d.out' > '%s/%s-res%d.dat'" % (
+        str(os.getcwd()),
+        str(output_directory),
+        res,
+        str(os.getcwd()),
+        str(output_directory),
+        res,
+    )
     call(grep_str, shell="True")
 
     """ Grab data and plot transmission/reflection spectra
     """
-    norm_data = np.genfromtxt("%s/%s-norm-res%d.dat"%(str(os.getcwd()), str(output_directory), res), delimiter=",")
-    freq, refl0, trans0 = norm_data[:,1], -norm_data[:,2], norm_data[:,3]# refl0 = -norm_data[:,2]
-    comp_data = np.genfromtxt("%s/%s-res%d.dat"%(str(os.getcwd()), str(output_directory), res), delimiter=",")
+    norm_data = np.genfromtxt(
+        "%s/%s-norm-res%d.dat" % (str(os.getcwd()), str(output_directory), res),
+        delimiter=",",
+    )
+    freq, refl0, trans0 = (
+        norm_data[:, 1],
+        -norm_data[:, 2],
+        norm_data[:, 3],
+    )  # refl0 = -norm_data[:,2]
+    comp_data = np.genfromtxt(
+        "%s/%s-res%d.dat" % (str(os.getcwd()), str(output_directory), res),
+        delimiter=",",
+    )
 
     flux_data = []
-    for i in range(len(ports)): #Get the power flux-data from the component simulation for each flux-plane
-        flux_data.append((-1)*input_directions[i]*comp_data[:,i+2])
+    for i in range(
+        len(ports)
+    ):  # Get the power flux-data from the component simulation for each flux-plane
+        flux_data.append((-1) * input_directions[i] * comp_data[:, i + 2])
 
-    wavelength = [1.0/f for f in freq]
+    wavelength = [1.0 / f for f in freq]
     from matplotlib import pyplot as plt
 
     # Plot a spectrum corresponding to each port (sign is calculated from the port "direction")
-    colorlist = ['r-', 'b-', 'g-', 'c-', 'm-', 'y-']
-    plt.plot(wavelength, (flux_data[0]-refl0)/trans0, colorlist[0], label='port 0')
-    for i in range(len(flux_data)-1):
-        plt.plot(wavelength, flux_data[i+1]/trans0, colorlist[(i+1)%len(colorlist)], label='port '+str(i+1))
+    colorlist = ["r-", "b-", "g-", "c-", "m-", "y-"]
+    plt.plot(wavelength, (flux_data[0] - refl0) / trans0, colorlist[0], label="port 0")
+    for i in range(len(flux_data) - 1):
+        plt.plot(
+            wavelength,
+            flux_data[i + 1] / trans0,
+            colorlist[(i + 1) % len(colorlist)],
+            label="port " + str(i + 1),
+        )
 
     plt.xlabel("Wavelength [um]")
     plt.ylabel("Transmission")
-    plt.xlim([min(wavelength),max(wavelength)])
-    plt.legend(loc='best')
-    plt.savefig("%s/%s-res%d.png"%(str(os.getcwd()), str(output_directory), res))
+    plt.xlim([min(wavelength), max(wavelength)])
+    plt.legend(loc="best")
+    plt.savefig("%s/%s-res%d.png" % (str(os.getcwd()), str(output_directory), res))
     if plot_window:
         plt.show()
     plt.close()
 
     if fields:
-        print("Outputting fields images to "+str(output_directory))
+        print("Outputting fields images to " + str(output_directory))
         export_timestep_fields_to_png(str(output_directory))
 
     return None
-

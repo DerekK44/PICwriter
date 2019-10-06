@@ -8,6 +8,7 @@ from picwriter.components.waveguide import Waveguide
 from picwriter.components.bbend import BBend
 from picwriter.components.taper import Taper
 
+
 class AdiabaticCoupler(tk.Component):
     """ Adiabatic Coupler Cell class.  Design based on asymmetric adiabatic 3dB coupler designs, such as those from https://doi.org/10.1364/CLEO.2010.CThAA2, https://doi.org/10.1364/CLEO_SI.2017.SF1I.5, and https://doi.org/10.1364/CLEO_SI.2018.STh4B.4.  Uses Bezier curves for the input, with poles set to half of the x-length of the S-bend.
 
@@ -40,17 +41,20 @@ class AdiabaticCoupler(tk.Component):
         'Direction' points *towards* the waveguide that will connect to it.
 
     """
-    def __init__(self, 
-                 wgt, 
-                 length1, 
-                 length2,
-                 length3,
-                 wg_sep, 
-                 input_wg_sep,
-                 output_wg_sep,
-                 dw, 
-                 port=(0,0), 
-                 direction='EAST'):
+
+    def __init__(
+        self,
+        wgt,
+        length1,
+        length2,
+        length3,
+        wg_sep,
+        input_wg_sep,
+        output_wg_sep,
+        dw,
+        port=(0, 0),
+        direction="EAST",
+    ):
         tk.Component.__init__(self, "AdiabaticCoupler", locals())
 
         self.portlist = {}
@@ -66,19 +70,25 @@ class AdiabaticCoupler(tk.Component):
         self.output_wg_sep = output_wg_sep
         self.dw = dw
         self.wgt = wgt
-        self.wg_spec = {'layer': wgt.wg_layer, 'datatype': wgt.wg_datatype}
-        self.clad_spec = {'layer': wgt.clad_layer, 'datatype': wgt.clad_datatype}
+        self.wg_spec = {"layer": wgt.wg_layer, "datatype": wgt.wg_datatype}
+        self.clad_spec = {"layer": wgt.clad_layer, "datatype": wgt.clad_datatype}
 
-        self.yc = -input_wg_sep/2.0
+        self.yc = -input_wg_sep / 2.0
 
-        self.portlist_input_top = (0,0)
-        self.portlist_input_bot = (0,-input_wg_sep)
-        self.portlist_output_top = (length1+length2+length3, self.yc + self.output_wg_sep/2.0)
-        self.portlist_output_bot = (length1+length2+length3, self.yc - self.output_wg_sep/2.0)
+        self.portlist_input_top = (0, 0)
+        self.portlist_input_bot = (0, -input_wg_sep)
+        self.portlist_output_top = (
+            length1 + length2 + length3,
+            self.yc + self.output_wg_sep / 2.0,
+        )
+        self.portlist_output_bot = (
+            length1 + length2 + length3,
+            self.yc - self.output_wg_sep / 2.0,
+        )
 
         self.__build_cell()
         self.__build_ports()
-        
+
         """ Translate & rotate the ports corresponding to this specific component object
         """
         self._auto_transform_()
@@ -88,82 +98,142 @@ class AdiabaticCoupler(tk.Component):
         # for waveguide, then add it to the Cell
 
         """ Add the Region 1 S-bend waveguides with Bezier curves """
-        poles = [(0,0),
-                 (self.length1/2.0, 0),
-                 (self.length1/2.0, self.yc + self.wg_sep/2.0),
-                 (self.length1, self.yc + self.wg_sep/2.0)]
-        input_top_bezier = BBend(self.wgt, poles, end_width=self.wgt.wg_width+self.dw/2.0)
+        poles = [
+            (0, 0),
+            (self.length1 / 2.0, 0),
+            (self.length1 / 2.0, self.yc + self.wg_sep / 2.0),
+            (self.length1, self.yc + self.wg_sep / 2.0),
+        ]
+        input_top_bezier = BBend(
+            self.wgt, poles, end_width=self.wgt.wg_width + self.dw / 2.0
+        )
         self.add(input_top_bezier)
-        
-        poles = [(0,-self.input_wg_sep),
-                 (self.length1/2.0, -self.input_wg_sep),
-                 (self.length1/2.0, self.yc - self.wg_sep/2.0),
-                 (self.length1, self.yc - self.wg_sep/2.0)]
-        input_bot_bezier = BBend(self.wgt, poles, end_width=self.wgt.wg_width-self.dw/2.0)
+
+        poles = [
+            (0, -self.input_wg_sep),
+            (self.length1 / 2.0, -self.input_wg_sep),
+            (self.length1 / 2.0, self.yc - self.wg_sep / 2.0),
+            (self.length1, self.yc - self.wg_sep / 2.0),
+        ]
+        input_bot_bezier = BBend(
+            self.wgt, poles, end_width=self.wgt.wg_width - self.dw / 2.0
+        )
         self.add(input_bot_bezier)
 
         """ Add the Region 2 tapered waveguide part """
-        taper_top = Taper(self.wgt, self.length2, end_width=self.wgt.wg_width, start_width=self.wgt.wg_width+self.dw/2.0, **input_top_bezier.portlist["output"])
+        taper_top = Taper(
+            self.wgt,
+            self.length2,
+            end_width=self.wgt.wg_width,
+            start_width=self.wgt.wg_width + self.dw / 2.0,
+            **input_top_bezier.portlist["output"]
+        )
         self.add(taper_top)
-        taper_bot = Taper(self.wgt, self.length2, end_width=self.wgt.wg_width, start_width=self.wgt.wg_width-self.dw/2.0, **input_bot_bezier.portlist["output"])
+        taper_bot = Taper(
+            self.wgt,
+            self.length2,
+            end_width=self.wgt.wg_width,
+            start_width=self.wgt.wg_width - self.dw / 2.0,
+            **input_bot_bezier.portlist["output"]
+        )
         self.add(taper_bot)
-        
+
         """ Add the Region 3 S-bend output waveguides with Bezier curves """
-        poles = [(self.length1+self.length2, self.yc+self.wg_sep/2.0),
-                 (self.length1+self.length2+self.length3/2.0, self.yc+self.wg_sep/2.0),
-                 (self.length1+self.length2+self.length3/2.0, self.yc + self.output_wg_sep/2.0),
-                 (self.length1+self.length2+self.length3, self.yc + self.output_wg_sep/2.0)]
+        poles = [
+            (self.length1 + self.length2, self.yc + self.wg_sep / 2.0),
+            (
+                self.length1 + self.length2 + self.length3 / 2.0,
+                self.yc + self.wg_sep / 2.0,
+            ),
+            (
+                self.length1 + self.length2 + self.length3 / 2.0,
+                self.yc + self.output_wg_sep / 2.0,
+            ),
+            (
+                self.length1 + self.length2 + self.length3,
+                self.yc + self.output_wg_sep / 2.0,
+            ),
+        ]
         output_top_bezier = BBend(self.wgt, poles)
         self.add(output_top_bezier)
-        
-        poles = [(self.length1+self.length2, self.yc-self.wg_sep/2.0),
-                 (self.length1+self.length2+self.length3/2.0, self.yc-self.wg_sep/2.0),
-                 (self.length1+self.length2+self.length3/2.0, self.yc - self.output_wg_sep/2.0),
-                 (self.length1+self.length2+self.length3, self.yc - self.output_wg_sep/2.0)]
+
+        poles = [
+            (self.length1 + self.length2, self.yc - self.wg_sep / 2.0),
+            (
+                self.length1 + self.length2 + self.length3 / 2.0,
+                self.yc - self.wg_sep / 2.0,
+            ),
+            (
+                self.length1 + self.length2 + self.length3 / 2.0,
+                self.yc - self.output_wg_sep / 2.0,
+            ),
+            (
+                self.length1 + self.length2 + self.length3,
+                self.yc - self.output_wg_sep / 2.0,
+            ),
+        ]
         output_bot_bezier = BBend(self.wgt, poles)
         self.add(output_bot_bezier)
-        
+
     def __build_ports(self):
         # Portlist format:
         # example: example:  {'port':(x_position, y_position), 'direction': 'NORTH'}
-        self.portlist["input_top"] = {'port':self.portlist_input_top, 'direction':'WEST'}
-        self.portlist["input_bot"] = {'port':self.portlist_input_bot, 'direction':'WEST'}
-        self.portlist["output_top"] = {'port':self.portlist_output_top, 'direction':'EAST'}
-        self.portlist["output_bot"] = {'port':self.portlist_output_bot, 'direction':'EAST'}
+        self.portlist["input_top"] = {
+            "port": self.portlist_input_top,
+            "direction": "WEST",
+        }
+        self.portlist["input_bot"] = {
+            "port": self.portlist_input_bot,
+            "direction": "WEST",
+        }
+        self.portlist["output_top"] = {
+            "port": self.portlist_output_top,
+            "direction": "EAST",
+        }
+        self.portlist["output_bot"] = {
+            "port": self.portlist_output_bot,
+            "direction": "EAST",
+        }
+
 
 if __name__ == "__main__":
     from . import *
     from picwriter.components.waveguide import WaveguideTemplate
-    top = gdspy.Cell("top")
-    wgt = WaveguideTemplate(wg_width=0.5, bend_radius=100, resist='+')
 
-    wg1=Waveguide([(0,0), (0.1,0)], wgt)
+    top = gdspy.Cell("top")
+    wgt = WaveguideTemplate(wg_width=0.5, bend_radius=100, resist="+")
+
+    wg1 = Waveguide([(0, 0), (0.1, 0)], wgt)
     tk.add(top, wg1)
 
-    ac = AdiabaticCoupler(wgt, 
-                          length1=30.0, 
-                          length2=50.0,
-                          length3=20.0,
-                          wg_sep=1.0,
-                          input_wg_sep = 3.0,
-                          output_wg_sep = 3.0,
-                          dw=0.1,
-                          **wg1.portlist["output"])
+    ac = AdiabaticCoupler(
+        wgt,
+        length1=30.0,
+        length2=50.0,
+        length3=20.0,
+        wg_sep=1.0,
+        input_wg_sep=3.0,
+        output_wg_sep=3.0,
+        dw=0.1,
+        **wg1.portlist["output"]
+    )
     tk.add(top, ac)
-    
-    ac2 = AdiabaticCoupler(wgt, 
-                          length1=20.0, 
-                          length2=50.0,
-                          length3=30.0,
-                          wg_sep=1.0,
-                          input_wg_sep = 3.0,
-                          output_wg_sep = 3.0,
-                          dw=0.1,
-                          **ac.portlist["output_bot"])
+
+    ac2 = AdiabaticCoupler(
+        wgt,
+        length1=20.0,
+        length2=50.0,
+        length3=30.0,
+        wg_sep=1.0,
+        input_wg_sep=3.0,
+        output_wg_sep=3.0,
+        dw=0.1,
+        **ac.portlist["output_bot"]
+    )
     tk.add(top, ac2)
-    
+
     for p in ac.portlist.keys():
-        print(str(p)+": "+str(ac.portlist[p]['port']))
+        print(str(p) + ": " + str(ac.portlist[p]["port"]))
 
     gdspy.LayoutViewer()
-    gdspy.write_gds('ac.gds', unit=1.0e-6, precision=1.0e-9)
+    gdspy.write_gds("ac.gds", unit=1.0e-6, precision=1.0e-9)
