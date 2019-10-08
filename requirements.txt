@@ -3,4 +3,3 @@ numpy
 scipy
 future; python_version < "3"
 gdspy
-h5py
