@@ -149,6 +149,14 @@ class WaveguideTemplate:
                 datatype=self.wg_datatype,
             )
             self.bend_period_cell.add(bend_path)
+            
+    def __copy__(self):
+        new_wgt = type(self)()
+        new_wgt.__dict__.update(self.__dict__)
+        new_wgt.name = tk.getCellName(
+            "WaveguideTemplate"
+        )
+        return new_wgt
 
     def get_num_points_wg(self, angle):
         # This is determined from Eq 1 and 2 in "Design and simulation of silicon photonic schematics and layouts" by Chrostowski et al.
