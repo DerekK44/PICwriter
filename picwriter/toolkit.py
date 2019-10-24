@@ -43,6 +43,17 @@ def add(top_cell, component_cell, center=(0, 0), x_reflection=False):
             top_cell.add(component_cell)
         except:
             raise ValueError("Improper inputs given to add()")
+            
+def reset_database():
+    """ Resets the gdspy library, and resets the CURRENT_CELLS and CURRENT_CELL_NAMES dicts
+    """
+    gdspy.current_library = gdspy.GdsLibrary()
+    
+    global CURRENT_CELLS
+    CURRENT_CELLS = {}
+    
+    global CURRENT_CELL_NAMES
+    CURRENT_CELL_NAMES = {}
 
 
 def getCellName(name):
