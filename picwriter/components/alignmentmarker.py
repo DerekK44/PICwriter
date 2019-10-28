@@ -30,7 +30,7 @@ class AlignmentCross(tk.Component):
         layer=1,
         datatype=0,
     ):
-        tk.Component.__init__(self, "AlignmentCross")
+        tk.Component.__init__(self, "AlignmentCross", locals())
 
         self.cross_length = cross_length
         self.cross_width = cross_width
@@ -50,12 +50,6 @@ class AlignmentCross(tk.Component):
         """ Translate & rotate the ports corresponding to this specific component object
         """
         self._auto_transform_()
-
-        """ The _hash_cell_ function makes sure that duplicate cells are not created.
-        Pass to it all the unique properties of this cell, which are used to check for duplicates.
-        Do *not* include properties like port, direction.  These are specific to Cell References only.
-        """
-        self._hash_cell_(cross_length, cross_width, small_cross_width, layer, datatype)
 
     def __build_cell(self):
         # Sequentially build all the geometric shapes, then add it to the Cell
