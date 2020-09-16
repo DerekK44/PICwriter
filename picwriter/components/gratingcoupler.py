@@ -287,7 +287,7 @@ class GratingCouplerStraight(tk.Component):
         clad_path = gdspy.Path(self.wgt.wg_width + 2*self.wgt.clad_width, (0,0))
         clad_path.segment(self.taper_length, direction='+x',
                      final_width=self.width+2*self.wgt.clad_width, **self.clad_spec)
-        clad_path.segment(self.length, direction='+x', **self.clad_spec)
+        clad_path.segment(self.length+self.wgt.clad_width, direction='+x', **self.clad_spec)
 
         self.add(path)
         self.add(clad_path)
