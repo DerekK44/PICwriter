@@ -219,6 +219,7 @@ class GratingCouplerStraight(tk.Component):
         taper_length=20,
         period=1.0,
         dutycycle=0.5,
+        teeth_list=None,
     ):
         tk.Component.__init__(self, "GratingCouplerStraight", locals())
 
@@ -240,6 +241,7 @@ class GratingCouplerStraight(tk.Component):
         self.dc = dutycycle
         self.wg_spec = {"layer": wgt.wg_layer, "datatype": wgt.wg_datatype}
         self.clad_spec = {"layer": wgt.clad_layer, "datatype": wgt.clad_datatype}
+        self.teeth_list = teeth_list
 
         self.__build_cell()
         self.__build_ports()
