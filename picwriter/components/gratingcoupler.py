@@ -22,7 +22,7 @@ class GratingCoupler(tk.Component):
            * **ridge** (boolean): If True, adds another layer to the grating coupler that can be used for partial etched gratings
            * **ridge_layers** (tuple): Tuple specifying the layer/datatype of the ridge region.  Defaults to (3,0)
            * **teeth_list** (list): Can optionally pass a list of (gap, width) tuples to be used as the gap and teeth widths for irregularly spaced gratings.  For example, [(0.6, 0.2), (0.7, 0.3), ...] would be a gap of 0.6, then a tooth of width 0.2, then gap of 0.7 and tooth of 0.3, and so on.  Overrides *period*, *dutycycle*, and *length*.  Defaults to None.
-           
+
         Members:
            **portlist** (dict): Dictionary with the relevant port information
 
@@ -124,7 +124,7 @@ class GratingCoupler(tk.Component):
             stub = gdspy.Path(self.wgt.wg_width, (0,0))
             stub.segment(stub_length+0.1, **self.wg_spec)
             self.add(stub)
-        
+
         if self.teeth_list == None:
             """ Fixed pitch grating coupler """
             num_teeth = int((self.length - self.taper_length) // self.period)
@@ -196,6 +196,7 @@ class GratingCouplerStraight(tk.Component):
            * **taper_length** (float): Length of the taper before the grating coupler
            * **period** (float): Grating period
            * **dutycycle** (float): dutycycle, determines the size of the 'gap' by dutycycle=(period-gap)/period.
+           * **teeth_list** (list): Can optionally pass a list of (gap, width) tuples to be used as the gap and teeth widths for irregularly spaced gratings.  For example, [(0.6, 0.2), (0.7, 0.3), ...] would be a gap of 0.6, then a tooth of width 0.2, then gap of 0.7 and tooth of 0.3, and so on.  Overrides *period*, *dutycycle*, and *length*.  Defaults to None.
 
         Members:
            **portlist** (dict): Dictionary with the relevant port information
@@ -248,40 +249,46 @@ class GratingCouplerStraight(tk.Component):
         self._auto_transform_()
 
     def __build_cell(self):
-        # Sequentially build all the geometric shapes using gdspy path functions
-        # then add it to the Cell
-        num_teeth = int(self.length // self.period)
-        """ Create a straight grating GratingCoupler
-        """
-        gap = self.period - (self.period * self.dc)
-        path = gdspy.Path(self.wgt.wg_width, (0, 0))
-        path.segment(
-            self.taper_length, direction="+x", final_width=self.width, **self.wg_spec
-        )
-        teeth = gdspy.L1Path(
-            (
-                gap + self.taper_length + 0.5 * (num_teeth - 1 + self.dc) * self.period,
-                -0.5 * self.width,
-            ),
-            "+y",
-            self.period * self.dc,
-            [self.width],
-            [],
-            num_teeth,
-            self.period,
-            **self.wg_spec
-        )
+        #Sequentially build all the geometric shapes using gdspy path functions
+        #then add it to the Cell
 
-        clad_path = gdspy.Path(self.wgt.wg_width + 2 * self.wgt.clad_width, (0, 0))
-        clad_path.segment(
-            self.taper_length,
-            direction="+x",
-            final_width=self.width + 2 * self.wgt.clad_width,
-            **self.clad_spec
-        )
-        clad_path.segment(self.length, direction="+x", **self.clad_spec)
+        path = gdspy.Path(self.wgt.wg_width, (0,0))
+        path.segment(self.taper_length, direction='+x',
+                     final_width=self.width, **self.wg_spec)
 
-        self.add(teeth)
+
+        if self.teeth_list == None:
+            """ Create a straight grating GratingCoupler
+            """
+            num_teeth = int(self.length/self.period)
+            gap = self.period - (self.period*self.dc)
+            for i in range(num_teeth):
+                left_edge = self.taper_length + i*self.period + gap
+                right_edge = self.taper_length + (i+1)*self.period
+                tooth = gdspy.Rectangle( (left_edge,-self.width/2.0),
+                                    (right_edge,self.width/2.0),
+                                    **self.wg_spec)
+                self.add(tooth)
+        else:
+            """ User specified gap/width grating coupler """
+            cur_pos = self.taper_length
+            num_teeth = len(self.teeth_list)
+            for i in range(num_teeth):
+                (gap, width) = self.teeth_list[i]
+                left_edge = cur_pos + gap
+                right_edge = cur_pos + gap + width
+                tooth = gdspy.Rectangle( (left_edge,-self.width/2.0),
+                                    (right_edge,self.width/2.0),
+                                    **self.wg_spec)
+                self.add(tooth)
+                cur_pos = right_edge
+            self.length = cur_pos - self.taper_length
+
+        clad_path = gdspy.Path(self.wgt.wg_width + 2*self.wgt.clad_width, (0,0))
+        clad_path.segment(self.taper_length, direction='+x',
+                     final_width=self.width+2*self.wgt.clad_width, **self.clad_spec)
+        clad_path.segment(self.length, direction='+x', **self.clad_spec)
+
         self.add(path)
         self.add(clad_path)
 
