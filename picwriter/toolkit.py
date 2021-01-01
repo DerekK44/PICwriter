@@ -121,7 +121,7 @@ def get_trace_length(trace, wgt):
     """Returns the total length of a curved waveguide trace.
 
     Args:
-       * **trace** (list): tracelist of (x,y) points all specifying 90 degree angles.
+       * **trace** (list): tracelist of (x,y) points all specifying 90 degree angles.  Assumes there are no bends on the first and last point.
        * **wgt** (WaveguideTemplate): template for the waveguide, the bend_radius of which is used to compute the length of the curved section.
 
     Returns:
@@ -129,11 +129,16 @@ def get_trace_length(trace, wgt):
 
     """
     length = 0.0
-    dbr = 2 * wgt.bend_radius - 0.5 * np.pi * wgt.bend_radius
+
     for i in range(len(trace) - 1):
         pt2, pt1 = trace[i + 1], trace[i]
         length += np.sqrt((pt2[0] - pt1[0]) ** 2 + (pt2[1] - pt1[1]) ** 2)
-    length = length - (dbr * (len(trace) - 1))
+
+    if wgt.euler == True:
+        corner_dl = 2 * wgt.effective_bend_radius - wgt.bend_length_90
+    else:
+        corner_dl = 2 * wgt.bend_radius - (0.5 * np.pi * wgt.bend_radius)
+    length = length - (corner_dl * (len(trace) - 2))
     return length
 
 
