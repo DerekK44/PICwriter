@@ -168,7 +168,7 @@ class EBend(tk.Component):
         )  # Radius of curvature: https://en.wikipedia.org/wiki/Radius_of_curvature
 
     def get_bend_length(self):
-        """Returns the length of the Euler S-Bend"""
+        """Returns the length of the Euler curve"""
         # The length of a parametric curve x(t) y(t) is Integral[ sqrt( (dx/dt)^2 + (dy/dt)^2 ), {t,0,t0}], which for a Fresnel curve, simplifies to just t0
         if abs(self.turnby) <= np.pi / 2.0:
             return 2 * self.t * self.scale_factor
