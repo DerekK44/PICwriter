@@ -58,7 +58,10 @@ class EBend(tk.Component):
         if end_width != None:
             self.end_width = end_width
         else:
-            self.end_width = wgt.wg_width
+            if wgt.wg_type == "strip":
+                self.end_width = wgt.wg_width
+            elif wgt.wg_type == "slot":
+                self.end_width = wgt.rail
 
         self.wgt = wgt
         self.wg_spec = {"layer": wgt.wg_layer, "datatype": wgt.wg_datatype}
@@ -340,7 +343,10 @@ class EulerSBend(tk.Component):
         if end_width != None:
             self.end_width = end_width
         else:
-            self.end_width = wgt.wg_width
+            if wgt.wg_type == "strip":
+                self.end_width = wgt.wg_width
+            elif wgt.wg_type == "slot":
+                self.end_width = wgt.rail
 
         if length < 0:
             raise ValueError("Warning! The length argument must be positive")
