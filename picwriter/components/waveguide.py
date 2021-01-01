@@ -684,6 +684,7 @@ class Waveguide(tk.Component):
 
         else:
             """Strip and slot waveguide generation below"""
+            self.length = 0.0
             if len(self.trace) == 2:
                 if self.wgt.wg_type == "strip":
                     path = gdspy.Path(self.wgt.wg_width, self.trace[0])
@@ -692,6 +693,8 @@ class Waveguide(tk.Component):
                         direction=tk.get_exact_angle(self.trace[0], self.trace[1]),
                         **self.wg_spec
                     )
+                    self.length += tk.dist(self.trace[0], self.trace[1])
+                    print("Initial length: {}".format(tk.dist(self.trace[0], self.trace[1])))
                 elif self.wgt.wg_type == "slot":
                     path = gdspy.Path(
                         self.wgt.rail,
@@ -704,6 +707,8 @@ class Waveguide(tk.Component):
                         direction=tk.get_exact_angle(self.trace[0], self.trace[1]),
                         **self.wg_spec
                     )
+                    self.length += tk.dist(self.trace[0], self.trace[1])
+                    print("Initial length: {}".format(tk.dist(self.trace[0], self.trace[1])))
 
                 clad_path_list = []
                 for c in range(len(self.wgt.waveguide_stack) - 1):
@@ -759,6 +764,8 @@ class Waveguide(tk.Component):
                         )
                         dl = ebend.dist_to_vertex
                         self.add(ebend)
+                        self.length += ebend.get_bend_length()
+                        print("EBend length: {}".format(ebend.get_bend_length()))
 
                     if (dl + prev_dl) > tk.dist(
                         self.trace[i], self.trace[i + 1]
@@ -780,6 +787,8 @@ class Waveguide(tk.Component):
                         direction=start_angle,
                         **self.wg_spec
                     )
+                    self.length += tk.dist(self.trace[i], self.trace[i + 1]) - dl - prev_dl
+                    print("Segment length: {}".format(tk.dist(self.trace[i], self.trace[i + 1]) - dl - prev_dl))
 
                     for c in range(len(self.wgt.waveguide_stack) - 1):
                         cur_spec = {
@@ -799,6 +808,9 @@ class Waveguide(tk.Component):
                             number_of_points=self.wgt.get_num_points_wg(turnby),
                             **self.wg_spec
                         )
+                        self.length += abs(br * turnby)
+                        print("Bend length: {}".format(abs(br * turnby)))
+
                         for c in range(len(self.wgt.waveguide_stack) - 1):
                             cur_spec = {
                                 "layer": self.wgt.waveguide_stack[c + 1][1][0],
@@ -811,6 +823,7 @@ class Waveguide(tk.Component):
                                 **cur_spec
                             )
                     else:
+                        # Create a new gdspy Path object, since bends are separate objects from straight waveguides
                         self.add(path)
                         for cpath in clad_path_list:
                             self.add(cpath)
@@ -841,6 +854,8 @@ class Waveguide(tk.Component):
                     direction=next_angle,
                     **self.wg_spec
                 )
+                self.length += tk.dist(self.trace[-2], self.trace[-1]) - prev_dl
+                print("Final length: {}".format(tk.dist(self.trace[-2], self.trace[-1]) - prev_dl))
                 for c in range(len(self.wgt.waveguide_stack) - 1):
                     cur_spec = {
                         "layer": self.wgt.waveguide_stack[c + 1][1][0],
@@ -893,7 +908,7 @@ if __name__ == "__main__":
         slot=0.3,
         waveguide_stack=wg_stack,
         resist="+",
-        euler_bend=True,
+        euler_bend=False,
     )
 
     space = 10.0
@@ -907,9 +922,19 @@ if __name__ == "__main__":
             (200, -300),
             (-500, 100),
             (-500, -200),
+            # (0, 0), # These are Manhattan grid waypoints
+            # (300, 0),
+            # (300.0, 100.0),
+            # (900.0, 100.0),
+            # (900.0, -400.0),
+            # (-1900.0, -400.0),
+            # (-1900, 800),
+            # (-600, 800)
         ],
         wgt1,
     )
+    print("wg1 length = {}".format(wg1.length))
+    print("wg1 length (other way) = {}".format(tk.get_trace_length(wg1.trace, wgt1)))
     tk.add(top, wg1)
     wg2 = Waveguide(
         [(0, -space), (140.0, -space), (160.0, 50.0 - space), (300.0, 50.0 - space)],
