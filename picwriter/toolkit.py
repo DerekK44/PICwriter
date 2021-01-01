@@ -128,6 +128,13 @@ def get_trace_length(trace, wgt):
        float corresponding to the length of the waveguide trace
 
     """
+
+    for i in range(len(trace)-1):
+        cur_pt = trace[i]
+        next_pt = trace[i+1]
+        if not ((abs(cur_pt[0] - next_pt[0]) < 1E-9) or (abs(cur_pt[1] - next_pt[1]) < 1E-9)):
+            raise Exception("The 'trace' list argument passed to 'get_trace_length()' must be a set of Manhattan grid points.")
+
     length = 0.0
 
     for i in range(len(trace) - 1):
