@@ -7,32 +7,32 @@ import picwriter.toolkit as tk
 
 
 class DBR(tk.Component):
-    """ Distributed Bragg Reflector Cell class.  Tapers the input waveguide to a periodic waveguide structure with varying width (1-D photonic crystal).
+    """Distributed Bragg Reflector Cell class.  Tapers the input waveguide to a periodic waveguide structure with varying width (1-D photonic crystal).
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **length** (float): Length of the DBR region.
-           * **period** (float): Period of the repeated unit.
-           * **dc** (float): Duty cycle of the repeated unit (must be a float between 0 and 1.0).
-           * **w_phc** (float): Width of the thin section of the waveguide.  w_phc = 0 corresponds to disconnected periodic blocks.
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **length** (float): Length of the DBR region.
+       * **period** (float): Period of the repeated unit.
+       * **dc** (float): Duty cycle of the repeated unit (must be a float between 0 and 1.0).
+       * **w_phc** (float): Width of the thin section of the waveguide.  w_phc = 0 corresponds to disconnected periodic blocks.
 
-        Keyword Args:
-           * **taper_length** (float): Length of the taper between the input/output waveguide and the DBR region.  Defaults to 20.0.
-           * **fins** (boolean): If `True`, adds fins to the input/output waveguides.  In this case a different template for the component must be specified.  This feature is useful when performing electron-beam lithography and using different beam currents for fine features (helps to reduce stitching errors).  Defaults to `False`
-           * **fin_size** ((x,y) Tuple): Specifies the x- and y-size of the `fins`.  Defaults to 200 nm x 50 nm
-           * **dbr_wgt** (WaveguideTemplate): If `fins` above is True, a WaveguideTemplate (dbr_wgt) must be specified.  This defines the layertype / datatype of the DBR (which will be separate from the input/output waveguides).  Defaults to `None`
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+    Keyword Args:
+       * **taper_length** (float): Length of the taper between the input/output waveguide and the DBR region.  Defaults to 20.0.
+       * **fins** (boolean): If `True`, adds fins to the input/output waveguides.  In this case a different template for the component must be specified.  This feature is useful when performing electron-beam lithography and using different beam currents for fine features (helps to reduce stitching errors).  Defaults to `False`
+       * **fin_size** ((x,y) Tuple): Specifies the x- and y-size of the `fins`.  Defaults to 200 nm x 50 nm
+       * **dbr_wgt** (WaveguideTemplate): If `fins` above is True, a WaveguideTemplate (dbr_wgt) must be specified.  This defines the layertype / datatype of the DBR (which will be separate from the input/output waveguides).  Defaults to `None`
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the DBR, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the DBR, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 

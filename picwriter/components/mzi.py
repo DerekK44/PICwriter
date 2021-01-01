@@ -11,40 +11,40 @@ from picwriter.components.directionalcoupler import DirectionalCoupler
 
 
 class MachZehnder(tk.Component):
-    """ Mach-Zehnder Cell class with thermo-optic option.  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
+    """Mach-Zehnder Cell class with thermo-optic option.  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **MMIlength** (float): Length of the 1x2 MMI region (along direction of propagation)
-           * **MMIwidth** (float): Width of the 1x2 MMI region (perpendicular to direction of propagation).
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **MMIlength** (float): Length of the 1x2 MMI region (along direction of propagation)
+       * **MMIwidth** (float): Width of the 1x2 MMI region (perpendicular to direction of propagation).
 
-        Keyword Args:
-           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
-           * **MMItaper_width** (float): Maximum width of the 1x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
-           * **MMItaper_length** (float): Length of the taper leading up to the 1x2 MMI.  Defaults to None (taper_length=20).
-           * **MMIwg_sep** (float): Separation between waveguides on the 2-port side of the 1x2 MMI (defaults to width/3.0)
-           * **arm1** (float): Additional length of the top arm (when going `'EAST'`).  Defaults to zero.
-           * **arm2** (float): Additional length of the bottom arm (when going `'EAST'`).  Defaults to zero.
-           * **heater** (boolean): If true, adds heater on-top of one MZI arm.  Defaults to False.
-           * **heater_length** (float): Specifies the length of the heater along the waveguide. Doesn't include the length of the 180 degree bend.  Defaults to 400.0.
-           * **mt** (MetalTemplate): If 'heater' is true, must specify a Metal Template that defines heater & heater cladding layers.
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians). Defaults to `'EAST'` (0 radians)
+    Keyword Args:
+       * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
+       * **MMItaper_width** (float): Maximum width of the 1x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
+       * **MMItaper_length** (float): Length of the taper leading up to the 1x2 MMI.  Defaults to None (taper_length=20).
+       * **MMIwg_sep** (float): Separation between waveguides on the 2-port side of the 1x2 MMI (defaults to width/3.0)
+       * **arm1** (float): Additional length of the top arm (when going `'EAST'`).  Defaults to zero.
+       * **arm2** (float): Additional length of the bottom arm (when going `'EAST'`).  Defaults to zero.
+       * **heater** (boolean): If true, adds heater on-top of one MZI arm.  Defaults to False.
+       * **heater_length** (float): Specifies the length of the heater along the waveguide. Doesn't include the length of the 180 degree bend.  Defaults to 400.0.
+       * **mt** (MetalTemplate): If 'heater' is true, must specify a Metal Template that defines heater & heater cladding layers.
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians). Defaults to `'EAST'` (0 radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
-           * portlist['heater_top_in'] = {'port', (x3, y3), 'direction': 'dir3'}
-           * portlist['heater_top_out'] = {'port', (x4, y4), 'direction': 'dir4'}
-           * portlist['heater_bot_in'] = {'port', (x5, y5), 'direction': 'dir5'}
-           * portlist['heater_bot_out'] = {'port', (x6, y6), 'direction': 'dir6'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+       * portlist['heater_top_in'] = {'port', (x3, y3), 'direction': 'dir3'}
+       * portlist['heater_top_out'] = {'port', (x4, y4), 'direction': 'dir4'}
+       * portlist['heater_bot_in'] = {'port', (x5, y5), 'direction': 'dir5'}
+       * portlist['heater_bot_out'] = {'port', (x6, y6), 'direction': 'dir6'}
 
-        Where in the above (x1,y1) is the input port, (x2, y2) is the output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
-        Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
+    Where in the above (x1,y1) is the input port, (x2, y2) is the output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
+    Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
 
     """
 
@@ -300,45 +300,45 @@ class MachZehnder(tk.Component):
 
 
 class MachZehnderSwitch1x2(tk.Component):
-    """ Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm.  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
+    """Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm.  It is possible to generate your own Mach-Zehnder from the waveguide and MMI1x2 classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **MMI1x2length** (float): Length of the 1x2 MMI region (along direction of propagation)
-           * **MMI1x2width** (float): Width of the 1x2 MMI region (perpendicular to direction of propagation).
-           * **MMI2x2length** (float): Length of the 2x2 MMI region (along direction of propagation)
-           * **MMI2x2width** (float): Width of the 2x2 MMI region (perpendicular to direction of propagation).
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **MMI1x2length** (float): Length of the 1x2 MMI region (along direction of propagation)
+       * **MMI1x2width** (float): Width of the 1x2 MMI region (perpendicular to direction of propagation).
+       * **MMI2x2length** (float): Length of the 2x2 MMI region (along direction of propagation)
+       * **MMI2x2width** (float): Width of the 2x2 MMI region (perpendicular to direction of propagation).
 
-        Keyword Args:
-           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
-           * **MMI1x2taper_width** (float): Maximum width of the 1x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
-           * **MMI1x2taper_length** (float): Length of the taper leading up to the 1x2 MMI.  Defaults to None (taper_length=20).
-           * **MMI1x2wg_sep** (float): Separation between waveguides on the 2-port side of the 1x2 MMI (defaults to width/3.0)
-           * **MMI2x2taper_width** (float): Maximum width of the 2x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
-           * **MMI2x2wg_sep** (float): Separation between waveguides of the 2x2 MMI (defaults to width/3.0)
-           * **arm1** (float): Additional length of the top arm (when going `'EAST'`).  Defaults to zero.
-           * **arm2** (float): Additional length of the bottom arm (when going `'EAST'`).  Defaults to zero.
-           * **heater** (boolean): If true, adds heater on-top of one MZI arm.  Defaults to False.
-           * **heater_length** (float): Specifies the length of the heater along the waveguide. Doesn't include the length of the 180 degree bend.  Defaults to 400.0.
-           * **mt** (MetalTemplate): If 'heater' is true, must specify a Metal Template that defines heater & heater cladding layers.
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to `'EAST'` (0 radians)
+    Keyword Args:
+       * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
+       * **MMI1x2taper_width** (float): Maximum width of the 1x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
+       * **MMI1x2taper_length** (float): Length of the taper leading up to the 1x2 MMI.  Defaults to None (taper_length=20).
+       * **MMI1x2wg_sep** (float): Separation between waveguides on the 2-port side of the 1x2 MMI (defaults to width/3.0)
+       * **MMI2x2taper_width** (float): Maximum width of the 2x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
+       * **MMI2x2wg_sep** (float): Separation between waveguides of the 2x2 MMI (defaults to width/3.0)
+       * **arm1** (float): Additional length of the top arm (when going `'EAST'`).  Defaults to zero.
+       * **arm2** (float): Additional length of the bottom arm (when going `'EAST'`).  Defaults to zero.
+       * **heater** (boolean): If true, adds heater on-top of one MZI arm.  Defaults to False.
+       * **heater_length** (float): Specifies the length of the heater along the waveguide. Doesn't include the length of the 180 degree bend.  Defaults to 400.0.
+       * **mt** (MetalTemplate): If 'heater' is true, must specify a Metal Template that defines heater & heater cladding layers.
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to `'EAST'` (0 radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
-           * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
-           * portlist['heater_top_in'] = {'port', (x4, y4), 'direction': 'dir4'}
-           * portlist['heater_top_out'] = {'port', (x5, y5), 'direction': 'dir5'}
-           * portlist['heater_bot_in'] = {'port', (x6, y6), 'direction': 'dir6'}
-           * portlist['heater_bot_out'] = {'port', (x7, y7), 'direction': 'dir7'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
+       * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
+       * portlist['heater_top_in'] = {'port', (x4, y4), 'direction': 'dir4'}
+       * portlist['heater_top_out'] = {'port', (x5, y5), 'direction': 'dir5'}
+       * portlist['heater_bot_in'] = {'port', (x6, y6), 'direction': 'dir6'}
+       * portlist['heater_bot_out'] = {'port', (x7, y7), 'direction': 'dir7'}
 
-        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
-        Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
+    Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
+    Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
 
     """
 
@@ -621,43 +621,43 @@ class MachZehnderSwitch1x2(tk.Component):
 
 
 class MachZehnderSwitchDC1x2(tk.Component):
-    """ Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm and a directional coupler.  It is possible to generate your own Mach-Zehnder from the other classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
+    """Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm and a directional coupler.  It is possible to generate your own Mach-Zehnder from the other classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **MMI1x2length** (float): Length of the 1x2 MMI region (along direction of propagation)
-           * **MMI1x2width** (float): Width of the 1x2 MMI region (perpendicular to direction of propagation).
-           * **DClength** (float): Length of the directional coupler region
-           * **DCgap** (float): Size of the directional coupler gap
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **MMI1x2length** (float): Length of the 1x2 MMI region (along direction of propagation)
+       * **MMI1x2width** (float): Width of the 1x2 MMI region (perpendicular to direction of propagation).
+       * **DClength** (float): Length of the directional coupler region
+       * **DCgap** (float): Size of the directional coupler gap
 
-        Keyword Args:
-           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region (same for MMI & DC).  Default=pi/6.
-           * **MMI1x2taper_width** (float): Maximum width of the 1x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
-           * **MMI1x2taper_length** (float): Length of the taper leading up to the 1x2 MMI.  Defaults to None (taper_length=20).
-           * **MMI1x2wg_sep** (float): Separation between waveguides on the 2-port side of the 1x2 MMI (defaults to width/3.0)
-           * **arm1** (float): Additional length of the top arm (when going `'EAST'`).  Defaults to zero.
-           * **arm2** (float): Additional length of the bottom arm (when going `'EAST'`).  Defaults to zero.
-           * **heater** (boolean): If true, adds heater on-top of one MZI arm.  Defaults to False.
-           * **heater_length** (float): Specifies the length of the heater along the waveguide. Doesn't include the length of the 180 degree bend.  Defaults to 400.0.
-           * **mt** (MetalTemplate): If 'heater' is true, must specify a Metal Template that defines heater & heater cladding layers.
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to `'EAST'` (0 radians)
+    Keyword Args:
+       * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region (same for MMI & DC).  Default=pi/6.
+       * **MMI1x2taper_width** (float): Maximum width of the 1x2 MMI taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
+       * **MMI1x2taper_length** (float): Length of the taper leading up to the 1x2 MMI.  Defaults to None (taper_length=20).
+       * **MMI1x2wg_sep** (float): Separation between waveguides on the 2-port side of the 1x2 MMI (defaults to width/3.0)
+       * **arm1** (float): Additional length of the top arm (when going `'EAST'`).  Defaults to zero.
+       * **arm2** (float): Additional length of the bottom arm (when going `'EAST'`).  Defaults to zero.
+       * **heater** (boolean): If true, adds heater on-top of one MZI arm.  Defaults to False.
+       * **heater_length** (float): Specifies the length of the heater along the waveguide. Doesn't include the length of the 180 degree bend.  Defaults to 400.0.
+       * **mt** (MetalTemplate): If 'heater' is true, must specify a Metal Template that defines heater & heater cladding layers.
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to `'EAST'` (0 radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
-           * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
-           * portlist['heater_top_in'] = {'port', (x4, y4), 'direction': 'dir4'}
-           * portlist['heater_top_out'] = {'port', (x5, y5), 'direction': 'dir5'}
-           * portlist['heater_bot_in'] = {'port', (x6, y6), 'direction': 'dir6'}
-           * portlist['heater_bot_out'] = {'port', (x7, y7), 'direction': 'dir7'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
+       * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
+       * portlist['heater_top_in'] = {'port', (x4, y4), 'direction': 'dir4'}
+       * portlist['heater_top_out'] = {'port', (x5, y5), 'direction': 'dir5'}
+       * portlist['heater_bot_in'] = {'port', (x6, y6), 'direction': 'dir6'}
+       * portlist['heater_bot_out'] = {'port', (x7, y7), 'direction': 'dir7'}
 
-        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
-        Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
+    Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
+    Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
 
     """
 
@@ -945,41 +945,41 @@ class MachZehnderSwitchDC1x2(tk.Component):
 
 
 class MachZehnderSwitchDC2x2(tk.Component):
-    """ Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm and a directional coupler for both input and output.  It is possible to generate your own Mach-Zehnder from the other classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
+    """Standard Mach-Zehnder Optical Switch Cell class with heaters on each arm and a directional coupler for both input and output.  It is possible to generate your own Mach-Zehnder from the other classes, but this class is simply a shorthand (with some extra type-checking).  Defaults to a *balanced* Mach Zehnder.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **DC1length** (float): Length of the directional coupler region at the input
-           * **DC1gap** (float): Size of the directional coupler gap at the input
-           * **DC2length** (float): Length of the directional coupler region at the output
-           * **DC2gap** (float): Size of the directional coupler gap at the output
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **DC1length** (float): Length of the directional coupler region at the input
+       * **DC1gap** (float): Size of the directional coupler gap at the input
+       * **DC2length** (float): Length of the directional coupler region at the output
+       * **DC2gap** (float): Size of the directional coupler gap at the output
 
-        Keyword Args:
-           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
-           * **arm1** (float): Additional length of the top arm (when going `'EAST'`).  Defaults to zero.
-           * **arm2** (float): Additional length of the bottom arm (when going `'EAST'`).  Defaults to zero.
-           * **heater** (boolean): If true, adds heater on-top of one MZI arm.  Defaults to False.
-           * **heater_length** (float): Specifies the length of the heater along the waveguide. Doesn't include the length of the 180 degree bend.  Defaults to 400.0.
-           * **mt** (MetalTemplate): If 'heater' is true, must specify a Metal Template that defines heater & heater cladding layers.
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to `'EAST'` (0 radians)
+    Keyword Args:
+       * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
+       * **arm1** (float): Additional length of the top arm (when going `'EAST'`).  Defaults to zero.
+       * **arm2** (float): Additional length of the bottom arm (when going `'EAST'`).  Defaults to zero.
+       * **heater** (boolean): If true, adds heater on-top of one MZI arm.  Defaults to False.
+       * **heater_length** (float): Specifies the length of the heater along the waveguide. Doesn't include the length of the 180 degree bend.  Defaults to 400.0.
+       * **mt** (MetalTemplate): If 'heater' is true, must specify a Metal Template that defines heater & heater cladding layers.
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to `'EAST'` (0 radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input_top'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['input_bot'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
-           * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
-           * portlist['heater_top_in'] = {'port', (x4, y4), 'direction': 'dir4'}
-           * portlist['heater_top_out'] = {'port', (x5, y5), 'direction': 'dir5'}
-           * portlist['heater_bot_in'] = {'port', (x6, y6), 'direction': 'dir6'}
-           * portlist['heater_bot_out'] = {'port', (x7, y7), 'direction': 'dir7'}
+    Portlist format:
+       * portlist['input_top'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['input_bot'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
+       * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
+       * portlist['heater_top_in'] = {'port', (x4, y4), 'direction': 'dir4'}
+       * portlist['heater_top_out'] = {'port', (x5, y5), 'direction': 'dir5'}
+       * portlist['heater_bot_in'] = {'port', (x6, y6), 'direction': 'dir6'}
+       * portlist['heater_bot_out'] = {'port', (x7, y7), 'direction': 'dir7'}
 
-        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
-        Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
+    Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and the directions are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
+    Four additional ports are created for the heaters if the `heater` argument is True.  Metals are not generated, but should be connected to the specified 'heater' ports.
 
     """
 

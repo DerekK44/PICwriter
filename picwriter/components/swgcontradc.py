@@ -8,43 +8,43 @@ from picwriter.components.waveguide import Waveguide
 
 
 class SWGContraDirectionalCoupler(tk.Component):
-    """ SWG Contra-Directional Coupler Cell class.
+    """SWG Contra-Directional Coupler Cell class.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **length** (float): Length of the coupling region.
-           * **gap** (float): Distance between the two waveguides.
-           * **period** (float): Period of the grating.
-           * **dc** (float): Duty cycle of the grating. Must be between 0 and 1.
-           * **taper_length** (float): Length of the taper region
-           * **w_phc_bot** (float): Width of the thin section of the bottom waveguide.  w_phc_bot = 0 corresponds to disconnected periodic blocks.
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **length** (float): Length of the coupling region.
+       * **gap** (float): Distance between the two waveguides.
+       * **period** (float): Period of the grating.
+       * **dc** (float): Duty cycle of the grating. Must be between 0 and 1.
+       * **taper_length** (float): Length of the taper region
+       * **w_phc_bot** (float): Width of the thin section of the bottom waveguide.  w_phc_bot = 0 corresponds to disconnected periodic blocks.
 
-        Keyword Args:
-           * **top_angle** (float): Angle in radians (between 0 and pi/2) at which the *top* waveguide bends towards the coupling region.  Default=pi/6.
-           * **width_top** (float): Width of the top waveguide in the coupling region.  Defaults to the WaveguideTemplate wg width.
-           * **width_bot** (float): Width of the bottom waveguide in the coupling region.  Defaults to the WaveguideTemplate wg width.
-           * **extra_swg_length** (float): Extra length of SWG waveguide between coupling region and taper.  Default=0.0.
-           * **input_bot** (boolean): If `True`, will make the default input the bottom waveguide (rather than the top).  Default=`False`
-           * **apodization_top** (boolean): If `True`, will apodize the *coupling_gap* distance for the top waveguide using a Gaussian profile.
-           * **apodization_far_dist** (float): If `apodization_top`=`True`, then this parameter sets how far away the coupling gap *starts*.  The minimum coupling gap is defined by `gap`.  Defaults to 1um.
-           * **apodization_curv** (float): If `apodization_top`=`True`, then this parameter sets the curvature for the Gaussian apodization.  Defaults to (10.0/length)**2.
-           * **fins** (boolean): If `True`, adds fins to the input/output waveguides.  In this case a different template for the component must be specified.  This feature is useful when performing electron-beam lithography and using different beam currents for fine features (helps to reduce stitching errors).  Defaults to `False`
-           * **fin_size** ((x,y) Tuple): Specifies the x- and y-size of the `fins`.  Defaults to 200 nm x 50 nm
-           * **contradc_wgt** (WaveguideTemplate): If `fins` above is True, a WaveguideTemplate (contradc_wgt) must be specified.  This defines the layertype / datatype of the ContraDC (which will be separate from the input/output waveguides).  Defaults to `None`
-           * **port** (tuple): Cartesian coordinate of the input port (AT TOP if input_bot=False, AT BOTTOM if input_bot=True).  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to 'EAST'.
+    Keyword Args:
+       * **top_angle** (float): Angle in radians (between 0 and pi/2) at which the *top* waveguide bends towards the coupling region.  Default=pi/6.
+       * **width_top** (float): Width of the top waveguide in the coupling region.  Defaults to the WaveguideTemplate wg width.
+       * **width_bot** (float): Width of the bottom waveguide in the coupling region.  Defaults to the WaveguideTemplate wg width.
+       * **extra_swg_length** (float): Extra length of SWG waveguide between coupling region and taper.  Default=0.0.
+       * **input_bot** (boolean): If `True`, will make the default input the bottom waveguide (rather than the top).  Default=`False`
+       * **apodization_top** (boolean): If `True`, will apodize the *coupling_gap* distance for the top waveguide using a Gaussian profile.
+       * **apodization_far_dist** (float): If `apodization_top`=`True`, then this parameter sets how far away the coupling gap *starts*.  The minimum coupling gap is defined by `gap`.  Defaults to 1um.
+       * **apodization_curv** (float): If `apodization_top`=`True`, then this parameter sets the curvature for the Gaussian apodization.  Defaults to (10.0/length)**2.
+       * **fins** (boolean): If `True`, adds fins to the input/output waveguides.  In this case a different template for the component must be specified.  This feature is useful when performing electron-beam lithography and using different beam currents for fine features (helps to reduce stitching errors).  Defaults to `False`
+       * **fin_size** ((x,y) Tuple): Specifies the x- and y-size of the `fins`.  Defaults to 200 nm x 50 nm
+       * **contradc_wgt** (WaveguideTemplate): If `fins` above is True, a WaveguideTemplate (contradc_wgt) must be specified.  This defines the layertype / datatype of the ContraDC (which will be separate from the input/output waveguides).  Defaults to `None`
+       * **port** (tuple): Cartesian coordinate of the input port (AT TOP if input_bot=False, AT BOTTOM if input_bot=True).  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to 'EAST'.
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input_top'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['input_bot'] = {'port': (x2,y2), 'direction': 'dir1'}
-           * portlist['output_top'] = {'port': (x3, y3), 'direction': 'dir3'}
-           * portlist['output_bot'] = {'port': (x4, y4), 'direction': 'dir4'}
+    Portlist format:
+       * portlist['input_top'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['input_bot'] = {'port': (x2,y2), 'direction': 'dir1'}
+       * portlist['output_top'] = {'port': (x3, y3), 'direction': 'dir3'}
+       * portlist['output_bot'] = {'port': (x4, y4), 'direction': 'dir4'}
 
-        Where in the above (x1,y1) (or (x2,y2) if input_bot=False) is the same as the input 'port', (x3, y3), and (x4, y4) are the two output port locations.  Directions 'dir1', 'dir2', etc. are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) (or (x2,y2) if input_bot=False) is the same as the input 'port', (x3, y3), and (x4, y4) are the two output port locations.  Directions 'dir1', 'dir2', etc. are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 
@@ -188,7 +188,7 @@ class SWGContraDirectionalCoupler(tk.Component):
         """ First the top waveguide """
 
         def gaussian_top(
-            t
+            t,
         ):  # Gaussian path only used for apodized coupler gaps, t varies from 0 to 1
             x = x01 + angle_x_dist + t * (self.length)
             xcent = x01 + angle_x_dist + 0.5 * self.length

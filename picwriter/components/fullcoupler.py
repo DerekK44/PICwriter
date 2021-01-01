@@ -8,7 +8,7 @@ from picwriter.components.waveguide import Waveguide
 
 
 class FullCoupler(tk.Component):
-    """ Adiabatic Full Cell class.  Design based on asymmetric adiabatic full coupler designs, such as the one reported in 'Integrated Optic Adiabatic Devices on Silicon' by Y. Shani, et al (IEEE Journal of Quantum Electronics, Vol. 27, No. 3 March 1991).
+    """Adiabatic Full Cell class.  Design based on asymmetric adiabatic full coupler designs, such as the one reported in 'Integrated Optic Adiabatic Devices on Silicon' by Y. Shani, et al (IEEE Journal of Quantum Electronics, Vol. 27, No. 3 March 1991).
 
     In this design, Region I is the first half of the input S-bend waveguide where the input waveguides widths taper by +dw and -dw, Region II is the second half of the S-bend waveguide with constant, unbalanced widths, Region III is the coupling region where the waveguides from unbalanced widths to balanced widths to reverse polarity unbalanced widths, Region IV is the fixed width waveguide that curves away from the coupling region, and Region V is the final curve where the waveguides taper back to the regular width specified in the waveguide template.
 

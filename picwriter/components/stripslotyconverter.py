@@ -7,32 +7,32 @@ import picwriter.toolkit as tk
 
 
 class StripSlotYConverter(tk.Component):
-    """ Strip-to-Slot Y Converter Cell class.  For more information on this specific type of strip to slot mode converter, please see the original paper at https://doi.org/10.1364/OL.34.001498.
+    """Strip-to-Slot Y Converter Cell class.  For more information on this specific type of strip to slot mode converter, please see the original paper at https://doi.org/10.1364/OL.34.001498.
 
-        Args:
-           * **wgt_input** (WaveguideTemplate):  WaveguideTemplate object for the input waveguide (should be either of type `strip` or `slot`).
-           * **wgt_output** (WaveguideTemplate):  WaveguideTemplate object for the output waveguide (should be either of type `strip` or `slot`, opposite of the input type).
-           * **length** (float): Length of the tapered region.
-           * **d** (float): Distance between the outer edge of the strip waveguide and the start of the slot waveguide rail.
+    Args:
+       * **wgt_input** (WaveguideTemplate):  WaveguideTemplate object for the input waveguide (should be either of type `strip` or `slot`).
+       * **wgt_output** (WaveguideTemplate):  WaveguideTemplate object for the output waveguide (should be either of type `strip` or `slot`, opposite of the input type).
+       * **length** (float): Length of the tapered region.
+       * **d** (float): Distance between the outer edge of the strip waveguide and the start of the slot waveguide rail.
 
-        Keyword Args:
-           * **end_strip_width** (float): End width of the strip waveguide (at the narrow tip).  Defaults to 0.
-           * **end_slot_width** (float): End width of the slot waveguide (at the narrow tip).  Defaults to 0.
-           * **input_strip** (Boolean): If `True`, sets the input port to be the strip waveguide side.  If `False`, slot waveguide is on the input.  Defaults to `None`, in which case the input port waveguide template is used to choose.
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+    Keyword Args:
+       * **end_strip_width** (float): End width of the strip waveguide (at the narrow tip).  Defaults to 0.
+       * **end_slot_width** (float): End width of the slot waveguide (at the narrow tip).  Defaults to 0.
+       * **input_strip** (Boolean): If `True`, sets the input port to be the strip waveguide side.  If `False`, slot waveguide is on the input.  Defaults to `None`, in which case the input port waveguide template is used to choose.
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
-        Note: The waveguide and cladding layer/datatype are taken from the `wgt_slot` by default.
+    Note: The waveguide and cladding layer/datatype are taken from the `wgt_slot` by default.
 
     """
 

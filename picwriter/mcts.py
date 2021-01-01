@@ -34,17 +34,17 @@ def str2bool(v):
 
 def get_prism_objects(eps_file):
     with h5py.File(eps_file, "r") as hf:
-        """ Write-format:
-           * LL = layer
-           * DD = datatype
-           * NN = polygon index
-           * VV = vertex index
-           * XX = x-position
-           * ZZ = z-position
+        """Write-format:
+        * LL = layer
+        * DD = datatype
+        * NN = polygon index
+        * VV = vertex index
+        * XX = x-position
+        * ZZ = z-position
 
-           * height = height of the prism
-           * eps = epsilon of the prism
-           * y-center = center (y-direction) of the prism [note: (x,y) center defaults to (0,0)]
+        * height = height of the prism
+        * eps = epsilon of the prism
+        * y-center = center (y-direction) of the prism [note: (x,y) center defaults to (0,0)]
         """
         data = np.array(
             [

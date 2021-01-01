@@ -6,31 +6,31 @@ import picwriter.toolkit as tk
 
 
 class MMI2x2(tk.Component):
-    """ 2x2 multi-mode interferometer (MMI) Cell class.  Two input ports, two output ports.
+    """2x2 multi-mode interferometer (MMI) Cell class.  Two input ports, two output ports.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **length** (float): Length of the MMI region (along direction of propagation)
-           * **width** (float): Width of the MMI region (perpendicular to direction of propagation)
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **length** (float): Length of the MMI region (along direction of propagation)
+       * **width** (float): Width of the MMI region (perpendicular to direction of propagation)
 
-        Keyword Args:
-           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6. Note: it is possible to generate a MMI with straight tapered outputs (not curved) by setting angle=0 and then connecting a straight Taper object to the desired MMI ports.
-           * **taper_width** (float): Maximum width of the taper region (default = wg_width from wg_template)
-           * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to width/3.0)
-           * **port** (tuple): Cartesian coordinate of the **top** input port
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+    Keyword Args:
+       * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6. Note: it is possible to generate a MMI with straight tapered outputs (not curved) by setting angle=0 and then connecting a straight Taper object to the desired MMI ports.
+       * **taper_width** (float): Maximum width of the taper region (default = wg_width from wg_template)
+       * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to width/3.0)
+       * **port** (tuple): Cartesian coordinate of the **top** input port
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input_top'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['input_bot'] = {'port': (x2, y2), 'direction': 'dir2'}
-           * portlist['output_top'] = {'port': (x3, y3), 'direction': 'dir3'}
-           * portlist['output_bot'] = {'port': (x4, y4), 'direction': 'dir4'}
+    Portlist format:
+       * portlist['input_top'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['input_bot'] = {'port': (x2, y2), 'direction': 'dir2'}
+       * portlist['output_top'] = {'port': (x3, y3), 'direction': 'dir3'}
+       * portlist['output_bot'] = {'port': (x4, y4), 'direction': 'dir4'}
 
-        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and 'dir1', 'dir2', 'dir3' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and 'dir1', 'dir2', 'dir3' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 

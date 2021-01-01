@@ -7,18 +7,18 @@ import picwriter.toolkit as tk
 
 
 class MetalTemplate:
-    """ Template for electrical wires that contains some standard information about the fabrication process and metal wire.
+    """Template for electrical wires that contains some standard information about the fabrication process and metal wire.
 
-        Keyword Args:
-           * **bend_radius** (float): Radius of curvature for bends in the metal route.  Defaults to zero.
-           * **width** (float): Width of the metal route as shown on the mask.  Defaults to 20.
-           * **clad_width** (float): Width of the cladding (region next to route, mainly used for positive-type photoresists + etching, or negative-type and liftoff).  Defaults to 20.
-           * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used.  Defaults to `'+'`.
-           * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.  Defaults to `'ETCH'`.
-           * **metal_layer** (int): Layer type used for metal route.  Defaults to 11.
-           * **metal_datatype** (int): Data type used for metal route.  Defaults to 0.
-           * **clad_layer** (int): Layer type used for cladding.  Defaults to 12.
-           * **clad_datatype** (int): Data type used for cladding.  Defaults to 0.
+    Keyword Args:
+       * **bend_radius** (float): Radius of curvature for bends in the metal route.  Defaults to zero.
+       * **width** (float): Width of the metal route as shown on the mask.  Defaults to 20.
+       * **clad_width** (float): Width of the cladding (region next to route, mainly used for positive-type photoresists + etching, or negative-type and liftoff).  Defaults to 20.
+       * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used.  Defaults to `'+'`.
+       * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.  Defaults to `'ETCH'`.
+       * **metal_layer** (int): Layer type used for metal route.  Defaults to 11.
+       * **metal_datatype** (int): Data type used for metal route.  Defaults to 0.
+       * **clad_layer** (int): Layer type used for cladding.  Defaults to 12.
+       * **clad_datatype** (int): Data type used for cladding.  Defaults to 0.
 
     """
 
@@ -56,20 +56,20 @@ class MetalTemplate:
 
 
 class MetalRoute(tk.Component):
-    """ Standard MetalRoute Cell class.
+    """Standard MetalRoute Cell class.
 
-        Args:
-           * **trace** (list):  List of coordinates used to generate the route (such as '[(x1,y1), (x2,y2), ...]').  For now, all trace points must specify 90 degree turns.
-           * **mt** (MetalTemplate):  MetalTemplate object
+    Args:
+       * **trace** (list):  List of coordinates used to generate the route (such as '[(x1,y1), (x2,y2), ...]').  For now, all trace points must specify 90 degree turns.
+       * **mt** (MetalTemplate):  MetalTemplate object
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) are the first elements of 'trace', (x2, y2) are the last elements of 'trace', and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+    Where in the above (x1,y1) are the first elements of 'trace', (x2, y2) are the last elements of 'trace', and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
 
     """
 
@@ -330,24 +330,24 @@ class MetalRoute(tk.Component):
 
 
 class Bondpad(tk.Component):
-    """ Standard Bondpad Cell class.
+    """Standard Bondpad Cell class.
 
-        Args:
-           * **mt** (MetalTemplate):  WaveguideTemplate object
+    Args:
+       * **mt** (MetalTemplate):  WaveguideTemplate object
 
-        Keyword Args:
-           * **length** (float): Length of the bondpad.  Defaults to 150
-           * **width** (float): Width of the bondpad.  Defaults to 100
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.  Defaults to `'EAST'`.
+    Keyword Args:
+       * **length** (float): Length of the bondpad.  Defaults to 150
+       * **width** (float): Width of the bondpad.  Defaults to 100
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the taper will point *towards*, must be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.  Defaults to `'EAST'`.
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['output'] = {'port': (x1, y1), 'direction': 'dir'}
+    Portlist format:
+       * portlist['output'] = {'port': (x1, y1), 'direction': 'dir'}
 
-        Where in the above (x1,y1) is the same as the 'port' input, and 'dir' is the same as 'direction' input of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
+    Where in the above (x1,y1) is the same as the 'port' input, and 'dir' is the same as 'direction' input of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`.
 
     """
 

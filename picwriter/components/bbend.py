@@ -8,29 +8,29 @@ import math
 
 
 class BBend(tk.Component):
-    """ Bezier Cell class.  Creates a Bezier waveguide bend that can be used in waveguide routing.  The number of points is computed based on the waveguide template grid resolution to automatically minimize grid errors.
-        
-        See https://en.wikipedia.org/wiki/Bezier_curve for more information.
-    
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **poles** (list): List of (x,y) pole coordinates used for routing the Bezier curve
+    """Bezier Cell class.  Creates a Bezier waveguide bend that can be used in waveguide routing.  The number of points is computed based on the waveguide template grid resolution to automatically minimize grid errors.
 
-        Keyword Args:
-           * **start_width** (float): If a value is provided, overrides the initial waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
-           * **end_width** (float): If a value is provided, overrides the final waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+    See https://en.wikipedia.org/wiki/Bezier_curve for more information.
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **poles** (list): List of (x,y) pole coordinates used for routing the Bezier curve
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+    Keyword Args:
+       * **start_width** (float): If a value is provided, overrides the initial waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
+       * **end_width** (float): If a value is provided, overrides the final waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
-        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
+
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+
+    Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 

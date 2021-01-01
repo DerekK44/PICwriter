@@ -7,29 +7,29 @@ import picwriter.toolkit as tk
 
 
 class Ring(tk.Component):
-    """ Ring Resonator Cell class.
+    """Ring Resonator Cell class.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **radius** (float): Radius of the resonator
-           * **coupling_gap** (float): Distance between the bus waveguide and resonator
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **radius** (float): Radius of the resonator
+       * **coupling_gap** (float): Distance between the bus waveguide and resonator
 
-        Keyword Args:
-           * **wrap_angle** (float): Angle in *radians* between 0 and pi that determines how much the bus waveguide wraps along the resonator.  0 corresponds to a straight bus waveguide, and pi corresponds to a bus waveguide wrapped around half of the resonator. Defaults to `0`.
-           * **parity** (1 or -1): If 1, resonator to left of bus waveguide, if -1 resonator to the right
-           * **port** (tuple): Cartesian coordinate of the input port (x1, y1)
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
-           * **draw_bus_wg** (bool): If `False`, does not generate the bus waveguide.  Instead, the input/output port positions will be at the some location at the bottom of the ring, and the user can route their own bus waveguide.  Defaults to `True`.
+    Keyword Args:
+       * **wrap_angle** (float): Angle in *radians* between 0 and pi that determines how much the bus waveguide wraps along the resonator.  0 corresponds to a straight bus waveguide, and pi corresponds to a bus waveguide wrapped around half of the resonator. Defaults to `0`.
+       * **parity** (1 or -1): If 1, resonator to left of bus waveguide, if -1 resonator to the right
+       * **port** (tuple): Cartesian coordinate of the input port (x1, y1)
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+       * **draw_bus_wg** (bool): If `False`, does not generate the bus waveguide.  Instead, the input/output port positions will be at the some location at the bottom of the ring, and the user can route their own bus waveguide.  Defaults to `True`.
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the component, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the component, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 

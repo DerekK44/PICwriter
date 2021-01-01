@@ -8,32 +8,32 @@ from picwriter.components.waveguide import Waveguide
 
 
 class ZeroLengthCavity(tk.Component):
-    """ Zero-Length Cavity Cell class.
+    """Zero-Length Cavity Cell class.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **num_holes** (float): Number of holes in the mirror.
-           * **period** (float): Period of the repeated unit.
-           * **radius** (float): Radius of the holes of the mirror.
-           * **radius_taper** (float): Radius of the smallest hole of the taper. Defaults to radius/2.
-           * **gap** (float): Gap between the cavity and the waveguide.
-           * **wgt_beam_length** (float): Extra length of nanobeam that is simple  waveguide.
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **num_holes** (float): Number of holes in the mirror.
+       * **period** (float): Period of the repeated unit.
+       * **radius** (float): Radius of the holes of the mirror.
+       * **radius_taper** (float): Radius of the smallest hole of the taper. Defaults to radius/2.
+       * **gap** (float): Gap between the cavity and the waveguide.
+       * **wgt_beam_length** (float): Extra length of nanobeam that is simple  waveguide.
 
-        Keyword Args:
-           * **num_taper_holes** (float): Number of holes in the taper region between the mirror and the waveguide. Defaults to 4.
-           * **taper_type** (string): Determines the radius of the taper holes. 'ratio' corresponds to a constant radius/period ratio. 'FF' corresponds to a linearly decreasing fill factor (hole area/unit cell area). Defaults to 'FF'.
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+    Keyword Args:
+       * **num_taper_holes** (float): Number of holes in the taper region between the mirror and the waveguide. Defaults to 4.
+       * **taper_type** (string): Determines the radius of the taper holes. 'ratio' corresponds to a constant radius/period ratio. 'FF' corresponds to a linearly decreasing fill factor (hole area/unit cell area). Defaults to 'FF'.
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the DBR, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the DBR, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 

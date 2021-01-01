@@ -8,25 +8,25 @@ from picwriter.components.ebend import EBend
 
 
 class WaveguideTemplate:
-    """ Template for waveguides that contains standard information about the geometry and fabrication.  Supported waveguide types are **strip** (also known as 'channel' waveguides), **slot**, and **SWG** ('sub-wavelength grating', or 1D photonic crystal waveguides).
+    """Template for waveguides that contains standard information about the geometry and fabrication.  Supported waveguide types are **strip** (also known as 'channel' waveguides), **slot**, and **SWG** ('sub-wavelength grating', or 1D photonic crystal waveguides).
 
-        Keyword Args:
-           * **wg_type** (string): Type of waveguide used.  Options are 'strip', 'slot', and 'swg'.  Defaults to 'strip'.
-           * **bend_radius** (float): Radius of curvature for waveguide bends (circular).  Defaults to 50.
-           * **waveguide_stack** (list): List of layers and path widths to be drawn when waveguides are routed & placed.  Format is '[[width1, (layer1, datatype1)], [width2, (layer2, datatype2)], ...]'.  The first element defines the main waveguide width & layer for slot and subwavelength gratings.  If using waveguide_stack, the following keyword arguments are ignored: wg_width, clad_width, wg_layer, wg_datatype, clad_layer, clad_datatype.  Defaults to [[2.0, (1,0)], [10.0, (2,0)]].
-           * **wg_width** (float): Width of the waveguide as shown on the mask.  Defaults to 2.
-           * **euler_bend** (boolean): If `True`, uses Euler bends to route waveguides.  Defaults to `False`.  Currently only works with slot and strip waveguides.  The given `bend_radius` value determines the **smallest** bend radius along the entire Euler curve.
-           * **slot** (float): Size of the waveguide slot region.  This is only used if `wg_type`=`'slot'`.  Defaults to 0.1.
-           * **period** (float): Period of the SWG. This is only used if `wg_type`=`'swg'`. Defaults to 0.1.
-           * **duty_cycle** (float): Duty cycle of the SWG. This is only used if `wg_type`=`'swg'`. Defaults to 0.5.
-           * **clad_width** (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff).  Defaults to 10.
-           * **grid** (float): Defines the grid spacing in units of microns, so that the number of points per bend can be automatically calculated.  Defaults to 0.001 (1 nm).
-           * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used.  Defaults to '+'
-           * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.   Defaults to 'ETCH'.           
-           * **wg_layer** (int): Layer type used for waveguides.  Defaults to 1.
-           * **wg_datatype** (int): Data type used for waveguides.  Defaults to 0.
-           * **clad_layer** (int): Layer type used for cladding.  Defaults to 2.
-           * **clad_datatype** (int): Data type used for cladding.  Defaults to 0.
+    Keyword Args:
+       * **wg_type** (string): Type of waveguide used.  Options are 'strip', 'slot', and 'swg'.  Defaults to 'strip'.
+       * **bend_radius** (float): Radius of curvature for waveguide bends (circular).  Defaults to 50.
+       * **waveguide_stack** (list): List of layers and path widths to be drawn when waveguides are routed & placed.  Format is '[[width1, (layer1, datatype1)], [width2, (layer2, datatype2)], ...]'.  The first element defines the main waveguide width & layer for slot and subwavelength gratings.  If using waveguide_stack, the following keyword arguments are ignored: wg_width, clad_width, wg_layer, wg_datatype, clad_layer, clad_datatype.  Defaults to [[2.0, (1,0)], [10.0, (2,0)]].
+       * **wg_width** (float): Width of the waveguide as shown on the mask.  Defaults to 2.
+       * **euler_bend** (boolean): If `True`, uses Euler bends to route waveguides.  Defaults to `False`.  Currently only works with slot and strip waveguides.  The given `bend_radius` value determines the **smallest** bend radius along the entire Euler curve.
+       * **slot** (float): Size of the waveguide slot region.  This is only used if `wg_type`=`'slot'`.  Defaults to 0.1.
+       * **period** (float): Period of the SWG. This is only used if `wg_type`=`'swg'`. Defaults to 0.1.
+       * **duty_cycle** (float): Duty cycle of the SWG. This is only used if `wg_type`=`'swg'`. Defaults to 0.5.
+       * **clad_width** (float): Width of the cladding (region next to waveguide, mainly used for positive-type photoresists + etching, or negative-type and liftoff).  Defaults to 10.
+       * **grid** (float): Defines the grid spacing in units of microns, so that the number of points per bend can be automatically calculated.  Defaults to 0.001 (1 nm).
+       * **resist** (string): Must be either '+' or '-'.  Specifies the type of photoresist used.  Defaults to '+'
+       * **fab** (string): If 'ETCH', then keeps resist as is, otherwise changes it from '+' to '-' (or vice versa).  This is mainly used to reverse the type of mask used if the fabrication type is 'LIFTOFF'.   Defaults to 'ETCH'.
+       * **wg_layer** (int): Layer type used for waveguides.  Defaults to 1.
+       * **wg_datatype** (int): Data type used for waveguides.  Defaults to 0.
+       * **clad_layer** (int): Layer type used for cladding.  Defaults to 2.
+       * **clad_datatype** (int): Data type used for cladding.  Defaults to 0.
 
     """
 
@@ -149,13 +149,11 @@ class WaveguideTemplate:
                 datatype=self.wg_datatype,
             )
             self.bend_period_cell.add(bend_path)
-            
+
     def __copy__(self):
         new_wgt = type(self)()
         new_wgt.__dict__.update(self.__dict__)
-        new_wgt.name = tk.getCellName(
-            "WaveguideTemplate"
-        )
+        new_wgt.name = tk.getCellName("WaveguideTemplate")
         return new_wgt
 
     def get_num_points_wg(self, angle):
@@ -185,20 +183,20 @@ class WaveguideTemplate:
 
 
 class Waveguide(tk.Component):
-    """ Waveguide Cell class.
+    """Waveguide Cell class.
 
-        Args:
-           * **trace** (list):  List of coordinates used to generate the waveguide (such as '[(x1,y1), (x2,y2), ...]').
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+    Args:
+       * **trace** (list):  List of coordinates used to generate the waveguide (such as '[(x1,y1), (x2,y2), ...]').
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) are the first elements of 'trace', (x2, y2) are the last elements of 'trace', and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*. 'Direction' points *towards* the component that the waveguide will connect to.
+    Where in the above (x1,y1) are the first elements of 'trace', (x2, y2) are the last elements of 'trace', and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*. 'Direction' points *towards* the component that the waveguide will connect to.
 
     """
 
@@ -222,12 +220,12 @@ class Waveguide(tk.Component):
         self.__build_ports()
 
     def __normalize_trace(self):
-        """ Rotates and translates the input trace so the following two constraints are satisfied:
-            1. The input point (first point) lies at the origin (0,0)
-            2. The second point lies in the +x direction (rot angle = 0.0)
-            
-            This allows the trace to be properly hashed, so duplicate traces can be referenced
-            rather than have new cells for identical waveguides.
+        """Rotates and translates the input trace so the following two constraints are satisfied:
+        1. The input point (first point) lies at the origin (0,0)
+        2. The second point lies in the +x direction (rot angle = 0.0)
+
+        This allows the trace to be properly hashed, so duplicate traces can be referenced
+        rather than have new cells for identical waveguides.
         """
         return NotImplemented
 
@@ -685,8 +683,7 @@ class Waveguide(tk.Component):
                 self.add(path2)
 
         else:
-            """ Strip and slot waveguide generation below
-            """
+            """Strip and slot waveguide generation below"""
             if len(self.trace) == 2:
                 if self.wgt.wg_type == "strip":
                     path = gdspy.Path(self.wgt.wg_width, self.trace[0])

@@ -7,33 +7,33 @@ import picwriter.toolkit as tk
 
 
 class StripSlotConverter(tk.Component):
-    """ Strip-to-Slot Side Converter Cell class.  Adiabatically transforms a strip to a slot waveguide mode, with two sections.  Section 1 introduces a narrow waveguide alongside the input strip waveguide and gradually lowers the gap between the strip waveguide and narrow side waveguide.  Section 2 gradually converts the widths of the two waveguides until they are equal to the slot rail widths.  
+    """Strip-to-Slot Side Converter Cell class.  Adiabatically transforms a strip to a slot waveguide mode, with two sections.  Section 1 introduces a narrow waveguide alongside the input strip waveguide and gradually lowers the gap between the strip waveguide and narrow side waveguide.  Section 2 gradually converts the widths of the two waveguides until they are equal to the slot rail widths.
 
-        Args:
-           * **wgt_input** (WaveguideTemplate):  WaveguideTemplate object for the input waveguide (should be either of type `strip` or `slot`).
-           * **wgt_output** (WaveguideTemplate):  WaveguideTemplate object for the output waveguide (should be either of type `strip` or `slot`, opposite of the input type).
-           * **length1** (float): Length of section 1 that gradually changes the distance between the two waveguides.
-           * **length2** (float): Length of section 2 that gradually changes the widths of the two waveguides until equal to the slot waveguide rail widths.
-           * **start_rail_width** (float): Width of the narrow waveguide appearing next to the strip waveguide.
-           * **end_strip_width** (float): Width of the strip waveguide at the end of `length1` and before `length2`
-           * **d** (float): Distance between the outer edge of the strip waveguide and the start of the slot waveguide rail.
+    Args:
+       * **wgt_input** (WaveguideTemplate):  WaveguideTemplate object for the input waveguide (should be either of type `strip` or `slot`).
+       * **wgt_output** (WaveguideTemplate):  WaveguideTemplate object for the output waveguide (should be either of type `strip` or `slot`, opposite of the input type).
+       * **length1** (float): Length of section 1 that gradually changes the distance between the two waveguides.
+       * **length2** (float): Length of section 2 that gradually changes the widths of the two waveguides until equal to the slot waveguide rail widths.
+       * **start_rail_width** (float): Width of the narrow waveguide appearing next to the strip waveguide.
+       * **end_strip_width** (float): Width of the strip waveguide at the end of `length1` and before `length2`
+       * **d** (float): Distance between the outer edge of the strip waveguide and the start of the slot waveguide rail.
 
-        Keyword Args:
-           * **input_strip** (Boolean): If `True`, sets the input port to be the strip waveguide side.  If `False`, slot waveguide is on the input.  Defaults to `None`, in which case the input port waveguide template is used to choose.
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+    Keyword Args:
+       * **input_strip** (Boolean): If `True`, sets the input port to be the strip waveguide side.  If `False`, slot waveguide is on the input.  Defaults to `None`, in which case the input port waveguide template is used to choose.
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
-        Note: The waveguide and cladding layer/datatype are taken from the `wgt_slot` by default.
+    Note: The waveguide and cladding layer/datatype are taken from the `wgt_slot` by default.
 
     """
 

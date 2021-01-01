@@ -9,28 +9,28 @@ from picwriter.components.sbend import SBend
 
 
 class Spiral(tk.Component):
-    """ Spiral Waveguide Cell class.  The desired length of the spiral is first set, along with the spacing between input and output (the 'width' paramter).  Then, the corresponding height of the spiral is automatically set.
+    """Spiral Waveguide Cell class.  The desired length of the spiral is first set, along with the spacing between input and output (the 'width' paramter).  Then, the corresponding height of the spiral is automatically set.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **width** (float): width of the spiral (i.e. distance between input/output ports)
-           * **length** (float): desired length of the waveguide
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **width** (float): width of the spiral (i.e. distance between input/output ports)
+       * **length** (float): desired length of the waveguide
 
-        Keyword Args:
-           * **spacing** (float): distance between parallel waveguides
-           * **parity** (int): If 1 spiral on right side, if -1 spiral on left side (mirror flip)
-           * **port** (tuple): Cartesian coordinate of the input port
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+    Keyword Args:
+       * **spacing** (float): distance between parallel waveguides
+       * **parity** (int): If 1 spiral on right side, if -1 spiral on left side (mirror flip)
+       * **port** (tuple): Cartesian coordinate of the input port
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
 
-        Where in the above (x1,y1) are the first elements of the spiral trace, (x2, y2) are the last elements of the spiral trace, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) are the first elements of the spiral trace, (x2, y2) are the last elements of the spiral trace, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 
@@ -159,8 +159,7 @@ class Spiral(tk.Component):
         n = self.__get_number_of_spirals()
 
         if n != None:
-            """ Determine the corresponding spiral height
-            """
+            """Determine the corresponding spiral height"""
             h = self.__get_spiral_height(n)
 
             w = self.width

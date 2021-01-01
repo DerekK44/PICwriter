@@ -8,33 +8,33 @@ from picwriter.components.taper import Taper
 
 
 class MMI1x2(tk.Component):
-    """ 1x2 multi-mode interfereomter (MMI) Cell class.
+    """1x2 multi-mode interfereomter (MMI) Cell class.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **length** (float): Length of the MMI region (along direction of propagation)
-           * **width** (float): Width of the MMI region (perpendicular to direction of propagation)
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **length** (float): Length of the MMI region (along direction of propagation)
+       * **width** (float): Width of the MMI region (perpendicular to direction of propagation)
 
-        Keyword Args:
-           * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to width/3.0).  Defaults to None (width/3.0).
-           * **taper_width** (float): Ending width of the taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
-           * **taper_length** (float): Length of the input taper leading up to the MMI (single-port side).  Defaults to None (no input taper, port right against the MMI region).
-           * **output_length** (float): Length (along x-direction) of the output bends, made with Euler S-Bends.  Defaults to None (no output bend, ports right up againt the MMI region).
-           * **output_wg_sep** (float): Distance (along y-direction) between the two output bends, made with Euler S-Bends.  Defaults to None (no output bend, ports right up againt the MMI region).
-           * **output_width** (float): Starting width of the output waveguide.  Defaults to None (no change from regular wg_width).
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+    Keyword Args:
+       * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to width/3.0).  Defaults to None (width/3.0).
+       * **taper_width** (float): Ending width of the taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
+       * **taper_length** (float): Length of the input taper leading up to the MMI (single-port side).  Defaults to None (no input taper, port right against the MMI region).
+       * **output_length** (float): Length (along x-direction) of the output bends, made with Euler S-Bends.  Defaults to None (no output bend, ports right up againt the MMI region).
+       * **output_wg_sep** (float): Distance (along y-direction) between the two output bends, made with Euler S-Bends.  Defaults to None (no output bend, ports right up againt the MMI region).
+       * **output_width** (float): Starting width of the output waveguide.  Defaults to None (no change from regular wg_width).
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
-           * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
+       * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
 
-        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and 'dir1', 'dir2', 'dir3' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and 'dir1', 'dir2', 'dir3' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 

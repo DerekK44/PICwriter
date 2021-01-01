@@ -8,7 +8,7 @@ import picwriter.toolkit as tk
 
 
 class EBend(tk.Component):
-    """ Euler shaped Bend Cell class.  Creates a generic Euler waveguide bend that can be used in waveguide routing.  The number of points is computed based on the waveguide template grid resolution to automatically minimize grid errors.
+    """Euler shaped Bend Cell class.  Creates a generic Euler waveguide bend that can be used in waveguide routing.  The number of points is computed based on the waveguide template grid resolution to automatically minimize grid errors.
     This class can be automatically called and implemented during waveguide routing by passing `euler_bend=True` to a WaveguideTemplate object.  The smallest radius of curvature on the Euler bend is set to be the `bend_radius` value given by the WaveguideTemplate object passed to this class.
 
         Args:
@@ -21,7 +21,7 @@ class EBend(tk.Component):
            * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
            * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
            * **vertex** (tuple): If a value for `vertex` is given (Cartesian x,y coordinate), then the Euler bend is placed at this location, bypassing the normal `port` value.  This is used in waypoint routing.
-           
+
         Members:
            * **portlist** (dict): Dictionary with the relevant port information
 
@@ -154,8 +154,7 @@ class EBend(tk.Component):
         self._auto_transform_()
 
     def __get_radius_of_curvature(self):
-        """ Returns the *normalized* radius of curvature for the Euler curve
-        """
+        """Returns the *normalized* radius of curvature for the Euler curve"""
         t = self.t
         xp = np.cos((np.pi * t ** 2) / 2.0)  # First derivative of x(t) (FresnelC)
         yp = np.sin((np.pi * t ** 2) / 2.0)  # First derivative of y(t) (FresnelS)
@@ -166,8 +165,7 @@ class EBend(tk.Component):
         )  # Radius of curvature: https://en.wikipedia.org/wiki/Radius_of_curvature
 
     def get_bend_length(self):
-        """ Returns the length of the Euler S-Bend
-        """
+        """Returns the length of the Euler S-Bend"""
         # The length of a parametric curve x(t) y(t) is Integral[ sqrt( (dx/dt)^2 + (dy/dt)^2 ), {t,0,t0}], which for a Fresnel curve, simplifies to just t0
         if abs(self.turnby) <= np.pi / 2.0:
             return 2 * self.t * self.scale_factor
@@ -292,28 +290,28 @@ class EBend(tk.Component):
 
 
 class EulerSBend(tk.Component):
-    """ Euler shaped S-Bend Cell class.  Creates an S-shaped Euler waveguide bend that can be used in waveguide routing (in place of the sinusoidal S-Bend).  The number of points is computed based on the waveguide template grid resolution to automatically minimize grid errors.
+    """Euler shaped S-Bend Cell class.  Creates an S-shaped Euler waveguide bend that can be used in waveguide routing (in place of the sinusoidal S-Bend).  The number of points is computed based on the waveguide template grid resolution to automatically minimize grid errors.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object.  Bend radius is extracted from this object.
-           * **height** (float): Height of the Euler S-Bend
-           * **length** (float): Length of the Euler S-Bend
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object.  Bend radius is extracted from this object.
+       * **height** (float): Height of the Euler S-Bend
+       * **length** (float): Length of the Euler S-Bend
 
-        Keyword Args:
-           * **start_width** (float): If a value is provided, overrides the initial waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
-           * **end_width** (float): If a value is provided, overrides the final waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
-           
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Keyword Args:
+       * **start_width** (float): If a value is provided, overrides the initial waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
+       * **end_width** (float): If a value is provided, overrides the final waveguide width (otherwise the width is taken from the WaveguideTemplate object).  Currently only works for strip waveguides.
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output'] = {'port': (x2, y2), 'direction': 'dir2'}
+
+    Where in the above (x1,y1) is the same as the 'port' input, (x2, y2) is the end of the taper, and 'dir1', 'dir2' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 
@@ -391,8 +389,7 @@ class EulerSBend(tk.Component):
         self._auto_transform_()
 
     def get_radius_of_curvature(self):
-        """ Returns the minimum radius of curvature used to construct the Euler S-Bend
-        """
+        """Returns the minimum radius of curvature used to construct the Euler S-Bend"""
         t = self.t
         # Returns the radius of curvature for a normalized Euler curve at a position t
         xp = np.cos((np.pi * t ** 2) / 2.0)  # First derivative of x(t) (FresnelC)
@@ -404,8 +401,7 @@ class EulerSBend(tk.Component):
         )  # Radius of curvature: https://en.wikipedia.org/wiki/Radius_of_curvature
 
     def get_bend_length(self):
-        """ Returns the length of the Euler S-Bend
-        """
+        """Returns the length of the Euler S-Bend"""
         # The length of a parametric curve x(t) y(t) is Integral[ sqrt( (dx/dt)^2 + (dy/dt)^2 ), {t,0,t0}], which for a Fresnel curve, simplifies to just t0
         return 4 * self.t * self.scale_factor
 

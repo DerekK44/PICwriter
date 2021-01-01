@@ -7,17 +7,17 @@ import picwriter.toolkit as tk
 
 
 class AlignmentCross(tk.Component):
-    """ Cross Cell class, used for alignment
+    """Cross Cell class, used for alignment
 
-        Args:
-           * **cross_length** (float):  Length of each arm of the cross.
-           * **cross_width** (float): Width of the cross arm
-           * **center** (tuple): Coordinate (x1, y1) of the center of the cross
+    Args:
+       * **cross_length** (float):  Length of each arm of the cross.
+       * **cross_width** (float): Width of the cross arm
+       * **center** (tuple): Coordinate (x1, y1) of the center of the cross
 
-        Keyword Args:
-           * **small_cross_width** (float): If given, sets the width of the small cross in the center of the big cross.  Defaults to 1/4 the value of cross_width
-           * **layer** (int): Layer to place the marker on.  Defaults to 1
-           * **datatype** (int): Datatype to place the marker on.  Defaults to 0
+    Keyword Args:
+       * **small_cross_width** (float): If given, sets the width of the small cross in the center of the big cross.  Defaults to 1/4 the value of cross_width
+       * **layer** (int): Layer to place the marker on.  Defaults to 1
+       * **datatype** (int): Datatype to place the marker on.  Defaults to 0
 
     """
 
@@ -112,17 +112,17 @@ class AlignmentCross(tk.Component):
 
 
 class AlignmentTarget(tk.Component):
-    """ Standard Target Cell class, used for alignment.  Set of concentric circles
+    """Standard Target Cell class, used for alignment.  Set of concentric circles
 
-        Args:
-           * **diameter** (float):  Total diameter of the target marker
-           * **ring_width** (float): Width of each ring
+    Args:
+       * **diameter** (float):  Total diameter of the target marker
+       * **ring_width** (float): Width of each ring
 
-        Keyword Args:
-           * **num_rings** (float): Number of concentric rings in the target.  Defaults to 10
-           * **center** (tuple): Coordinate (x1, y1) of the center of the cross.  Defaults to (0,0)
-           * **layer** (int): Layer to place the marker on.  Defaults to 1
-           * **datatype** (int): Datatype to place the marker on.  Defaults to 0
+    Keyword Args:
+       * **num_rings** (float): Number of concentric rings in the target.  Defaults to 10
+       * **center** (tuple): Coordinate (x1, y1) of the center of the cross.  Defaults to (0,0)
+       * **layer** (int): Layer to place the marker on.  Defaults to 1
+       * **datatype** (int): Datatype to place the marker on.  Defaults to 0
 
     """
 

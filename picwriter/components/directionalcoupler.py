@@ -8,30 +8,30 @@ from picwriter.components.waveguide import Waveguide
 
 
 class DirectionalCoupler(tk.Component):
-    """ Directional Coupler Cell class.
+    """Directional Coupler Cell class.
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **length** (float): Length of the coupling region.
-           * **gap** (float): Distance between the two waveguides.
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **length** (float): Length of the coupling region.
+       * **gap** (float): Distance between the two waveguides.
 
-        Keyword Args:
-           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
-           * **parity** (integer -1 or 1): If -1, mirror-flips the structure so that the input port is actually the *bottom* port.  Default = 1.
-           * **port** (tuple): Cartesian coordinate of the input port (AT TOP if parity=1, AT BOTTOM if parity=-1).  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to 'EAST'.
+    Keyword Args:
+       * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
+       * **parity** (integer -1 or 1): If -1, mirror-flips the structure so that the input port is actually the *bottom* port.  Default = 1.
+       * **port** (tuple): Cartesian coordinate of the input port (AT TOP if parity=1, AT BOTTOM if parity=-1).  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to 'EAST'.
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input_top'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['input_bot'] = {'port': (x2,y2), 'direction': 'dir1'}
-           * portlist['output_top'] = {'port': (x3, y3), 'direction': 'dir3'}
-           * portlist['output_bot'] = {'port': (x4, y4), 'direction': 'dir4'}
+    Portlist format:
+       * portlist['input_top'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['input_bot'] = {'port': (x2,y2), 'direction': 'dir1'}
+       * portlist['output_top'] = {'port': (x3, y3), 'direction': 'dir3'}
+       * portlist['output_bot'] = {'port': (x4, y4), 'direction': 'dir4'}
 
-        Where in the above (x1,y1) (or (x2,y2) if parity=-1) is the same as the input 'port', (x3, y3), and (x4, y4) are the two output port locations.  Directions 'dir1', 'dir2', etc. are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) (or (x2,y2) if parity=-1) is the same as the input 'port', (x3, y3), and (x4, y4) are the two output port locations.  Directions 'dir1', 'dir2', etc. are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 

@@ -13,17 +13,17 @@ import h5py
 
 
 class MaterialStack:
-    """ Standard template for generating a material stack
+    """Standard template for generating a material stack
 
-        Args:
-           * **vsize** (float): Vertical size of the material stack in microns (um)
-           * **default_layer** (list): Default VStack with the following format: [(eps1, t1), (eps2, t2), (eps3, t3), ...] where eps1, eps2, .. are the permittivity (float), and t1, t2, .. are the thicknesses (float) from bottom to top. Note: t1+t2+... *must* add up to vsize.
+    Args:
+       * **vsize** (float): Vertical size of the material stack in microns (um)
+       * **default_layer** (list): Default VStack with the following format: [(eps1, t1), (eps2, t2), (eps3, t3), ...] where eps1, eps2, .. are the permittivity (float), and t1, t2, .. are the thicknesses (float) from bottom to top. Note: t1+t2+... *must* add up to vsize.
 
-        Members:
-           * **stacklist** (dictionary): Each entry of the stacklist dictionary contains a VStack list.
+    Members:
+       * **stacklist** (dictionary): Each entry of the stacklist dictionary contains a VStack list.
 
-        Keyword Args:
-           * **name** (string): Identifier (optional) for the material stack
+    Keyword Args:
+       * **name** (string): Identifier (optional) for the material stack
 
     """
 
@@ -38,7 +38,7 @@ class MaterialStack:
         self.addVStack(-1, -1, default_stack)
 
     def addVStack(self, layer, datatype, stack):
-        """ Adds a vertical layer to the material stack LIST
+        """Adds a vertical layer to the material stack LIST
 
         Args:
            * **layer** (int): Layer of the VStack
@@ -80,7 +80,7 @@ class MaterialStack:
         return np.array(points)
 
     def get_eps(self, key, height):
-        """ Returns the dielectric constant (epsilon) corresponding to the `height` and VStack specified by `key`, where the height range is zero centered (-vsize/2.0, +vsize/2.0).
+        """Returns the dielectric constant (epsilon) corresponding to the `height` and VStack specified by `key`, where the height range is zero centered (-vsize/2.0, +vsize/2.0).
 
         Args:
             * **key** (layer,datatype): Key value of the VStack being used
@@ -113,7 +113,7 @@ def point_inside_polygon(x, y, poly):
 
 
 def export_component_to_hdf5(filename, component, mstack, boolean_operations):
-    """ Outputs the polygons corresponding to the desired component and MaterialStack.
+    """Outputs the polygons corresponding to the desired component and MaterialStack.
     Format is compatible for generating prism geometries in MEEP/MPB.
 
     **Note**: that the top-down view of the device is the 'X-Z' plane.  The 'Y' direction specifies the vertical height.
@@ -183,8 +183,8 @@ def export_component_to_hdf5(filename, component, mstack, boolean_operations):
     #    print(polygon_dict[(-1,-1)])
 
     for key in polygon_dict.keys():
-        """ Merge the polygons
-            This prevents weird edge effects in MEEP with subpixel averaging between adjacent objects
+        """Merge the polygons
+        This prevents weird edge effects in MEEP with subpixel averaging between adjacent objects
         """
         polygons = polygon_dict[key]
         polygons_union = gdspy.fast_boolean(
@@ -210,7 +210,10 @@ def export_component_to_hdf5(filename, component, mstack, boolean_operations):
     #        print(polygon_dict[key])
 
     for key in polygon_dict.keys():
-        ll, dd, = key[0], key[1]
+        ll, dd, = (
+            key[0],
+            key[1],
+        )
         if key in list(mstack.stacklist.keys()):
             stacklist = np.array(mstack.stacklist[key])
 
@@ -253,7 +256,7 @@ def export_component_to_hdf5(filename, component, mstack, boolean_operations):
 
 
 def export_wgt_to_hdf5(filename, wgt, mstack, sx):
-    """ Outputs the polygons corresponding to the desired waveguide template and MaterialStack.
+    """Outputs the polygons corresponding to the desired waveguide template and MaterialStack.
     Format is compatible for generating prism geometries in MEEP/MPB.
 
     **Note**: that the top-down view of the device is the 'X-Z' plane.  The 'Y' direction specifies the vertical height.
@@ -316,8 +319,7 @@ def export_wgt_to_hdf5(filename, wgt, mstack, sx):
                     eps_list.append(layer[0])
 
     elif wgt.wg_type == "slot":
-        """ Same thing as above but for slot waveguides
-        """
+        """Same thing as above but for slot waveguides"""
         slot = wgt.slot
         for key in mstack.stacklist.keys():
             if key == (wgt.wg_layer, wgt.wg_datatype):
@@ -474,7 +476,7 @@ def compute_mode(
     suppress_window=False,
 ):
 
-    """ Launches a MPB simulation to quickly compute and visualize a waveguide's electromagnetic eigenmodes
+    """Launches a MPB simulation to quickly compute and visualize a waveguide's electromagnetic eigenmodes
 
     Args:
        * **wgt** (WaveguideTemplate): WaveguideTemplate object used to specify the waveguide geometry (mask-level)
@@ -567,7 +569,7 @@ def compute_transmission_spectra(
     n_p=2,
 ):
 
-    """ Launches a MEEP simulation to compute the transmission/reflection spectra from each of the component's ports when light enters at the input `port`.
+    """Launches a MEEP simulation to compute the transmission/reflection spectra from each of the component's ports when light enters at the input `port`.
 
     How this function maps the GDSII layers to the material stack is something that will be improved in the future.  Currently works well for 1 or 2 layer devices.
     **Currently only supports components with port-directions that are `EAST` (0) or `WEST` (pi)**

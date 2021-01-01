@@ -16,18 +16,18 @@ CURRENT_CELL_NAMES = {}
 
 
 def add(top_cell, component_cell, center=(0, 0), x_reflection=False):
-    """ First creates a CellReference to subcell, then adds this to topcell at location center.
+    """First creates a CellReference to subcell, then adds this to topcell at location center.
 
-        Args:
-           * **top_cell** (gdspy.Cell):  Cell being added to
-           * **component_cell** (gdspy.Cell):  Cell of the component being added
+    Args:
+       * **top_cell** (gdspy.Cell):  Cell being added to
+       * **component_cell** (gdspy.Cell):  Cell of the component being added
 
-        Keyword Args:
-           * **port** (tuple): location for the subcell to be added
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to 'EAST' (zero degrees of rotation).
+    Keyword Args:
+       * **port** (tuple): location for the subcell to be added
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians).  Defaults to 'EAST' (zero degrees of rotation).
 
-        Returns:
-           None
+    Returns:
+       None
     """
 
     if isinstance(component_cell, gdspy.Cell):
@@ -43,15 +43,15 @@ def add(top_cell, component_cell, center=(0, 0), x_reflection=False):
             top_cell.add(component_cell)
         except:
             raise ValueError("Improper inputs given to add()")
-            
+
+
 def reset_database():
-    """ Resets the gdspy library, and resets the CURRENT_CELLS and CURRENT_CELL_NAMES dicts
-    """
+    """Resets the gdspy library, and resets the CURRENT_CELLS and CURRENT_CELL_NAMES dicts"""
     gdspy.current_library = gdspy.GdsLibrary()
-    
+
     global CURRENT_CELLS
     CURRENT_CELLS = {}
-    
+
     global CURRENT_CELL_NAMES
     CURRENT_CELL_NAMES = {}
 
@@ -66,18 +66,18 @@ def getCellName(name):
 
 
 def build_mask(cell, wgt, final_layer=None, final_datatype=None):
-    """ Builds the appropriate mask according to the resist specifications and fabrication type.  Does this by applying a boolean 'XOR' or 'AND' operation on the waveguide and clad masks.
+    """Builds the appropriate mask according to the resist specifications and fabrication type.  Does this by applying a boolean 'XOR' or 'AND' operation on the waveguide and clad masks.
 
-        Args:
-           * **cell** (gdspy.Cell):  Cell with components.  Final mask is placed in this cell.
-           * **wgt** (WaveguideTemplate):  Waveguide template containing the resist information, and layers/datatypes for the waveguides and cladding.
+    Args:
+       * **cell** (gdspy.Cell):  Cell with components.  Final mask is placed in this cell.
+       * **wgt** (WaveguideTemplate):  Waveguide template containing the resist information, and layers/datatypes for the waveguides and cladding.
 
-        Keyword Args:
-           * **final_layer** (int): layer to place the mask on (defaults to `wgt.clad_layer + 1`)
-           * **final_datatype** (int): datatype to place the mask on (defaults to `0`)
+    Keyword Args:
+       * **final_layer** (int): layer to place the mask on (defaults to `wgt.clad_layer + 1`)
+       * **final_datatype** (int): datatype to place the mask on (defaults to `0`)
 
-        Returns:
-           None
+    Returns:
+       None
 
     """
     fl = wgt.clad_layer + 1 if final_layer == None else final_layer
@@ -118,7 +118,7 @@ def build_mask(cell, wgt, final_layer=None, final_datatype=None):
 
 
 def get_trace_length(trace, wgt):
-    """ Returns the total length of a curved waveguide trace.
+    """Returns the total length of a curved waveguide trace.
 
     Args:
        * **trace** (list): tracelist of (x,y) points all specifying 90 degree angles.
@@ -138,13 +138,13 @@ def get_trace_length(trace, wgt):
 
 
 def get_keys(cell):
-    """ Returns a list of the keys available in a portlist, such as 'input', 'output', 'top_output', etc.  Only works for picwriter components.
+    """Returns a list of the keys available in a portlist, such as 'input', 'output', 'top_output', etc.  Only works for picwriter components.
 
-        Args:
-           * **cell** (gdspy.Cell):  Cell from which to get get the portlist
+    Args:
+       * **cell** (gdspy.Cell):  Cell from which to get get the portlist
 
-        Returns:
-           List of portlist keys corresponding to 'cell'.
+    Returns:
+       List of portlist keys corresponding to 'cell'.
 
     """
     return list(cell.portlist.keys())
@@ -234,23 +234,23 @@ def dist(pt1, pt2):
 
 
 def get_direction(pt1, pt2):
-    """  Returns a cardinal direction (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, and ``'EAST'``)
-        that corresponds to a cartesian point `pt1 (tuple), pointing
-        TOWARDS a second point `pt2`
+    """Returns a cardinal direction (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, and ``'EAST'``)
+    that corresponds to a cartesian point `pt1 (tuple), pointing
+    TOWARDS a second point `pt2`
 
-        Args:
-           * **pt1** (tuple):  Point 1
-           * **pt2** (tuple):  Point 2
+    Args:
+       * **pt1** (tuple):  Point 1
+       * **pt2** (tuple):  Point 2
 
-        Returns:
-           string  (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, and ``'EAST'``)
+    Returns:
+       string  (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, and ``'EAST'``)
 
-        Example::
+    Example::
 
-            import picwriter.toolkit as tk
-            tk.get_direction((0,0), (-100,0))
+        import picwriter.toolkit as tk
+        tk.get_direction((0,0), (-100,0))
 
-        The above prints 'WEST'
+    The above prints 'WEST'
 
     """
     dx, dy = pt2[0] - pt1[0], pt2[1] - pt1[1]
@@ -265,14 +265,14 @@ def get_direction(pt1, pt2):
 
 
 def get_turn(dir1, dir2):
-    """  Returns an angle (+pi/2 or -pi/2) corresponding to the CW or CCW turns that takes you from direction `dir1` to `dir2`, where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
+    """Returns an angle (+pi/2 or -pi/2) corresponding to the CW or CCW turns that takes you from direction `dir1` to `dir2`, where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
 
-        Args:
-           * **dir1** (direction):  Point 1
-           * **pt2** (tuple):  Point 2
+    Args:
+       * **dir1** (direction):  Point 1
+       * **pt2** (tuple):  Point 2
 
-        Returns:
-           float  (+pi/2 or -pi/2)
+    Returns:
+       float  (+pi/2 or -pi/2)
 
     """
     if (
@@ -292,14 +292,14 @@ def get_turn(dir1, dir2):
 
 
 def flip_direction(direction):
-    """  Returns the opposite of `direction`, where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
+    """Returns the opposite of `direction`, where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
 
-        Args:
-           * **direction** (direction):  Direction to be flipped
-           * **pt2** (tuple):  Point 2
+    Args:
+       * **direction** (direction):  Direction to be flipped
+       * **pt2** (tuple):  Point 2
 
-        Returns:
-           direction (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``)
+    Returns:
+       direction (``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``)
 
     """
     if direction == "NORTH":
@@ -315,18 +315,18 @@ def flip_direction(direction):
 
 
 def translate_point(pt, length, direction, height=0.0):
-    """  Returns the point (tuple) corresponding to `pt` translated by distance `length` in direction `direction` where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
+    """Returns the point (tuple) corresponding to `pt` translated by distance `length` in direction `direction` where each direction is either ``'NORTH'``, ``'WEST'``, ``'SOUTH'``, or ``'EAST'``
 
-        Args:
-           * **pt** (tuple):  Starting point
-           * **length** (float): Distance to move in *direction*
-           * **direction** (direction):  Direction to move in
-           
-        Keyword Args:
-           * **height** (float):  Distance to move perpendicular to *direction*.  Defaults to 0.
+    Args:
+       * **pt** (tuple):  Starting point
+       * **length** (float): Distance to move in *direction*
+       * **direction** (direction):  Direction to move in
 
-        Returns:
-           point, tuple (x, y)
+    Keyword Args:
+       * **height** (float):  Distance to move perpendicular to *direction*.  Defaults to 0.
+
+    Returns:
+       point, tuple (x, y)
 
     """
     if isinstance(direction, float):
@@ -346,13 +346,13 @@ def translate_point(pt, length, direction, height=0.0):
 
 
 def normalize_angle(angle):
-    """  Returns the angle (in radians) between -pi and +pi that corresponds to the input angle
+    """Returns the angle (in radians) between -pi and +pi that corresponds to the input angle
 
-        Args:
-           * **angle** (float):  Angle to normalize
+    Args:
+       * **angle** (float):  Angle to normalize
 
-        Returns:
-           float  Angle
+    Returns:
+       float  Angle
 
     """
     angle = angle % (2 * np.pi)
@@ -362,18 +362,18 @@ def normalize_angle(angle):
 
 
 def get_curve_length(func, start, end, grid=0.001):
-    """  Returns the length (in microns) of a curve defined by the function `func` on the interval [start, end]
+    """Returns the length (in microns) of a curve defined by the function `func` on the interval [start, end]
 
-        Args:
-           * **func** (function):  Function that takes a single (floating point) argument, and returns a (x,y) tuple.
-           * **start** (float):  Starting value (argument passed to `func`).
-           * **end** (float):  Ending value (argument passed to `func`).
-           
-        Keyword Args:
-           * **grid** (float):  Grid resolution used to determine when curve length has converged.  Defaults to 0.001.
+    Args:
+       * **func** (function):  Function that takes a single (floating point) argument, and returns a (x,y) tuple.
+       * **start** (float):  Starting value (argument passed to `func`).
+       * **end** (float):  Ending value (argument passed to `func`).
 
-        Returns:
-           float  Length
+    Keyword Args:
+       * **grid** (float):  Grid resolution used to determine when curve length has converged.  Defaults to 0.001.
+
+    Returns:
+       float  Length
 
     """
 
@@ -408,21 +408,21 @@ def build_waveguide_polygon(
     func, wg_width, start_direction, end_direction, start_val=0, end_val=1, grid=0.001
 ):
     """
-        Args:
-           * **func** (function):  Function that takes a single (floating point) argument, and returns a (x,y) tuple.
-           * **wg_width** (float):  Waveguide width
-           * **num_pts** (int):  Number of points that make up the waveguide path
-           * **start_direction** (float):  Starting direction of the path, in *radians*.
-           * **end_direction** (float):  End direction of the path, in *radians*.
-           
-        Keyword Args:
-           * **start_val** (float):  Starting value (argument passed to `func`).  Defaults to 0.
-           * **end_val** (float):  Ending value (argument passed to `func`).  Defaults to 1.
-           * **grid** (float): Grid resolution used to determine when curve length has converged.  Guarantees that polygon formed by the points results in no more than a grid/2.0 error from the true position.  Defaults to 0.001
+    Args:
+       * **func** (function):  Function that takes a single (floating point) argument, and returns a (x,y) tuple.
+       * **wg_width** (float):  Waveguide width
+       * **num_pts** (int):  Number of points that make up the waveguide path
+       * **start_direction** (float):  Starting direction of the path, in *radians*.
+       * **end_direction** (float):  End direction of the path, in *radians*.
 
-        Returns:
-           Two lists, one for each edge of the waveguide.
-    
+    Keyword Args:
+       * **start_val** (float):  Starting value (argument passed to `func`).  Defaults to 0.
+       * **end_val** (float):  Ending value (argument passed to `func`).  Defaults to 1.
+       * **grid** (float): Grid resolution used to determine when curve length has converged.  Guarantees that polygon formed by the points results in no more than a grid/2.0 error from the true position.  Defaults to 0.001
+
+    Returns:
+       Two lists, one for each edge of the waveguide.
+
     """
 
     def get_path_points(
@@ -499,7 +499,7 @@ def build_waveguide_polygon(
         return (poly_list1, poly_list2)
 
     def check_path(path, grid):
-        """ Determines if a path has sufficiently low grid error (and if so, returns True, else False).
+        """Determines if a path has sufficiently low grid error (and if so, returns True, else False).
         Does this by iterating through the points, and computing the area of the triangle formed by any
         3 consecutive points on path.  If this area, divided by the length between the first & last point, is greater than 0.5*grid,
         then the the error is too large!
@@ -553,14 +553,14 @@ def build_waveguide_polygon(
 
 
 class Component:
-    """ Super class for all objects created in PICwriter.  This class handles rotations, naming, etc. for all components,
-        so that writing python code for new cells requires less overhead.  Component is a wrapper around gdspy Cell objects.
+    """Super class for all objects created in PICwriter.  This class handles rotations, naming, etc. for all components,
+    so that writing python code for new cells requires less overhead.  Component is a wrapper around gdspy Cell objects.
 
-        Args:
-           * **name** (string):  The name prefix to be used for these 
+    Args:
+       * **name** (string):  The name prefix to be used for these
 
-        Keyword Args:
-           * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
+    Keyword Args:
+       * **angle** (float): Angle in radians (between 0 and pi/2) at which the waveguide bends towards the coupling region.  Default=pi/6.
 
     """
 
@@ -575,8 +575,8 @@ class Component:
         self._hash_cell_(args[0])
 
     def _auto_transform_(self):
-        """ 
-        Go through all the ports and do the appropriate 
+        """
+        Go through all the ports and do the appropriate
         rotations and translations corresponding to the specified 'port' and 'direction'
         """
         for key in self.portlist.keys():
@@ -653,7 +653,7 @@ class Component:
             self.portlist[key]["port"] = (self.port[0] + dx, self.port[1] + dy)
 
     def _hash_cell_(self, *args):
-        """ Check to see if the same exact cell has been created already (with the same parameters).
+        """Check to see if the same exact cell has been created already (with the same parameters).
         If not, add the cell to the global CURRENT_CELLS dictionary.
         If so, point to the identical cell in the CURRENT_CELLS dictionary.
         """
@@ -708,8 +708,8 @@ class Component:
         this_cell = CURRENT_CELLS[self.cell_hash]
 
         if self.first_cell == True:
-            """ Only add elements if this is the first cell made. 
-            Otherwise, duplicate elements will be added 
+            """Only add elements if this is the first cell made.
+            Otherwise, duplicate elements will be added
             """
             if isinstance(element, Component):
                 element_cell = CURRENT_CELLS[element.cell_hash]

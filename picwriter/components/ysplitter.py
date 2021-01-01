@@ -9,34 +9,34 @@ from picwriter.components.taper import Taper
 
 
 class SplineYSplitter(tk.Component):
-    """ 1x2 Spline based Y Splitter Cell class.
-        Based on Zhang et al. (2013) A compact and low loss Y-junction for submicron silicon waveguide https://doi.org/10.1364/OE.21.001310
+    """1x2 Spline based Y Splitter Cell class.
+    Based on Zhang et al. (2013) A compact and low loss Y-junction for submicron silicon waveguide https://doi.org/10.1364/OE.21.001310
 
-        Args:
-           * **wgt** (WaveguideTemplate):  WaveguideTemplate object
-           * **length** (float): Length of the splitter region (along direction of propagation)
-           * **widths** (array of floats): Widths of the Spline Curve Splitter region (perpendicular to direction of propagation).  Width values are evenly spaced along the length of the splitter.
+    Args:
+       * **wgt** (WaveguideTemplate):  WaveguideTemplate object
+       * **length** (float): Length of the splitter region (along direction of propagation)
+       * **widths** (array of floats): Widths of the Spline Curve Splitter region (perpendicular to direction of propagation).  Width values are evenly spaced along the length of the splitter.
 
-        Keyword Args:
-           * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to be flush with the last width in the splitter region). Defaults to None.
-           * **taper_width** (float): Ending width of the taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
-           * **taper_length** (float): Length of the input taper leading up to the Y-splitter (single-port side).  Defaults to None (no input taper, port right against the splitter region).
-           * **output_length** (float): Length (along x-direction) of the output bends, made with Euler S-Bends.  Defaults to None (no output bend, ports right up againt the splitter region).
-           * **output_wg_sep** (float): Distance (along y-direction) between the two output bends, made with Euler S-Bends.  Defaults to None (no output bend, ports right up againt the splitter region).
-           * **output_width** (float): Starting width of the output waveguide.  Defaults to None (no change from regular wg_width).
-           * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
-           * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
+    Keyword Args:
+       * **wg_sep** (float): Separation between waveguides on the 2-port side (defaults to be flush with the last width in the splitter region). Defaults to None.
+       * **taper_width** (float): Ending width of the taper region (default = wg_width from wg_template).  Defaults to None (waveguide width).
+       * **taper_length** (float): Length of the input taper leading up to the Y-splitter (single-port side).  Defaults to None (no input taper, port right against the splitter region).
+       * **output_length** (float): Length (along x-direction) of the output bends, made with Euler S-Bends.  Defaults to None (no output bend, ports right up againt the splitter region).
+       * **output_wg_sep** (float): Distance (along y-direction) between the two output bends, made with Euler S-Bends.  Defaults to None (no output bend, ports right up againt the splitter region).
+       * **output_width** (float): Starting width of the output waveguide.  Defaults to None (no change from regular wg_width).
+       * **port** (tuple): Cartesian coordinate of the input port.  Defaults to (0,0).
+       * **direction** (string): Direction that the component will point *towards*, can be of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, OR an angle (float, in radians)
 
-        Members:
-           * **portlist** (dict): Dictionary with the relevant port information
+    Members:
+       * **portlist** (dict): Dictionary with the relevant port information
 
-        Portlist format:
-           * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
-           * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
-           * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
+    Portlist format:
+       * portlist['input'] = {'port': (x1,y1), 'direction': 'dir1'}
+       * portlist['output_top'] = {'port': (x2, y2), 'direction': 'dir2'}
+       * portlist['output_bot'] = {'port': (x3, y3), 'direction': 'dir3'}
 
-        Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and 'dir1', 'dir2', 'dir3' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
-        'Direction' points *towards* the waveguide that will connect to it.
+    Where in the above (x1,y1) is the input port, (x2, y2) is the top output port, (x3, y3) is the bottom output port, and 'dir1', 'dir2', 'dir3' are of type `'NORTH'`, `'WEST'`, `'SOUTH'`, `'EAST'`, *or* an angle in *radians*.
+    'Direction' points *towards* the waveguide that will connect to it.
 
     """
 
