@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import os
 import time
 
+
 class MaterialStack:
     """Standard template for generating a material stack
 
@@ -259,7 +260,9 @@ def export_component_to_hdf5(filename, component, mstack, boolean_operations):
         hf.create_dataset("ycenter", data=np.array(ycenter_list))
 
 
-def extract_wgt_polygons(wgt, mstack, sx, eps_input_file = 'epsilon.h5', save_as_hdf5 = False):
+def extract_wgt_polygons(
+    wgt, mstack, sx, eps_input_file="epsilon.h5", save_as_hdf5=False
+):
     """Outputs the polygons corresponding to the desired waveguide template and MaterialStack.
     Format is compatible for generating prism geometries in MEEP/MPB.
 
@@ -409,11 +412,13 @@ def extract_wgt_polygons(wgt, mstack, sx, eps_input_file = 'epsilon.h5', save_as
             hf.create_dataset("height_list", data=np.array(height_list))
             hf.create_dataset("eps_list", data=np.array(eps_list))
 
-    return {'CX' : np.array(CX),
-            'CY' : np.array(CY),
-            'width_list' : np.array(width_list),
-            'height_list' : np.array(height_list),
-            'eps_list' : np.array(eps_list)}
+    return {
+        "CX": np.array(CX),
+        "CY": np.array(CY),
+        "width_list": np.array(width_list),
+        "height_list": np.array(height_list),
+        "eps_list": np.array(eps_list),
+    }
 
 
 def export_timestep_fields_to_png(directory):
@@ -521,31 +526,42 @@ def compute_mode(
     data = extract_wgt_polygons(wgt, mstack, sx)
 
     geometry = []
-    for i in range(len(data['CX'])):
+    for i in range(len(data["CX"])):
 
         # Make sure blocks are only specified in the simulation domain -
         # this is important since the boundary conditions are periodic
-        xmin, xmax = data['CX'][i] - data['width_list'][i]/2.0, data['CX'][i] + data['width_list'][i]/2.0
-        ymin, ymax = data['CY'][i] - data['height_list'][i]/2.0, data['CY'][i] + data['height_list'][i]/2.0
+        xmin, xmax = (
+            data["CX"][i] - data["width_list"][i] / 2.0,
+            data["CX"][i] + data["width_list"][i] / 2.0,
+        )
+        ymin, ymax = (
+            data["CY"][i] - data["height_list"][i] / 2.0,
+            data["CY"][i] + data["height_list"][i] / 2.0,
+        )
 
-        if (ymin > sy/2.0) or (xmin > sx/2.0) or (ymax < -sy/2.0) or (xmax < -sx/2.0):
+        if (
+            (ymin > sy / 2.0)
+            or (xmin > sx / 2.0)
+            or (ymax < -sy / 2.0)
+            or (xmax < -sx / 2.0)
+        ):
             # Block is outside of simulation domain
             continue
 
         # Cut off the part of the block outside the simulation region
-        xmin = max(xmin, -sx/2.0)
-        xmax = min(xmax, sx/2.0)
-        ymin = max(ymin, -sy/2.0)
-        ymax = min(ymax, sy/2.0)
+        xmin = max(xmin, -sx / 2.0)
+        xmax = min(xmax, sx / 2.0)
+        ymin = max(ymin, -sy / 2.0)
+        ymax = min(ymax, sy / 2.0)
 
-        width, height = xmax-xmin, ymax-ymin
-        cx, cy = (xmin+xmax)/2.0, (ymin+ymax)/2.0
+        width, height = xmax - xmin, ymax - ymin
+        cx, cy = (xmin + xmax) / 2.0, (ymin + ymax) / 2.0
 
         geometry.append(
             mp.Block(
                 size=mp.Vector3(mp.inf, height, width),
                 center=mp.Vector3(0, cy, cx),
-                material=mp.Medium(epsilon=data['eps_list'][i]),
+                material=mp.Medium(epsilon=data["eps_list"][i]),
             )
         )
 
@@ -588,9 +604,9 @@ def compute_mode(
     vg = vg[0][0]
     print("k = {:.4f}".format(k))
     print("v_g = {:.4f}".format(vg))
-    ng = 1.0/vg
+    ng = 1.0 / vg
     print("n_g = {:.4f}".format(ng))
-    print("n_eff = {:.4f}".format(k/freq))
+    print("n_eff = {:.4f}".format(k / freq))
 
     """ Plot modes """
     eps = ms.get_epsilon()
@@ -821,11 +837,17 @@ def compute_mode(
 
         plt.tight_layout()
         if polarization == "TE":
-            savetxt = os.path.join(output_directory, "TE_mode{}_Efield.png".format(plot_mode_number))
+            savetxt = os.path.join(
+                output_directory, "TE_mode{}_Efield.png".format(plot_mode_number)
+            )
         elif polarization == "TM":
-            savetxt = os.path.join(output_directory, "TM_mode{}_Efield.png".format(plot_mode_number))
+            savetxt = os.path.join(
+                output_directory, "TM_mode{}_Efield.png".format(plot_mode_number)
+            )
         elif polarization == "None":
-            savetxt = os.path.join(output_directory, "mode{}_Efield.png".format(plot_mode_number))
+            savetxt = os.path.join(
+                output_directory, "mode{}_Efield.png".format(plot_mode_number)
+            )
         plt.savefig(savetxt)
 
         """
@@ -896,27 +918,47 @@ def compute_mode(
 
         plt.tight_layout()
         if polarization == "TE":
-            savetxt = os.path.join(output_directory, "TE_mode{}_Hfield.png".format(plot_mode_number))
+            savetxt = os.path.join(
+                output_directory, "TE_mode{}_Hfield.png".format(plot_mode_number)
+            )
         elif polarization == "TM":
-            savetxt = os.path.join(output_directory, "TM_mode{}_Hfield.png".format(plot_mode_number))
+            savetxt = os.path.join(
+                output_directory, "TM_mode{}_Hfield.png".format(plot_mode_number)
+            )
         elif polarization == "None":
-            savetxt = os.path.join(output_directory, "mode{}_Hfield.png".format(plot_mode_number))
+            savetxt = os.path.join(
+                output_directory, "mode{}_Hfield.png".format(plot_mode_number)
+            )
         plt.savefig(savetxt)
 
         """
         Save the mode data to a .txt file
         """
         if polarization == "TE":
-            datafilename = os.path.join(output_directory, "TE_mode{}_data.txt".format(plot_mode_number))
+            datafilename = os.path.join(
+                output_directory, "TE_mode{}_data.txt".format(plot_mode_number)
+            )
         elif polarization == "TM":
-            datafilename = os.path.join(output_directory, "TM_mode{}_data.txt".format(plot_mode_number))
+            datafilename = os.path.join(
+                output_directory, "TM_mode{}_data.txt".format(plot_mode_number)
+            )
         elif polarization == "None":
-            datafilename = os.path.join(output_directory, "mode{}_data.txt".format(plot_mode_number))
+            datafilename = os.path.join(
+                output_directory, "mode{}_data.txt".format(plot_mode_number)
+            )
 
         with open(datafilename, "w") as f:
-            f.write("#################################################################\n")
-            f.write("Mode {} with quasi-{} polarization \n".format(plot_mode_number, polarization))
-            f.write("#################################################################\n")
+            f.write(
+                "#################################################################\n"
+            )
+            f.write(
+                "Mode {} with quasi-{} polarization \n".format(
+                    plot_mode_number, polarization
+                )
+            )
+            f.write(
+                "#################################################################\n"
+            )
             f.write("\n")
             f.write("k \t\t {} \n".format(k))
             f.write("n_eff \t\t {} \n".format(wavelength * k))
@@ -926,10 +968,7 @@ def compute_mode(
     print("Time to run MPB simulation = {} seconds".format(time.time() - start))
     mp.verbosity(2)
 
-    return {'k' : k,
-            'neff' : wavelength*k,
-            'vg' : vg,
-            'ng' : 1/vg}
+    return {"k": k, "neff": wavelength * k, "vg": vg, "ng": 1 / vg}
 
 
 def compute_transmission_spectra(

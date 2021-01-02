@@ -784,7 +784,9 @@ class Waveguide(tk.Component):
                         direction=start_angle,
                         **self.wg_spec
                     )
-                    self.length += tk.dist(self.trace[i], self.trace[i + 1]) - dl - prev_dl
+                    self.length += (
+                        tk.dist(self.trace[i], self.trace[i + 1]) - dl - prev_dl
+                    )
 
                     for c in range(len(self.wgt.waveguide_stack) - 1):
                         cur_spec = {
