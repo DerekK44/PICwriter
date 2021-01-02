@@ -694,7 +694,6 @@ class Waveguide(tk.Component):
                         **self.wg_spec
                     )
                     self.length += tk.dist(self.trace[0], self.trace[1])
-                    print("Initial length: {}".format(tk.dist(self.trace[0], self.trace[1])))
                 elif self.wgt.wg_type == "slot":
                     path = gdspy.Path(
                         self.wgt.rail,
@@ -708,7 +707,6 @@ class Waveguide(tk.Component):
                         **self.wg_spec
                     )
                     self.length += tk.dist(self.trace[0], self.trace[1])
-                    print("Initial length: {}".format(tk.dist(self.trace[0], self.trace[1])))
 
                 clad_path_list = []
                 for c in range(len(self.wgt.waveguide_stack) - 1):
@@ -765,7 +763,6 @@ class Waveguide(tk.Component):
                         dl = ebend.dist_to_vertex
                         self.add(ebend)
                         self.length += ebend.get_bend_length()
-                        print("EBend length: {}".format(ebend.get_bend_length()))
 
                     if (dl + prev_dl) > tk.dist(
                         self.trace[i], self.trace[i + 1]
@@ -788,7 +785,6 @@ class Waveguide(tk.Component):
                         **self.wg_spec
                     )
                     self.length += tk.dist(self.trace[i], self.trace[i + 1]) - dl - prev_dl
-                    print("Segment length: {}".format(tk.dist(self.trace[i], self.trace[i + 1]) - dl - prev_dl))
 
                     for c in range(len(self.wgt.waveguide_stack) - 1):
                         cur_spec = {
@@ -809,7 +805,6 @@ class Waveguide(tk.Component):
                             **self.wg_spec
                         )
                         self.length += abs(br * turnby)
-                        print("Bend length: {}".format(abs(br * turnby)))
 
                         for c in range(len(self.wgt.waveguide_stack) - 1):
                             cur_spec = {
@@ -855,7 +850,6 @@ class Waveguide(tk.Component):
                     **self.wg_spec
                 )
                 self.length += tk.dist(self.trace[-2], self.trace[-1]) - prev_dl
-                print("Final length: {}".format(tk.dist(self.trace[-2], self.trace[-1]) - prev_dl))
                 for c in range(len(self.wgt.waveguide_stack) - 1):
                     cur_spec = {
                         "layer": self.wgt.waveguide_stack[c + 1][1][0],
