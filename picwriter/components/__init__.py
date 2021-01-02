@@ -35,3 +35,4 @@ from .sbend import SBend
 from .ebend import EBend, EulerSBend
 from .bbend import BBend
 from .ysplitter import SplineYSplitter
+from .via import Via
