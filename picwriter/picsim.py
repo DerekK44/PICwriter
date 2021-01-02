@@ -10,7 +10,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import numpy as np
 import gdspy
 import h5py
-
+import meep as mp
+from meep import mpb
+import matplotlib.pyplot as plt
+import os
+import time
 
 class MaterialStack:
     """Standard template for generating a material stack
@@ -255,17 +259,20 @@ def export_component_to_hdf5(filename, component, mstack, boolean_operations):
         hf.create_dataset("ycenter", data=np.array(ycenter_list))
 
 
-def export_wgt_to_hdf5(filename, wgt, mstack, sx):
+def extract_wgt_polygons(wgt, mstack, sx, eps_input_file = 'epsilon.h5', save_as_hdf5 = False):
     """Outputs the polygons corresponding to the desired waveguide template and MaterialStack.
     Format is compatible for generating prism geometries in MEEP/MPB.
 
-    **Note**: that the top-down view of the device is the 'X-Z' plane.  The 'Y' direction specifies the vertical height.
+    **Note**: that the top-down view of the device is the 'X-Z' plane.  The 'Y' direction specifies the vertical height (wafer surface normal).
 
     Args:
-       * **filename** (string): Filename to save (must end with '.h5')
        * **wgt** (WaveguideTemplate): WaveguideTemplate object from the PICwriter library
        * **mstack** (MaterialStack): MaterialStack object that maps the gds layers to a physical stack
        * **sx** (float): Size of the simulation region in the x-direction
+
+    Kwargs:
+       * **eps_input_file** (string): If save_as_hdf5 is True, then this path should be specified.  Defaults to 'epsilon.h5'.
+       * **save_as_hdf5** (bool): If True, saves data to hdf5.  Defaults to False.
 
     Write-format for all blocks:
        * CX = center-x
@@ -394,12 +401,19 @@ def export_wgt_to_hdf5(filename, wgt, mstack, sx):
             height_list.append(layer[1])
             eps_list.append(layer[0])
 
-    with h5py.File(filename, "w") as hf:
-        hf.create_dataset("CX", data=np.array(CX))
-        hf.create_dataset("CY", data=np.array(CY))
-        hf.create_dataset("width_list", data=np.array(width_list))
-        hf.create_dataset("height_list", data=np.array(height_list))
-        hf.create_dataset("eps_list", data=np.array(eps_list))
+    if save_as_hdf5:
+        with h5py.File(eps_input_file, "w") as hf:
+            hf.create_dataset("CX", data=np.array(CX))
+            hf.create_dataset("CY", data=np.array(CY))
+            hf.create_dataset("width_list", data=np.array(width_list))
+            hf.create_dataset("height_list", data=np.array(height_list))
+            hf.create_dataset("eps_list", data=np.array(eps_list))
+
+    return {'CX' : np.array(CX),
+            'CY' : np.array(CY),
+            'width_list' : np.array(width_list),
+            'height_list' : np.array(height_list),
+            'eps_list' : np.array(eps_list)}
 
 
 def export_timestep_fields_to_png(directory):
@@ -495,52 +509,427 @@ def compute_mode(
        List of values for the modes: [[:math:`n_{eff,1}, n_{g,1}`], [:math:`n_{eff,2}, n_{g,2}`], ...]
 
     """
-    from subprocess import call
-    import os
-    import time
-
-    eps_input_file = str("epsilon.h5")
-    export_wgt_to_hdf5(eps_input_file, wgt, mstack, sx)
-
-    exec_str = (
-        "python mcm.py"
-        " -res %d"
-        " -wavelength %0.3f"
-        " -sx %0.3f"
-        " -sy %0.3f"
-        " -plot_mode_number %d"
-        " -polarization %s"
-        " -epsilon_file '%s/%s'"
-        " -output_directory '%s/%s'"
-        " -save_mode_data %r"
-        " -suppress_window %r"
-        " > '%s/%s-res%d.out'"
-    ) % (
-        res,
-        wavelength,
-        sx,
-        sy,
-        plot_mode_number,
-        polarization,
-        str(os.getcwd()),
-        str(eps_input_file),
-        str(os.getcwd()),
-        str(output_directory),
-        save_mode_data,
-        suppress_window,
-        str(os.getcwd()),
-        str(output_directory),
-        res,
-    )
-
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    print("dir_path = " + str(dir_path))
 
     print("Running MPB simulation... (check .out file for current status)")
+    mp.verbosity(0)
+
     start = time.time()
-    call(exec_str, shell=True, cwd=dir_path)
-    print("Time to run MPB simulation = " + str(time.time() - start) + " seconds")
-    return None
+
+    # Simulation code here...
+    geometry_lattice = mp.Lattice(size=mp.Vector3(0, sy, sx))
+
+    data = extract_wgt_polygons(wgt, mstack, sx)
+
+    geometry = []
+    for i in range(len(data['CX'])):
+
+        # Make sure blocks are only specified in the simulation domain -
+        # this is important since the boundary conditions are periodic
+        xmin, xmax = data['CX'][i] - data['width_list'][i]/2.0, data['CX'][i] + data['width_list'][i]/2.0
+        ymin, ymax = data['CY'][i] - data['height_list'][i]/2.0, data['CY'][i] + data['height_list'][i]/2.0
+
+        if (ymin > sy/2.0) or (xmin > sx/2.0) or (ymax < -sy/2.0) or (xmax < -sx/2.0):
+            # Block is outside of simulation domain
+            continue
+
+        # Cut off the part of the block outside the simulation region
+        xmin = max(xmin, -sx/2.0)
+        xmax = min(xmax, sx/2.0)
+        ymin = max(ymin, -sy/2.0)
+        ymax = min(ymax, sy/2.0)
+
+        width, height = xmax-xmin, ymax-ymin
+        cx, cy = (xmin+xmax)/2.0, (ymin+ymax)/2.0
+
+        geometry.append(
+            mp.Block(
+                size=mp.Vector3(mp.inf, height, width),
+                center=mp.Vector3(0, cy, cx),
+                material=mp.Medium(epsilon=data['eps_list'][i]),
+            )
+        )
+
+    ms = mpb.ModeSolver(
+        geometry_lattice=geometry_lattice,
+        geometry=geometry,
+        resolution=res,
+        default_material=mp.Medium(epsilon=1.0),
+        num_bands=plot_mode_number,
+    )
+
+    freq = 1 / wavelength
+    kdir = mp.Vector3(1, 0, 0)
+    tol = 1e-6
+    kmag_guess = freq * 2.02
+    kmag_min = freq * 0.01
+    kmag_max = freq * 10.0
+
+    if polarization == "TE":
+        parity = mp.ODD_Z
+    elif polarization == "TM":
+        parity = mp.EVEN_Z
+    elif polarization == "None":
+        parity = mp.NO_PARITY
+
+    k = ms.find_k(
+        parity,
+        freq,
+        plot_mode_number,
+        plot_mode_number,
+        kdir,
+        tol,
+        kmag_guess,
+        kmag_min,
+        kmag_max,
+    )
+    vg = ms.compute_group_velocities()
+
+    k = k[0]
+    vg = vg[0][0]
+    print("k = {:.4f}".format(k))
+    print("v_g = {:.4f}".format(vg))
+    ng = 1.0/vg
+    print("n_g = {:.4f}".format(ng))
+    print("n_eff = {:.4f}".format(k/freq))
+
+    """ Plot modes """
+    eps = ms.get_epsilon()
+    ms.get_dfield(plot_mode_number)
+    E = ms.get_efield(plot_mode_number)
+    Eabs = np.sqrt(
+        np.multiply(E[:, :, 0, 2], E[:, :, 0, 2])
+        + np.multiply(E[:, :, 0, 1], E[:, :, 0, 1])
+        + np.multiply(E[:, :, 0, 0], E[:, :, 0, 0])
+    )
+    H = ms.get_hfield(plot_mode_number)
+    Habs = np.sqrt(
+        np.multiply(H[:, :, 0, 2], H[:, :, 0, 2])
+        + np.multiply(H[:, :, 0, 1], H[:, :, 0, 1])
+        + np.multiply(H[:, :, 0, 0], H[:, :, 0, 0])
+    )
+
+    plt_extent = [-sy / 2.0, +sy / 2.0, -sx / 2.0, +sx / 2.0]
+
+    cmap_fields = "hot_r"
+    cmap_geom = "viridis"
+
+    if not suppress_window:
+        """
+        First plot electric field
+        """
+        plt.figure(figsize=(14, 8))
+
+        plt.subplot(2, 3, 1)
+        plt.imshow(
+            abs(E[:, :, 0, 2]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|E_x|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 2)
+        plt.imshow(
+            abs(E[:, :, 0, 1]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|E_y|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 3)
+        plt.imshow(
+            abs(E[:, :, 0, 0]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|E_z|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 4)
+        plt.imshow(
+            abs(Eabs),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|E|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 5)
+        plt.imshow(
+            eps, cmap=cmap_geom, origin="lower", aspect="auto", extent=plt_extent
+        )
+        plt.title("Waveguide dielectric")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.tight_layout()
+        plt.show()
+
+        """
+        Then plot magnetic field
+        """
+        plt.figure(figsize=(14, 8))
+
+        plt.subplot(2, 3, 1)
+        plt.imshow(
+            abs(H[:, :, 0, 2]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|H_x|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 2)
+        plt.imshow(
+            abs(H[:, :, 0, 1]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|H_y|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 3)
+        plt.imshow(
+            abs(H[:, :, 0, 0]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|H_z|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 4)
+        plt.imshow(
+            abs(Habs),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|H|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 5)
+        plt.imshow(
+            eps, cmap=cmap_geom, origin="lower", aspect="auto", extent=plt_extent
+        )
+        plt.title("Waveguide dielectric")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.tight_layout()
+        plt.show()
+
+    if save_mode_data:
+        """
+        First plot electric field
+        """
+        plt.figure(figsize=(14, 8))
+
+        plt.subplot(2, 3, 1)
+        plt.imshow(
+            abs(E[:, :, 0, 2]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|E_x|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 2)
+        plt.imshow(
+            abs(E[:, :, 0, 1]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|E_y|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 3)
+        plt.imshow(
+            abs(E[:, :, 0, 0]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|E_z|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 4)
+        plt.imshow(
+            abs(Eabs),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|E|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 5)
+        plt.imshow(
+            eps, cmap=cmap_geom, origin="lower", aspect="auto", extent=plt_extent
+        )
+        plt.title("Waveguide dielectric")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.tight_layout()
+        if polarization == "TE":
+            savetxt = os.path.join(output_directory, "TE_mode{}_Efield.png".format(plot_mode_number))
+        elif polarization == "TM":
+            savetxt = os.path.join(output_directory, "TM_mode{}_Efield.png".format(plot_mode_number))
+        elif polarization == "None":
+            savetxt = os.path.join(output_directory, "mode{}_Efield.png".format(plot_mode_number))
+        plt.savefig(savetxt)
+
+        """
+        Then plot magnetic field
+        """
+        plt.figure(figsize=(14, 8))
+
+        plt.subplot(2, 3, 1)
+        plt.imshow(
+            abs(H[:, :, 0, 2]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|H_x|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 2)
+        plt.imshow(
+            abs(H[:, :, 0, 1]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|H_y|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 3)
+        plt.imshow(
+            abs(H[:, :, 0, 0]),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|H_z|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 4)
+        plt.imshow(
+            abs(Habs),
+            cmap=cmap_fields,
+            origin="lower",
+            aspect="auto",
+            extent=plt_extent,
+        )
+        plt.title("Waveguide mode $|H|$")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.subplot(2, 3, 5)
+        plt.imshow(
+            eps, cmap=cmap_geom, origin="lower", aspect="auto", extent=plt_extent
+        )
+        plt.title("Waveguide dielectric")
+        plt.ylabel("y-axis")
+        plt.xlabel("x-axis")
+        plt.colorbar()
+
+        plt.tight_layout()
+        if polarization == "TE":
+            savetxt = os.path.join(output_directory, "TE_mode{}_Hfield.png".format(plot_mode_number))
+        elif polarization == "TM":
+            savetxt = os.path.join(output_directory, "TM_mode{}_Hfield.png".format(plot_mode_number))
+        elif polarization == "None":
+            savetxt = os.path.join(output_directory, "mode{}_Hfield.png".format(plot_mode_number))
+        plt.savefig(savetxt)
+
+        """
+        Save the mode data to a .txt file
+        """
+        if polarization == "TE":
+            datafilename = os.path.join(output_directory, "TE_mode{}_data.txt".format(plot_mode_number))
+        elif polarization == "TM":
+            datafilename = os.path.join(output_directory, "TM_mode{}_data.txt".format(plot_mode_number))
+        elif polarization == "None":
+            datafilename = os.path.join(output_directory, "mode{}_data.txt".format(plot_mode_number))
+
+        with open(datafilename, "w") as f:
+            f.write("#################################################################\n")
+            f.write("Mode {} with quasi-{} polarization \n".format(plot_mode_number, polarization))
+            f.write("#################################################################\n")
+            f.write("\n")
+            f.write("k \t\t {} \n".format(k))
+            f.write("n_eff \t\t {} \n".format(wavelength * k))
+            f.write("vg \t\t {} \n".format(vg))
+            f.write("ng \t\t {} \n".format(1 / vg))
+
+    print("Time to run MPB simulation = {} seconds".format(time.time() - start))
+    mp.verbosity(2)
+
+    return {'k' : k,
+            'neff' : wavelength*k,
+            'vg' : vg,
+            'ng' : 1/vg}
 
 
 def compute_transmission_spectra(
