@@ -3,6 +3,9 @@ Windows: [![Build status](https://ci.appveyor.com/api/projects/status/f9q96u9na6
 Documentation: [![Documentation Status](https://readthedocs.org/projects/picwriter/badge/?version=latest)](http://picwriter.readthedocs.io/en/latest/?badge=latest)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
+# UPDATE: This project is no longer actively maintained.  
+It should still work, but please consider using more recent, stable projects like [gdsfactory](https://gdsfactory.github.io/gdsfactory/index.html) for your photonics layout needs!
+
 # PICwriter README
 Picwriter (Photonic-Integrated-Circuit Writer) is a [Python](https://www.python.org/) module, built above the [gdspy](https://github.com/heitzmann/gdspy) module, aimed at simplifying the process of designing complex masks for photonic integrated circuits through a prebuilt library of easy-to-implement PCells.  Supported blocks currently include: 
 * waveguides (strip, slot, and sub-wavelength grating)
